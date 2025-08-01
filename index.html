@@ -28,6 +28,8 @@
             <h2>Kontrol Paneli</h2>
             <p>Seçilen Ülke: <span id="playerCountryName"></span></p>
             <p>Tur: <span id="currentTurn">1</span></p>
+            <p>Coin: <span id="playerCoins">0</span></p>
+            <p>Birimler: <span id="playerUnits">0</span></p>
 
             <div id="diplomacy-menu" class="menu">
                 <h3>Diplomasi</h3>
@@ -41,8 +43,11 @@
 
             <div id="unit-menu" class="menu">
                 <h3>Birimler</h3>
-                <p>Yakında eklenecek...</p>
+                <p>Birim Fiyatı: <span id="unitPrice">20</span> Coin</p>
+                <button id="buyUnitButton">1 Birim Satın Al</button>
+                <p>Satın aldıktan sonra, birim yerleştirmek için kendi toprağınıza tıklayın.</p>
             </div>
+
             <div id="notifications-menu" class="menu">
                 <h3>Bildirimler</h3>
                 <ul id="notificationList"></ul>
