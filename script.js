@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         'ES': {
             name: 'İspanya',
-            nuts2: ['ES1', 'ES2', 'ES3', 'ES4', 'ES5', 'ES6', 'ES7'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
+            nuts2: ['ES', 'ES12', 'ES13', 'ES61', 'ES43', 'ES6', 'ES7'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
             isPlayer: false,
             color: '#62d9d5' // Sizin verdiğiniz renk: Turkuaz
         },
