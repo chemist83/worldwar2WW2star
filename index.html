@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age of History Web Oyunu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="start-screen" class="game-screen active">
+        <h1>Web Oyunu'na Hoş Geldiniz!</h1>
+        <input type="text" id="playerNameInput" placeholder="Kullanıcı Adınızı Girin">
+        <button id="startGameButton">Oyuna Başla</button>
+    </div>
+
+    <div id="country-selection-screen" class="game-screen">
+        <h2>Ülke Seçin</h2>
+        <select id="countrySelect">
+            </select>
+        <button id="selectCountryButton">Ülkeyi Seç ve Oyna</button>
+    </div>
+
+    <div id="game-screen" class="game-screen">
+        <div id="map-container">
+            <object id="gameMap" type="image/svg+xml" data="map.svg"></object>
+        </div>
+        <div id="control-panel">
+            <h2>Kontrol Paneli</h2>
+            <p>Seçilen Ülke: <span id="playerCountryName"></span></p>
+            <p>Tur: <span id="currentTurn">1</span></p>
+
+            <div id="diplomacy-menu" class="menu">
+                <h3>Diplomasi</h3>
+                <button id="nextTurnButton">Tur Atla</button>
+                <hr>
+                <h4>Savaş İlan Et</h4>
+                <select id="targetCountrySelect">
+                    </select>
+                <button id="declareWarButton">Savaş İlan Et!</button>
+            </div>
+
+            <div id="unit-menu" class="menu">
+                <h3>Birimler</h3>
+                <p>Yakında eklenecek...</p>
+            </div>
+            <div id="notifications-menu" class="menu">
+                <h3>Bildirimler</h3>
+                <ul id="notificationList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
