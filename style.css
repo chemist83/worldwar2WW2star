@@ -165,3 +165,18 @@ button:hover {
 .notification-danger {
     background-color: #dc3545; /* Kırmızı */
 }
+
+.notification-success { /* Yeni başarı bildirimi rengi */
+    background-color: #17a2b8; /* Turkuaz */
+}
+
+/* Harita ve Birim Sayıları için Ek CSS */
+/* Path elementlerinin varsayılan hover ve active durumları için */
+#gameMap path {
+    transition: fill 0.2s ease, stroke 0.2s ease; /* Renk ve kenarlık geçişleri */
+}
+
+#gameMap path:hover {
+    filter: brightness(1.2); /* Fare üzerine gelince parlaklık */
+    cursor: pointer;
+}
