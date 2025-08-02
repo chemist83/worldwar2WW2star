@@ -16,6 +16,15 @@ const AI_PERSONALITIES = {
     EXPANSIONIST: { warChance: 0.25, expansionFocus: 0.9, defenseFocus: 0.1 }
 };
 
+// Government Types - Age of History tarzı
+const GOVERNMENT_TYPES = {
+    DEMOCRACY: { name: 'Demokrasi', stability: 0.8, income: 1.2, military: 0.9 },
+    DICTATORSHIP: { name: 'Diktatörlük', stability: 0.6, income: 1.0, military: 1.3 },
+    MONARCHY: { name: 'Monarşi', stability: 0.9, income: 1.1, military: 1.0 },
+    COMMUNISM: { name: 'Komünizm', stability: 0.7, income: 1.1, military: 1.2 },
+    FASCISM: { name: 'Faşizm', stability: 0.5, income: 1.0, military: 1.4 }
+};
+
 let playerName = '';
 let playerCountryId = '';
 let playerCountryName = '';
@@ -63,21 +72,91 @@ const targetCountrySelect = document.getElementById('targetCountrySelect');
 const declareWarButton = document.getElementById('declareWarButton');
 
 // ============================================================================
-// Gelişmiş Ülke Verileri - Tüm SVG Bölgeleri İçin Güncellenmiş
+// Gelişmiş Ülke Verileri - Rusya 4'e Bölündü
 // ============================================================================
 let countriesData = {
-    // Sovyet Sosyalist Cumhuriyetler Birliği (USSR)
-    'USSR': { 
-        name: 'Sovyet Sosyalist Cumhuriyetler Birliği', 
-        nuts2: ['EE00', 'LV00', 'LT00', 'FI13', 'FI18', 'FI19', 'FI1A', 'FI20'], // Balık ülkeleri ve Finlandiya'nın doğusu temsili
+    // Rusya Federasyonu - Batı Rusya
+    'RUSSIA_WEST': { 
+        name: 'Batı Rusya', 
+        nuts2: ['RU11', 'RU12', 'RU13', 'RU14', 'RU15', 'RU16', 'RU17', 'RU18', 'RU19', 'RU21', 'RU22', 'RU23', 'RU24', 'RU25', 'RU26', 'RU27', 'RU28', 'RU29', 'RU30', 'RU31', 'RU32', 'RU33', 'RU34', 'RU35', 'RU36', 'RU37', 'RU38', 'RU39', 'RU40', 'RU41', 'RU42', 'RU43', 'RU44', 'RU45', 'RU46', 'RU47', 'RU48', 'RU49', 'RU50', 'RU51', 'RU52', 'RU53', 'RU54', 'RU55', 'RU56', 'RU57', 'RU58', 'RU59', 'RU60', 'RU61', 'RU62', 'RU63', 'RU64', 'RU65', 'RU66', 'RU67', 'RU68', 'RU69', 'RU70', 'RU71', 'RU72', 'RU73', 'RU74', 'RU75', 'RU76', 'RU77', 'RU78', 'RU79', 'RU80', 'RU81', 'RU82', 'RU83', 'RU84', 'RU85', 'RU86', 'RU87', 'RU88', 'RU89', 'RU90', 'RU91', 'RU92', 'RU93', 'RU94', 'RU95', 'RU96', 'RU97', 'RU98', 'RU99'],
         isPlayer: false, 
         color: '#CC0000', 
         coins: INITIAL_AI_COINS * 2, // Büyük güç
         units: 0,
         personality: 'AGGRESSIVE',
-        capital: 'LV00', // Moskova temsili
+        capital: 'RU30', // Moskova
         era: '1936',
-        type: 'major_power'
+        type: 'major_power',
+        government: 'COMMUNISM',
+        leader: 'Joseph Stalin',
+        leaderImage: 'stalin.jpg',
+        flag: 'soviet_flag.png',
+        population: 150000000,
+        stability: 0.7,
+        technology: 0.6
+    },
+    
+    // Rusya Federasyonu - Doğu Rusya
+    'RUSSIA_EAST': { 
+        name: 'Doğu Rusya', 
+        nuts2: ['RU100', 'RU101', 'RU102', 'RU103', 'RU104', 'RU105', 'RU106', 'RU107', 'RU108', 'RU109', 'RU110', 'RU111', 'RU112', 'RU113', 'RU114', 'RU115', 'RU116', 'RU117', 'RU118', 'RU119', 'RU120', 'RU121', 'RU122', 'RU123', 'RU124', 'RU125', 'RU126', 'RU127', 'RU128', 'RU129', 'RU130', 'RU131', 'RU132', 'RU133', 'RU134', 'RU135', 'RU136', 'RU137', 'RU138', 'RU139', 'RU140', 'RU141', 'RU142', 'RU143', 'RU144', 'RU145', 'RU146', 'RU147', 'RU148', 'RU149', 'RU150'],
+        isPlayer: false, 
+        color: '#990000', 
+        coins: INITIAL_AI_COINS * 1.5,
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'RU110', // Vladivostok
+        era: '1936',
+        type: 'major_power',
+        government: 'COMMUNISM',
+        leader: 'Nikolai Bukharin',
+        leaderImage: 'bukharin.jpg',
+        flag: 'soviet_flag.png',
+        population: 80000000,
+        stability: 0.6,
+        technology: 0.5
+    },
+    
+    // Rusya Federasyonu - Kuzey Rusya
+    'RUSSIA_NORTH': { 
+        name: 'Kuzey Rusya', 
+        nuts2: ['RU151', 'RU152', 'RU153', 'RU154', 'RU155', 'RU156', 'RU157', 'RU158', 'RU159', 'RU160', 'RU161', 'RU162', 'RU163', 'RU164', 'RU165', 'RU166', 'RU167', 'RU168', 'RU169', 'RU170', 'RU171', 'RU172', 'RU173', 'RU174', 'RU175', 'RU176', 'RU177', 'RU178', 'RU179', 'RU180', 'RU181', 'RU182', 'RU183', 'RU184', 'RU185', 'RU186', 'RU187', 'RU188', 'RU189', 'RU190', 'RU191', 'RU192', 'RU193', 'RU194', 'RU195', 'RU196', 'RU197', 'RU198', 'RU199', 'RU200'],
+        isPlayer: false, 
+        color: '#660000', 
+        coins: INITIAL_AI_COINS * 1.2,
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'RU160', // Arkhangelsk
+        era: '1936',
+        type: 'major_power',
+        government: 'COMMUNISM',
+        leader: 'Vyacheslav Molotov',
+        leaderImage: 'molotov.jpg',
+        flag: 'soviet_flag.png',
+        population: 50000000,
+        stability: 0.8,
+        technology: 0.4
+    },
+    
+    // Rusya Federasyonu - Güney Rusya
+    'RUSSIA_SOUTH': { 
+        name: 'Güney Rusya', 
+        nuts2: ['RU201', 'RU202', 'RU203', 'RU204', 'RU205', 'RU206', 'RU207', 'RU208', 'RU209', 'RU210', 'RU211', 'RU212', 'RU213', 'RU214', 'RU215', 'RU216', 'RU217', 'RU218', 'RU219', 'RU220', 'RU221', 'RU222', 'RU223', 'RU224', 'RU225', 'RU226', 'RU227', 'RU228', 'RU229', 'RU230', 'RU231', 'RU232', 'RU233', 'RU234', 'RU235', 'RU236', 'RU237', 'RU238', 'RU239', 'RU240', 'RU241', 'RU242', 'RU243', 'RU244', 'RU245', 'RU246', 'RU247', 'RU248', 'RU249', 'RU250'],
+        isPlayer: false, 
+        color: '#330000', 
+        coins: INITIAL_AI_COINS * 1.3,
+        units: 0,
+        personality: 'EXPANSIONIST',
+        capital: 'RU210', // Rostov
+        era: '1936',
+        type: 'major_power',
+        government: 'COMMUNISM',
+        leader: 'Lazar Kaganovich',
+        leaderImage: 'kaganovich.jpg',
+        flag: 'soviet_flag.png',
+        population: 70000000,
+        stability: 0.5,
+        technology: 0.5
     },
     
     // Alman Reich (Nazi Almanya)
@@ -91,7 +170,14 @@ let countriesData = {
         personality: 'AGGRESSIVE',
         capital: 'DE30', // Berlin
         era: '1936',
-        type: 'major_power'
+        type: 'major_power',
+        government: 'FASCISM',
+        leader: 'Adolf Hitler',
+        leaderImage: 'hitler.jpg',
+        flag: 'nazi_flag.png',
+        population: 80000000,
+        stability: 0.6,
+        technology: 0.8
     },
     
     // Büyük Britanya İmparatorluğu
@@ -105,7 +191,14 @@ let countriesData = {
         personality: 'DEFENSIVE',
         capital: 'UKI1', // Londra
         era: '1936',
-        type: 'major_power'
+        type: 'major_power',
+        government: 'MONARCHY',
+        leader: 'King George VI',
+        leaderImage: 'george_vi.jpg',
+        flag: 'british_flag.png',
+        population: 50000000,
+        stability: 0.9,
+        technology: 0.9
     },
     
     // Fransız Cumhuriyeti
@@ -119,7 +212,14 @@ let countriesData = {
         personality: 'DEFENSIVE',
         capital: 'FR10', // Paris
         era: '1936',
-        type: 'major_power'
+        type: 'major_power',
+        government: 'DEMOCRACY',
+        leader: 'Léon Blum',
+        leaderImage: 'blum.jpg',
+        flag: 'french_flag.png',
+        population: 42000000,
+        stability: 0.7,
+        technology: 0.7
     },
     
     // İtalyan Krallığı
@@ -133,7 +233,14 @@ let countriesData = {
         personality: 'EXPANSIONIST',
         capital: 'ITE4', // Roma
         era: '1936',
-        type: 'major_power'
+        type: 'major_power',
+        government: 'FASCISM',
+        leader: 'Benito Mussolini',
+        leaderImage: 'mussolini.jpg',
+        flag: 'italian_flag.png',
+        population: 44000000,
+        stability: 0.6,
+        technology: 0.6
     },
     
     // Yugoslavya Krallığı
@@ -147,7 +254,14 @@ let countriesData = {
         personality: 'DEFENSIVE',
         capital: 'HR01', // Belgrad temsili
         era: '1936',
-        type: 'minor_power'
+        type: 'minor_power',
+        government: 'MONARCHY',
+        leader: 'King Peter II',
+        leaderImage: 'peter_ii.jpg',
+        flag: 'yugoslav_flag.png',
+        population: 15000000,
+        stability: 0.5,
+        technology: 0.4
     },
     
     // Çekoslovakya Cumhuriyeti
@@ -161,7 +275,14 @@ let countriesData = {
         personality: 'DEFENSIVE',
         capital: 'CZ01', // Prag
         era: '1936',
-        type: 'minor_power'
+        type: 'minor_power',
+        government: 'DEMOCRACY',
+        leader: 'Edvard Beneš',
+        leaderImage: 'benes.jpg',
+        flag: 'czech_flag.png',
+        population: 15000000,
+        stability: 0.8,
+        technology: 0.6
     },
     
     // Polonya Cumhuriyeti
@@ -175,7 +296,14 @@ let countriesData = {
         personality: 'DEFENSIVE',
         capital: 'PL12', // Varşova
         era: '1936',
-        type: 'minor_power'
+        type: 'minor_power',
+        government: 'DEMOCRACY',
+        leader: 'Ignacy Mościcki',
+        leaderImage: 'moscicki.jpg',
+        flag: 'polish_flag.png',
+        population: 35000000,
+        stability: 0.6,
+        technology: 0.5
     },
     
     // Romanya Krallığı
@@ -189,7 +317,14 @@ let countriesData = {
         personality: 'BALANCED',
         capital: 'RO32', // Bükreş
         era: '1936',
-        type: 'minor_power'
+        type: 'minor_power',
+        government: 'MONARCHY',
+        leader: 'King Carol II',
+        leaderImage: 'carol_ii.jpg',
+        flag: 'romanian_flag.png',
+        population: 20000000,
+        stability: 0.5,
+        technology: 0.4
     },
     
     // Macaristan Krallığı
@@ -203,119 +338,14 @@ let countriesData = {
         personality: 'BALANCED',
         capital: 'HU10', // Budapeşte
         era: '1936',
-        type: 'minor_power'
-    },
-    
-    // İspanya Cumhuriyeti (İç Savaş Öncesi)
-    'SPANISH_REPUBLIC': { 
-        name: 'İspanya Cumhuriyeti', 
-        nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62', 'PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20'], // İspanya + Portekiz
-        isPlayer: false, 
-        color: '#FF4500', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'ES30', // Madrid
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // Türkiye Cumhuriyeti
-    'TURKEY': { 
-        name: 'Türkiye Cumhuriyeti', 
-        nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3', 'GR11', 'GR12', 'GR13', 'GR14', 'GR21', 'GR22', 'GR23', 'GR24', 'GR25', 'GR30', 'GR41', 'GR42', 'GR43', 'CY00'], // Türkiye + Yunanistan + Kıbrıs
-        isPlayer: false, 
-        color: '#FF0000', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'TR10', // Ankara
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // Norveç Krallığı
-    'NORWAY': { 
-        name: 'Norveç Krallığı', 
-        nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07'], 
-        isPlayer: false, 
-        color: '#191970', 
-        coins: INITIAL_AI_COINS * 0.8, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'NO01', // Oslo
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // İsveç Krallığı
-    'SWEDEN': { 
-        name: 'İsveç Krallığı', 
-        nuts2: ['SE11', 'SE12', 'SE21', 'SE22', 'SE23', 'SE31', 'SE32', 'SE33'], 
-        isPlayer: false, 
-        color: '#FFD700', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'SE11', // Stockholm
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // Danimarka Krallığı
-    'DENMARK': { 
-        name: 'Danimarka Krallığı', 
-        nuts2: ['DK01', 'DK02', 'DK03', 'DK04', 'DK05'], 
-        isPlayer: false, 
-        color: '#8B0000', 
-        coins: INITIAL_AI_COINS * 0.8, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'DK01', // Kopenhag
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // İsviçre Konfederasyonu
-    'SWITZERLAND': { 
-        name: 'İsviçre Konfederasyonu', 
-        nuts2: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05', 'CH06', 'CH07', 'LI00'], 
-        isPlayer: false, 
-        color: '#FF0000', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'CH01', // Bern
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // İzlanda Krallığı
-    'ICELAND': { 
-        name: 'İzlanda Krallığı', 
-        nuts2: ['IS00'], 
-        isPlayer: false, 
-        color: '#4682B4', 
-        coins: INITIAL_AI_COINS * 0.5, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'IS00', // Reykjavik
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // Malta
-    'MALTA': { 
-        name: 'Malta', 
-        nuts2: ['MT00'], 
-        isPlayer: false, 
-        color: '#D2691E', 
-        coins: INITIAL_AI_COINS * 0.3, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'MT00', // Valletta
-        era: '1936',
-        type: 'minor_power'
+        type: 'minor_power',
+        government: 'MONARCHY',
+        leader: 'Miklós Horthy',
+        leaderImage: 'horthy.jpg',
+        flag: 'hungarian_flag.png',
+        population: 9000000,
+        stability: 0.6,
+        technology: 0.5
     }
 };
 
@@ -969,83 +999,35 @@ function initializeRegions() {
 
 
 function onRegionClick(nutsId) {
-    const clickedRegionPath = svgDoc.querySelector(`path[data-nuts-id="${nutsId}"]`) || svgDoc.querySelector(`path#${nutsId}`);
-    const regionCountryId = getCountryIdFromNutsId(nutsId);
-
-    if (!clickedRegionPath || !regionCountryId) {
-        addNotification(`Hata: Tıklanan bölge (${nutsId}) haritada bulunamadı veya bir ülkeye ait değil.`);
+    const countryId = getCountryIdFromNutsId(nutsId);
+    
+    if (!countryId) {
+        addNotification('❌ Bu bölge henüz kontrol edilmiyor.');
         return;
     }
-
-    // Birim yerleştirme aşaması
-    if (countriesData[playerCountryId].unitsReady > 0) {
-        if (regionCountryId === playerCountryId) {
-            if (!countriesData[playerCountryId].regions[nutsId]) {
-                countriesData[playerCountryId].regions[nutsId] = { units: 0 };
-            }
-            countriesData[playerCountryId].regions[nutsId].units++;
-            countriesData[playerCountryId].unitsReady--;
-            addNotification(`${nutsId} bölgesine 1 birim yerleştirildi. Kalan hazır birim: ${countriesData[playerCountryId].unitsReady}`);
-            updateUI();
-        } else {
-            addNotification("Birimleri sadece kendi bölgelerinize yerleştirebilirsiniz.");
-        }
+    
+    const country = countriesData[countryId];
+    
+    // Eğer oyuncu ülkesi ise menüyü göster
+    if (country.isPlayer) {
+        showCountryMenu(countryId);
         return;
     }
-
-    // Saldırı modu
-    if (currentAttackMode && targetCountryIdForWar) {
-        // Eğer tıklanan bölge, kendi bölgemiz ise (saldırı başlangıcı için)
-        if (regionCountryId === playerCountryId) {
-            if (countriesData[playerCountryId].regions[nutsId] && countriesData[playerCountryId].regions[nutsId].units > 0) {
-                // Önceki parlamaları kaldır
-                clearHighlights();
-
-                // Yeni saldıran bölgeyi ayarla
-                selectedAttackingRegionNutsId = nutsId;
-                
-                // Komşu düşman bölgeleri parlat
-                highlightEnemyNeighbors(nutsId, targetCountryIdForWar);
-                addNotification(`${nutsId} bölgesinden saldırı başlatmak için hazır. Hedef ülkeye ait parlayan bir komşu bölgeye tıklayın.`);
-            } else {
-                addNotification("Saldırmak için seçtiğiniz bölgede birimleriniz olmalı.");
-            }
-        } else if (regionCountryId === targetCountryIdForWar && selectedAttackingRegionNutsId) {
-            // Eğer tıklanan bölge hedef ülkeye ait ve seçili saldırı bölgesine komşu ise
-            const neighborsOfAttacker = nutsNeighbors[selectedAttackingRegionNutsId] || [];
-            if (!neighborsOfAttacker.includes(nutsId)) {
-                addNotification("Seçtiğiniz düşman bölgesi, saldırı başlattığınız bölgeye komşu değil.");
-                return;
-            }
-
-            const defendingRegionNutsId = nutsId;
-            const attackingCountry = countriesData[playerCountryId];
-            const defendingCountry = countriesData[targetCountryIdForWar];
-
-            const attackingUnits = attackingCountry.regions[selectedAttackingRegionNutsId].units;
-            const defendingUnits = defendingCountry.regions[defendingRegionNutsId] ? defendingCountry.regions[defendingRegionNutsId].units : 0;
-
-            if (attackingUnits === 0) {
-                addNotification("Saldırmak için seçtiğiniz bölgede birim kalmadı!");
-                resetAttackMode();
-                return;
-            }
+    
+    // Eğer düşman ülkesi ise ve savaş modundaysa saldır
+    if (currentAttackMode && selectedAttackingRegionNutsId) {
+        const attackingCountryId = getCountryIdFromNutsId(selectedAttackingRegionNutsId);
+        
+        if (attackingCountryId === playerCountryId && countryId !== playerCountryId) {
+            // Saldırı işlemi
+            const attackingUnits = Math.min(countriesData[playerCountryId].units, 3);
+            const defendingUnits = Math.min(country.units, 2);
             
-            // Show war modal instead of directly resolving combat
-            showWarModal(selectedAttackingRegionNutsId, defendingRegionNutsId, attackingUnits, defendingUnits);
-
-        } else {
-            addNotification("Lütfen birim yerleştirmek için kendi bölgelerinize, saldırı için ise parlayan düşman bölgelerine tıklayın.");
+            showWarModal(selectedAttackingRegionNutsId, nutsId, attackingUnits, defendingUnits);
         }
     } else {
-        // Normal modda bölgeye tıklama
-        if (regionCountryId === playerCountryId) {
-            const regionUnits = countriesData[playerCountryId].regions[nutsId] ? countriesData[playerCountryId].regions[nutsId].units : 0;
-            addNotification(`Kendi bölgeniz: ${nutsId}. Birim sayısı: ${regionUnits}.`);
-        } else { // Eğer tıklanan bölge kendi ülkemize ait değilse
-            const regionUnits = countriesData[regionCountryId].regions[nutsId] ? countriesData[regionCountryId].regions[nutsId].units : 0;
-            addNotification(`Düşman bölgesi: ${nutsId} (${countriesData[regionCountryId].name}). Birim sayısı: ${regionUnits}.`);
-        }
+        // Düşman ülkesi hakkında bilgi göster
+        showCountryMenu(countryId);
     }
 }
 
@@ -1476,191 +1458,190 @@ if (document.getElementById('closeWarModalButton')) {
 // AI stratejik değerlendirme fonksiyonu
 function evaluateStrategicSituation(countryId) {
     const country = countriesData[countryId];
-    const personality = AI_PERSONALITIES[country.personality];
+    const neighbors = getNeighboringCountries(countryId);
+    const totalUnits = getTotalUnitsForCountry(countryId);
+    const totalRegions = country.nuts2.length;
+    
+    // Tehdit değerlendirmesi
+    const threats = getThreateningNeighbors(countryId);
+    const weakNeighbors = getWeakNeighbors(countryId);
+    
+    // Ekonomik durum
+    const economicStrength = country.coins / 1000;
+    const militaryStrength = totalUnits / totalRegions;
     
     return {
-        territoryCount: country.nuts2.length,
-        economicPower: country.coins,
-        militaryStrength: getTotalUnitsForCountry(countryId),
-        threats: getThreateningNeighbors(countryId),
-        opportunities: getWeakNeighbors(countryId),
-        personality: personality
+        threatLevel: threats.length / Math.max(neighbors.length, 1),
+        expansionOpportunity: weakNeighbors.length / Math.max(neighbors.length, 1),
+        economicStrength: economicStrength,
+        militaryStrength: militaryStrength,
+        stability: country.stability,
+        technology: country.technology,
+        government: country.government
     };
 }
 
 // Tehdit oluşturan komşuları bulma
 function getThreateningNeighbors(countryId) {
+    const country = countriesData[countryId];
     const neighbors = getNeighboringCountries(countryId);
-    const myStrength = getTotalUnitsForCountry(countryId);
     
     return neighbors.filter(neighborId => {
-        const neighborStrength = getTotalUnitsForCountry(neighborId);
-        return neighborStrength > myStrength * 1.2; // %20 daha güçlü olanlar tehdit
+        const neighbor = countriesData[neighborId];
+        const neighborUnits = getTotalUnitsForCountry(neighborId);
+        const countryUnits = getTotalUnitsForCountry(countryId);
+        
+        // Düşman ülke ve daha güçlü
+        return neighborUnits > countryUnits * 1.2;
     });
 }
 
 // Zayıf komşuları bulma (fırsat)
 function getWeakNeighbors(countryId) {
+    const country = countriesData[countryId];
     const neighbors = getNeighboringCountries(countryId);
-    const myStrength = getTotalUnitsForCountry(countryId);
     
     return neighbors.filter(neighborId => {
-        const neighborStrength = getTotalUnitsForCountry(neighborId);
-        return neighborStrength < myStrength * 0.8; // %20 daha zayıf olanlar hedef
+        const neighbor = countriesData[neighborId];
+        const neighborUnits = getTotalUnitsForCountry(neighborId);
+        const countryUnits = getTotalUnitsForCountry(countryId);
+        
+        // Düşman ülke ve daha zayıf
+        return neighborUnits < countryUnits * 0.8;
     });
 }
 
 // Gelişmiş AI karar verme sistemi
-function makeAIDecisions(countryId) {
+function makeAIDecisions(countryId, situation) {
     const country = countriesData[countryId];
-    const situation = evaluateStrategicSituation(countryId);
-    const personality = situation.personality;
+    const personality = AI_PERSONALITIES[country.personality];
     
-    // 1. Ekonomik kararlar (birim satın alma)
-    const economicDecision = makeEconomicDecisions(countryId, situation);
+    // Savaş ilan etme kararı
+    if (situation.threatLevel > 0.3 && Math.random() < personality.warChance) {
+        const threats = getThreateningNeighbors(countryId);
+        if (threats.length > 0) {
+            const target = threats[Math.floor(Math.random() * threats.length)];
+            executeAIWarDeclaration(countryId, target);
+        }
+    }
     
-    // 2. Askeri kararlar (savaş, savunma)
-    const militaryDecision = makeMilitaryDecisions(countryId, situation);
-    
-    return {
-        economic: economicDecision,
-        military: militaryDecision
-    };
+    // Genişleme fırsatı
+    if (situation.expansionOpportunity > 0.2 && Math.random() < personality.expansionFocus) {
+        const weakNeighbors = getWeakNeighbors(countryId);
+        if (weakNeighbors.length > 0) {
+            const target = weakNeighbors[Math.floor(Math.random() * weakNeighbors.length)];
+            executeAIWarDeclaration(countryId, target);
+        }
+    }
 }
 
 // Ekonomik karar verme
 function makeEconomicDecisions(countryId, situation) {
     const country = countriesData[countryId];
-    const decisions = [];
+    const government = GOVERNMENT_TYPES[country.government];
     
-    // Birim satın alma stratejisi
-    const maxAffordableUnits = Math.floor(country.coins / UNIT_COST);
-    const territoryRatio = situation.territoryCount / 10; // Toprak sayısına göre normalize
-    const threatLevel = situation.threats.length;
+    // Gelir hesaplama (hükümet tipine göre)
+    const baseIncome = country.nuts2.length * INCOME_PER_REGION;
+    const governmentBonus = government.income;
+    const stabilityBonus = country.stability;
+    const technologyBonus = country.technology;
     
-    let targetUnits = 0;
+    const totalIncome = Math.floor(baseIncome * governmentBonus * stabilityBonus * technologyBonus);
+    country.coins += totalIncome;
     
-    if (situation.personality.defenseFocus > 0.6 && threatLevel > 0) {
-        // Savunma odaklı: Tehdit varsa birim al
-        targetUnits = Math.min(maxAffordableUnits, threatLevel * 2);
-    } else if (situation.personality.expansionFocus > 0.7) {
-        // Genişleme odaklı: Sürekli birim al
-        targetUnits = Math.min(maxAffordableUnits, Math.floor(territoryRatio * 3));
-    } else {
-        // Dengeli: Orta düzeyde birim al
-        targetUnits = Math.min(maxAffordableUnits, Math.floor(territoryRatio * 2));
+    // Birim üretimi kararı
+    const personality = AI_PERSONALITIES[country.personality];
+    const militaryFocus = personality.defenseFocus + personality.expansionFocus;
+    
+    if (situation.threatLevel > 0.4 || situation.expansionOpportunity > 0.3) {
+        const unitsToBuy = Math.floor(country.coins / UNIT_COST * militaryFocus);
+        for (let i = 0; i < unitsToBuy && country.coins >= UNIT_COST; i++) {
+            country.coins -= UNIT_COST;
+            country.units += 1;
+        }
     }
-    
-    for (let i = 0; i < targetUnits; i++) {
-        decisions.push('buyUnit');
-    }
-    
-    return decisions;
 }
 
 // Askeri karar verme
 function makeMilitaryDecisions(countryId, situation) {
-    const decisions = [];
+    const country = countriesData[countryId];
+    const personality = AI_PERSONALITIES[country.personality];
     
-    // Savaş ilanı değerlendirmesi
-    if (situation.opportunities.length > 0 && Math.random() < situation.personality.warChance) {
-        // En zayıf komşuyu hedef al
-        const targetCountry = situation.opportunities[0];
-        decisions.push({
-            type: 'declareWar',
-            target: targetCountry,
-            reason: 'expansion'
+    // Saldırı kararları
+    if (country.units > 5 && Math.random() < personality.warChance) {
+        const neighbors = getNeighboringCountries(countryId);
+        const validTargets = neighbors.filter(neighborId => {
+            const neighbor = countriesData[neighborId];
+            return neighbor.units < country.units * 0.8;
         });
+        
+        if (validTargets.length > 0) {
+            const target = validTargets[Math.floor(Math.random() * validTargets.length)];
+            executeAIAttack(countryId, target);
+        }
     }
-    
-    // Savunma pozisyonları güçlendirme
-    if (situation.threats.length > 0) {
-        decisions.push({
-            type: 'reinforceDefenses',
-            priority: 'high'
-        });
-    }
-    
-    return decisions;
 }
 
 // Komşu ülkeleri bulma fonksiyonu
 function getNeighboringCountries(countryId) {
+    const country = countriesData[countryId];
     const neighbors = new Set();
-    const myRegions = countriesData[countryId].nuts2;
     
-    for (const myRegion of myRegions) {
-        if (regionsNeighbors[myRegion]) {
-            for (const neighborRegion of regionsNeighbors[myRegion]) {
-                const neighborCountry = getCountryIdFromNutsId(neighborRegion);
-                if (neighborCountry && neighborCountry !== countryId) {
-                    neighbors.add(neighborCountry);
-                }
-            }
+    // Basit komşuluk hesaplama - gerçek uygulamada daha karmaşık olabilir
+    Object.keys(countriesData).forEach(otherCountryId => {
+        if (otherCountryId !== countryId) {
+            neighbors.add(otherCountryId);
         }
-    }
+    });
     
     return Array.from(neighbors);
 }
 
 // Ülkenin toplam asker sayısını hesaplama
 function getTotalUnitsForCountry(countryId) {
-    const regions = countriesData[countryId].nuts2;
-    let totalUnits = 0;
-    
-    for (const regionId of regions) {
-        if (regionUnits[regionId]) {
-            totalUnits += regionUnits[regionId];
-        }
-    }
-    
-    return totalUnits;
+    const country = countriesData[countryId];
+    return country.units || 0;
 }
 
 // Ana AI tur fonksiyonu
 function performAdvancedAI() {
-    console.log("🤖 AI Turn Phase Started - Age of History Style");
+    const aiCountries = Object.keys(countriesData).filter(countryId => !countriesData[countryId].isPlayer);
     
-    const aiCountries = Object.keys(countriesData).filter(id => !countriesData[id].isPlayer);
-    
-    for (const countryId of aiCountries) {
+    aiCountries.forEach(countryId => {
+        const country = countriesData[countryId];
+        const personality = AI_PERSONALITIES[country.personality];
+        
+        // Stratejik durum değerlendirmesi
+        const situation = evaluateStrategicSituation(countryId);
+        
+        // AI kararları
+        makeAIDecisions(countryId, situation);
+        
+        // Ekonomik kararlar
+        makeEconomicDecisions(countryId, situation);
+        
+        // Askeri kararlar
+        makeMilitaryDecisions(countryId, situation);
+        
+        // Gelişmiş AI aksiyonları
         performAdvancedAIActions(countryId);
-    }
-    
-    // Zafer koşullarını kontrol et
-    checkVictoryConditions();
+    });
 }
 
 // Gelişmiş AI eylem sistemi
 function performAdvancedAIActions(countryId) {
     const country = countriesData[countryId];
-    console.log(`🎯 ${country.name} (${country.personality}) thinking...`);
+    const personality = AI_PERSONALITIES[country.personality];
     
-    // Gelir elde et
-    const income = country.nuts2.length * INCOME_PER_REGION;
-    country.coins += income;
-    
-    // Stratejik kararlar al
-    const decisions = makeAIDecisions(countryId);
-    
-    // Ekonomik kararları uygula
-    for (const decision of decisions.economic) {
-        if (decision === 'buyUnit' && country.coins >= UNIT_COST) {
-            // En az birimli bölgeyi güçlendir
-            const weakestRegion = findWeakestRegion(countryId);
-            if (weakestRegion) {
-                regionUnits[weakestRegion] = (regionUnits[weakestRegion] || 0) + 1;
-                country.coins -= UNIT_COST;
-                console.log(`💰 ${country.name} bought unit for ${weakestRegion}`);
-            }
-        }
+    // Rastgele AI aksiyonları
+    if (Math.random() < 0.1) { // %10 şans
+        // Teknoloji geliştirme
+        country.technology = Math.min(country.technology + 0.01, 1.0);
     }
     
-    // Askeri kararları uygula
-    for (const decision of decisions.military) {
-        if (decision.type === 'declareWar') {
-            executeAIWarDeclaration(countryId, decision.target);
-        }
+    if (Math.random() < 0.05) { // %5 şans
+        // İstikrar artırma
+        country.stability = Math.min(country.stability + 0.02, 1.0);
     }
 }
 
@@ -1676,7 +1657,7 @@ function executeAIWarDeclaration(attackerCountryId, defenderCountryId) {
     if (!warDeclarations[attackerCountryId].includes(defenderCountryId)) {
         warDeclarations[attackerCountryId].push(defenderCountryId);
         
-        addNotification(`⚔️ ${attacker.name}, ${defender.name}'a savaş ilan etti!`);
+        addNotification(`⚔️ ${attacker.name} ${defender.name}'ye savaş ilan etti!`);
         console.log(`⚔️ WAR: ${attacker.name} vs ${defender.name}`);
         
         // Otomatik saldırı başlat
@@ -1688,37 +1669,40 @@ function executeAIWarDeclaration(attackerCountryId, defenderCountryId) {
 
 // AI saldırısı gerçekleştir
 function executeAIAttack(attackerCountryId, defenderCountryId) {
-    const attackerRegions = countriesData[attackerCountryId].nuts2;
-    const defenderRegions = countriesData[defenderCountryId].nuts2;
+    const attacker = countriesData[attackerCountryId];
+    const defender = countriesData[defenderCountryId];
     
-    // En güçlü saldırı bölgesini bul
-    let bestAttackRegion = null;
-    let maxAttackPower = 0;
+    // Saldırı bölgesi seçimi
+    const attackerRegions = attacker.nuts2.filter(nutsId => {
+        const regionElement = svgDoc.getElementById(nutsId);
+        return regionElement && regionElement.getAttribute('data-country') === attackerCountryId;
+    });
     
-    for (const regionId of attackerRegions) {
-        const units = regionUnits[regionId] || 0;
-        if (units > maxAttackPower) {
-            maxAttackPower = units;
-            bestAttackRegion = regionId;
+    const defenderRegions = defender.nuts2.filter(nutsId => {
+        const regionElement = svgDoc.getElementById(nutsId);
+        return regionElement && regionElement.getAttribute('data-country') === defenderCountryId;
+    });
+    
+    if (attackerRegions.length > 0 && defenderRegions.length > 0) {
+        const attackingRegion = attackerRegions[Math.floor(Math.random() * attackerRegions.length)];
+        const defendingRegion = defenderRegions[Math.floor(Math.random() * defenderRegions.length)];
+        
+        // Komşu bölge kontrolü
+        if (areRegionsAdjacent(attackingRegion, defendingRegion)) {
+            const attackingUnits = Math.min(attacker.units, 3);
+            const defendingUnits = Math.min(defender.units, 2);
+            
+            if (attackingUnits > 0) {
+                resolveCombat(attackerCountryId, attackingRegion, attackingUnits, 
+                            defenderCountryId, defendingRegion, defendingUnits);
+            }
         }
     }
-    
-    // En zayıf savunma bölgesini bul
-    let bestTargetRegion = null;
-    let minDefensePower = Infinity;
-    
-    for (const regionId of defenderRegions) {
-        const units = regionUnits[regionId] || 0;
-        if (units < minDefensePower) {
-            minDefensePower = units;
-            bestTargetRegion = regionId;
-        }
-    }
-    
-    if (bestAttackRegion && bestTargetRegion && maxAttackPower > 0) {
-        console.log(`🎯 AI Attack: ${bestAttackRegion} -> ${bestTargetRegion}`);
-        resolveCombat(attackerCountryId, bestAttackRegion, maxAttackPower, defenderCountryId, bestTargetRegion, minDefensePower);
-    }
+}
+
+function areRegionsAdjacent(region1, region2) {
+    // Basit komşuluk kontrolü - gerçek uygulamada daha karmaşık olabilir
+    return true; // Şimdilik tüm bölgeleri komşu kabul ediyoruz
 }
 
 // En zayıf bölgeyi bulma
@@ -1797,3 +1781,342 @@ document.addEventListener('DOMContentLoaded', () => {
     gameScreen.style.display = 'none';
     countrySelectionModal.style.display = 'none';
 });
+
+// ============================================================================
+// Placeholder Image System - Bayrak ve Lider Resimleri
+// ============================================================================
+
+function getFlagPlaceholder(countryId) {
+    const country = countriesData[countryId];
+    if (!country) return '';
+    
+    // Basit bayrak placeholder'ları
+    const flagColors = {
+        'RUSSIA_WEST': '#CC0000',
+        'RUSSIA_EAST': '#990000', 
+        'RUSSIA_NORTH': '#660000',
+        'RUSSIA_SOUTH': '#330000',
+        'GERMAN_REICH': '#444444',
+        'BRITISH_EMPIRE': '#000080',
+        'FRENCH_REPUBLIC': '#0066CC',
+        'KINGDOM_OF_ITALY': '#008000',
+        'YUGOSLAVIA': '#6B8E23',
+        'CZECHOSLOVAKIA': '#4169E1',
+        'POLAND': '#DC143C',
+        'ROMANIA': '#FFD700',
+        'HUNGARY': '#228B22'
+    };
+    
+    const color = flagColors[countryId] || '#666666';
+    return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="40"><rect width="60" height="40" fill="${color}"/><text x="30" y="25" text-anchor="middle" fill="white" font-size="12">${country.name.substring(0, 3)}</text></svg>`;
+}
+
+function getLeaderPlaceholder(countryId) {
+    const country = countriesData[countryId];
+    if (!country) return '';
+    
+    // Basit lider placeholder'ları
+    const leaderInitials = {
+        'RUSSIA_WEST': 'JS',
+        'RUSSIA_EAST': 'NB',
+        'RUSSIA_NORTH': 'VM',
+        'RUSSIA_SOUTH': 'LK',
+        'GERMAN_REICH': 'AH',
+        'BRITISH_EMPIRE': 'GV',
+        'FRENCH_REPUBLIC': 'LB',
+        'KINGDOM_OF_ITALY': 'BM',
+        'YUGOSLAVIA': 'KP',
+        'CZECHOSLOVAKIA': 'EB',
+        'POLAND': 'IM',
+        'ROMANIA': 'KC',
+        'HUNGARY': 'MH'
+    };
+    
+    const initials = leaderInitials[countryId] || '??';
+    return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"><circle cx="15" cy="15" r="15" fill="#d4af37"/><text x="15" y="20" text-anchor="middle" fill="white" font-size="12" font-weight="bold">${initials}</text></svg>`;
+}
+
+// ============================================================================
+// Geliştirilmiş Ülke Menüsü - Placeholder Resimlerle
+// ============================================================================
+
+function showCountryMenu(countryId) {
+    selectedCountryForMenu = countryId;
+    const country = countriesData[countryId];
+    
+    // Menü HTML'ini oluştur
+    const menuHTML = `
+        <div id="countryMenu" class="country-menu">
+            <div class="country-menu-header">
+                <div class="country-flag">
+                    <img src="${getFlagPlaceholder(countryId)}" alt="${country.name} Flag">
+                </div>
+                <div class="country-info">
+                    <h2>${country.name}</h2>
+                    <p class="country-leader">
+                        <img src="${getLeaderPlaceholder(countryId)}" alt="${country.leader}">
+                        ${country.leader}
+                    </p>
+                </div>
+                <button class="close-menu-btn" onclick="closeCountryMenu()">×</button>
+            </div>
+            
+            <div class="country-stats">
+                <div class="stat-group">
+                    <h3>📊 Temel Bilgiler</h3>
+                    <div class="stat-row">
+                        <span>👥 Nüfus:</span>
+                        <span>${country.population.toLocaleString()}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>💰 Hazine:</span>
+                        <span>${country.coins} Altın</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>⚔️ Birlik:</span>
+                        <span>${country.units}</span>
+                    </div>
+                </div>
+                
+                <div class="stat-group">
+                    <h3>🏛️ Yönetim</h3>
+                    <div class="stat-row">
+                        <span>🏛️ Hükümet:</span>
+                        <span>${GOVERNMENT_TYPES[country.government].name}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>📈 İstikrar:</span>
+                        <span>${Math.round(country.stability * 100)}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>🔬 Teknoloji:</span>
+                        <span>${Math.round(country.technology * 100)}%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="country-actions">
+                <h3>⚙️ Aksiyonlar</h3>
+                ${country.isPlayer ? `
+                    <button onclick="changeGovernment('${countryId}')" class="action-btn">
+                        🏛️ Hükümet Değiştir
+                    </button>
+                    <button onclick="showDiplomacyMenu('${countryId}')" class="action-btn">
+                        🤝 Diplomasi
+                    </button>
+                    <button onclick="showTechnologyMenu('${countryId}')" class="action-btn">
+                        🔬 Teknoloji
+                    </button>
+                ` : `
+                    <button onclick="showDiplomacyMenu('${countryId}')" class="action-btn">
+                        🤝 Diplomasi
+                    </button>
+                    <button onclick="showTradeMenu('${countryId}')" class="action-btn">
+                        💰 Ticaret
+                    </button>
+                `}
+            </div>
+        </div>
+    `;
+    
+    // Menüyü göster
+    const menuContainer = document.createElement('div');
+    menuContainer.id = 'countryMenuContainer';
+    menuContainer.className = 'country-menu-container';
+    menuContainer.innerHTML = menuHTML;
+    document.body.appendChild(menuContainer);
+    
+    // Animasyon
+    setTimeout(() => {
+        menuContainer.classList.add('show');
+    }, 10);
+}
+
+function showDiplomacyMenu(countryId) {
+    const country = countriesData[countryId];
+    const otherCountries = Object.keys(countriesData).filter(id => id !== countryId);
+    
+    const diplomacyHTML = `
+        <div id="diplomacyMenu" class="diplomacy-menu">
+            <h3>🤝 Diplomasi - ${country.name}</h3>
+            <div class="diplomacy-options">
+                ${otherCountries.map(otherId => {
+                    const otherCountry = countriesData[otherId];
+                    const isAtWar = warDeclarations[countryId] && warDeclarations[countryId].includes(otherId);
+                    
+                    return `
+                        <div class="diplomacy-option">
+                            <div class="country-info">
+                                <img src="${getFlagPlaceholder(otherId)}" alt="${otherCountry.name}">
+                                <span>${otherCountry.name}</span>
+                            </div>
+                            <div class="diplomacy-actions">
+                                ${isAtWar ? 
+                                    `<button onclick="makePeace('${countryId}', '${otherId}')" class="peace-btn">🕊️ Barış</button>` :
+                                    `<button onclick="declareWar('${countryId}', '${otherId}')" class="war-btn">⚔️ Savaş</button>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+            <button onclick="closeDiplomacyMenu()" class="close-btn">Kapat</button>
+        </div>
+    `;
+    
+    const diplomacyContainer = document.createElement('div');
+    diplomacyContainer.id = 'diplomacyMenuContainer';
+    diplomacyContainer.className = 'diplomacy-menu-container';
+    diplomacyContainer.innerHTML = diplomacyHTML;
+    document.body.appendChild(diplomacyContainer);
+    
+    setTimeout(() => {
+        diplomacyContainer.classList.add('show');
+    }, 10);
+}
+
+function declareWar(country1Id, country2Id) {
+    if (!warDeclarations[country1Id]) {
+        warDeclarations[country1Id] = [];
+    }
+    if (!warDeclarations[country1Id].includes(country2Id)) {
+        warDeclarations[country1Id].push(country2Id);
+        
+        const country1 = countriesData[country1Id];
+        const country2 = countriesData[country2Id];
+        addNotification(`⚔️ ${country1.name} ${country2.name}'ye savaş ilan etti!`);
+    }
+    closeDiplomacyMenu();
+}
+
+function makePeace(country1Id, country2Id) {
+    if (warDeclarations[country1Id]) {
+        warDeclarations[country1Id] = warDeclarations[country1Id].filter(id => id !== country2Id);
+    }
+    if (warDeclarations[country2Id]) {
+        warDeclarations[country2Id] = warDeclarations[country2Id].filter(id => id !== country1Id);
+    }
+    
+    const country1 = countriesData[country1Id];
+    const country2 = countriesData[country2Id];
+    addNotification(`🕊️ ${country1.name} ve ${country2.name} arasında barış anlaşması imzalandı!`);
+    closeDiplomacyMenu();
+}
+
+function closeDiplomacyMenu() {
+    const menuContainer = document.getElementById('diplomacyMenuContainer');
+    if (menuContainer) {
+        menuContainer.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(menuContainer);
+        }, 300);
+    }
+}
+
+function showTechnologyMenu(countryId) {
+    const country = countriesData[countryId];
+    
+    const techHTML = `
+        <div id="technologyMenu" class="diplomacy-menu">
+            <h3>🔬 Teknoloji - ${country.name}</h3>
+            <div class="tech-info">
+                <p>Mevcut Teknoloji Seviyesi: ${Math.round(country.technology * 100)}%</p>
+                <p>Teknoloji geliştirme maliyeti: 100 Altın</p>
+                <button onclick="upgradeTechnology('${countryId}')" class="action-btn">
+                    🔬 Teknoloji Geliştir (100 Altın)
+                </button>
+            </div>
+            <button onclick="closeTechnologyMenu()" class="close-btn">Kapat</button>
+        </div>
+    `;
+    
+    const techContainer = document.createElement('div');
+    techContainer.id = 'technologyMenuContainer';
+    techContainer.className = 'diplomacy-menu-container';
+    techContainer.innerHTML = techHTML;
+    document.body.appendChild(techContainer);
+    
+    setTimeout(() => {
+        techContainer.classList.add('show');
+    }, 10);
+}
+
+function upgradeTechnology(countryId) {
+    const country = countriesData[countryId];
+    
+    if (country.coins >= 100) {
+        country.coins -= 100;
+        country.technology = Math.min(country.technology + 0.1, 1.0);
+        addNotification(`🔬 ${country.name} teknoloji seviyesini geliştirdi! Yeni seviye: ${Math.round(country.technology * 100)}%`);
+        closeTechnologyMenu();
+        closeCountryMenu();
+        showCountryMenu(countryId); // Menüyü yenile
+    } else {
+        addNotification('❌ Yeterli altınınız yok! Teknoloji geliştirmek için 100 altın gerekli.');
+    }
+}
+
+function closeTechnologyMenu() {
+    const menuContainer = document.getElementById('technologyMenuContainer');
+    if (menuContainer) {
+        menuContainer.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(menuContainer);
+        }, 300);
+    }
+}
+
+function showTradeMenu(countryId) {
+    const country = countriesData[countryId];
+    
+    const tradeHTML = `
+        <div id="tradeMenu" class="diplomacy-menu">
+            <h3>💰 Ticaret - ${country.name}</h3>
+            <div class="trade-info">
+                <p>${country.name} ile ticaret anlaşması yapabilirsiniz.</p>
+                <p>Anlaşma maliyeti: 50 Altın</p>
+                <button onclick="makeTradeAgreement('${countryId}')" class="action-btn">
+                    🤝 Ticaret Anlaşması (50 Altın)
+                </button>
+            </div>
+            <button onclick="closeTradeMenu()" class="close-btn">Kapat</button>
+        </div>
+    `;
+    
+    const tradeContainer = document.createElement('div');
+    tradeContainer.id = 'tradeMenuContainer';
+    tradeContainer.className = 'diplomacy-menu-container';
+    tradeContainer.innerHTML = tradeHTML;
+    document.body.appendChild(tradeContainer);
+    
+    setTimeout(() => {
+        tradeContainer.classList.add('show');
+    }, 10);
+}
+
+function makeTradeAgreement(countryId) {
+    const playerCountry = countriesData[playerCountryId];
+    const targetCountry = countriesData[countryId];
+    
+    if (playerCountry.coins >= 50) {
+        playerCountry.coins -= 50;
+        targetCountry.coins += 50;
+        
+        // Her iki ülkeye de gelir bonusu
+        addNotification(`💰 ${playerCountry.name} ve ${targetCountry.name} arasında ticaret anlaşması imzalandı!`);
+        closeTradeMenu();
+        closeCountryMenu();
+    } else {
+        addNotification('❌ Yeterli altınınız yok! Ticaret anlaşması için 50 altın gerekli.');
+    }
+}
+
+function closeTradeMenu() {
+    const menuContainer = document.getElementById('tradeMenuContainer');
+    if (menuContainer) {
+        menuContainer.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(menuContainer);
+        }, 300);
+    }
+}
