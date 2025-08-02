@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let countriesData = {
         'UK': {
             name: 'Birleşik Krallık',
-            nuts2: ['UKI', 'UKD', 'UKJ', 'UKM', 'UKN', 'UKL', 'UKF', 'UKC', 'UKE', 'UKG', 'UKH'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
+            nuts2: ['UKK1', 'UKI1', 'UKI2', 'UKJ4', 'UKD5', 'UKD3', 'UKD2', 'UKM2', 'UKM6', 'UKG', 'UKH'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
             isPlayer: false,
             color: '#19cf0c', // Sizin verdiğiniz renk: Yeşil
             coins: 100, // Başlangıç coin miktarı
