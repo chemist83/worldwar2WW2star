@@ -134,6 +134,47 @@ button {
     overflow: hidden;
 }
 
+/* SALDIRMA BUTONU - Age of History Tarzı */
+#attackButton {
+    background: linear-gradient(145deg, var(--accent-red), #a00000);
+    border-color: #ff4444;
+    color: #ffffff;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    animation: attackPulse 2s infinite;
+    margin-top: 10px;
+    width: 100%;
+}
+
+#attackButton:hover {
+    background: linear-gradient(145deg, #ff0000, var(--accent-red));
+    border-color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(139, 0, 0, 0.6);
+}
+
+#attackButton:disabled {
+    background: var(--secondary-bg);
+    color: #666;
+    border-color: #444;
+    animation: none;
+    transform: none;
+}
+
+@keyframes attackPulse {
+    0% { box-shadow: 0 4px 8px rgba(139, 0, 0, 0.4); }
+    50% { box-shadow: 0 4px 12px rgba(139, 0, 0, 0.8); }
+    100% { box-shadow: 0 4px 8px rgba(139, 0, 0, 0.4); }
+}
+
+/* SALDIRI MODU AKTİF STİLLERİ */
+.attack-mode-active {
+    background: linear-gradient(145deg, #8b0000, #a00000) !important;
+    border-color: #ff4444 !important;
+    color: #ffffff !important;
+    animation: attackPulse 1s infinite !important;
+}
+
 button::before {
     content: '';
     position: absolute;

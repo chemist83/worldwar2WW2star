@@ -61,6 +61,7 @@ const selectCountryButton = document.getElementById('selectCountryButton');
 
 const targetCountrySelect = document.getElementById('targetCountrySelect');
 const declareWarButton = document.getElementById('declareWarButton');
+const attackButton = document.getElementById('attackButton');
 
 // ============================================================================
 // Gelişmiş Ülke Verileri - Tüm SVG Bölgeleri İçin Güncellenmiş
@@ -1035,7 +1036,7 @@ function onRegionClick(nutsId) {
             showWarModal(selectedAttackingRegionNutsId, defendingRegionNutsId, attackingUnits, defendingUnits);
 
         } else {
-            addNotification("Lütfen birim yerleştirmek için kendi bölgelerinize, saldırı için ise parlayan düşman bölgelerine tıklayın.");
+            addNotification("Saldırı modunda: Kendi bölgelerinizden birine tıklayarak saldırı başlatın, sonra parlayan düşman bölgelerine tıklayın.");
         }
     } else {
         // Normal modda bölgeye tıklama
@@ -1054,6 +1055,12 @@ function resetAttackMode() {
     selectedAttackingRegionNutsId = null;
     targetCountryIdForWar = null;
     clearHighlights(); // Parlamaları kaldır
+    
+    // Saldırma butonunu sıfırla
+    if (attackButton) {
+        attackButton.disabled = true;
+        attackButton.textContent = "⚔️ SALDIRI MODU";
+    }
 }
 
 function clearHighlights() {
@@ -1128,12 +1135,33 @@ function declareWar() {
     }
 
     addNotification(`${targetCountry.name} ülkesine savaş ilan edildi!`);
-    addNotification(`Saldırı başlatmak için, kendi birimli bölgelerinizden birine tıklayın. Sonra düşman bölgesini seçin.`);
-    currentAttackMode = true; // Saldırı modunu aktif et
-    selectedAttackingRegionNutsId = null; // Saldıracak bölgeyi sıfırla
-    clearHighlights(); // Önceki vurguları temizle
+    addNotification(`Saldırı modunu aktifleştirin ve kendi birimli bölgelerinizden birine tıklayın.`);
+    
+    // Saldırma butonunu aktifleştir
+    attackButton.disabled = false;
+    attackButton.textContent = "⚔️ SALDIRI MODU AKTİF";
     
     updateUI();
+}
+
+// Saldırma butonu işlevi
+function toggleAttackMode() {
+    if (currentAttackMode) {
+        // Saldırı modunu kapat
+        resetAttackMode();
+        attackButton.disabled = true;
+        attackButton.textContent = "⚔️ SALDIRI MODU";
+        addNotification("Saldırı modu kapatıldı.");
+    } else {
+        // Saldırı modunu aç
+        if (targetCountryIdForWar) {
+            currentAttackMode = true;
+            attackButton.textContent = "⚔️ SALDIRI MODU AKTİF";
+            addNotification("Saldırı modu aktif! Kendi bölgelerinizden birine tıklayarak saldırı başlatın.");
+        } else {
+            addNotification("Önce bir devlete savaş ilan etmelisiniz.");
+        }
+    }
 }
 
 
@@ -1467,6 +1495,11 @@ if (document.getElementById('conductAttackButton')) {
 }
 if (document.getElementById('closeWarModalButton')) {
     document.getElementById('closeWarModalButton').addEventListener('click', closeWarModal);
+}
+
+// Saldırma butonu event listener
+if (attackButton) {
+    attackButton.addEventListener('click', toggleAttackMode);
 }
 
 // ============================================================================
