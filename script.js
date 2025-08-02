@@ -567,6 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // NUTS2 Komşuluk Verisi
     // ÖNEMLİ: Burayı kendi haritanızdaki NUTS2 bölgelerinin komşuluklarına göre DOLDURMALISINIZ.
     // Özellikle Yugoslavya'nın iç ve dış komşuluklarını güncelleyin.
+    // Örnek Komşuluklar:
     const nutsNeighbors = {
         'TR63': ['TR62', 'SY', 'IQ'],
         'SY': ['TR63', 'IQ', 'LB', 'JO', 'SA'],
@@ -843,6 +844,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Önceki tüm saldırı ikonlarını kaldır
         svgDoc.querySelectorAll('.attack-icon').forEach(icon => icon.remove());
+        // Önceki tüm geçici savaş rengi değişikliklerini geri al (eğer varsa)
+        applyCountryColorsToMap(); // Tüm bölgeleri kendi renklerine döndür
 
         // Saldırı ikonları için bir grup oluştur
         let attackIconsGroup = svgDoc.getElementById('attack-icons');
@@ -853,11 +856,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Saldıran ülkenin ikonunu dinamik olarak belirle
-        // Eğer saldıran ülke için özel bir ikon tanımlanmışsa onu kullan, yoksa genel bir ikon kullan.
         const attackerCountryData = countriesData[playerCountry];
         const attackerIconPath = (attackerCountryData && attackerCountryData.attackIconPath) ? attackerCountryData.attackIconPath : "icons/default_attack_icon.png"; // Varsayılan ikon yolu
 
+        let iconsPlaced = 0;
         playerNuts.forEach(playerNutsId => {
+            // Sadece birim olan kendi bölgelerinden saldırabilir
+            if ((territoryUnits[playerNutsId] || 0) === 0) {
+                // addNotification(`Birim bulunmayan kendi bölgenizden (${playerNutsId}) saldırı başlatılamaz.`, 'info');
+                return;
+            }
+
             const playerNeighbors = nutsNeighbors[playerNutsId] || [];
             playerNeighbors.forEach(neighborNutsId => {
                 // Eğer komşu, savaş ilan edilen ülkenin bir NUTS2 bölgesi ise
@@ -887,8 +896,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 openWarModal(event.target.getAttribute('data-attacking-nuts-id'), event.target.getAttribute('data-defending-nuts-id'));
                             });
                             attackIconsGroup.appendChild(icon);
+                            iconsPlaced++;
 
-                            // Savaş rengiyle boya
+                            // Savaş rengiyle boya (saldiran rengiyle dusman bolgesini isaretle)
                             changeNuts2ColorForConflict(neighborNutsId, '#FFA07A', '#FF0000'); // Açık somon ve kırmızı kenar
                         } catch (e) {
                             console.warn(`Error placing attack icon for NUTS ID ${neighborNutsId}:`, e);
@@ -897,7 +907,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-        addNotification('Savaş ilan edilen ülkenin komşu bölgelerine saldırı ikonları yerleştirildi. Saldırmak istediğiniz bir bölgedeki ikona tıklayın.', 'info');
+
+        if (iconsPlaced > 0) {
+            addNotification('Savaş ilan edilen ülkenin komşu bölgelerine saldırı ikonları yerleştirildi. Saldırmak istediğiniz bir bölgedeki ikona tıklayın.', 'info');
+        } else {
+            addNotification('Seçtiğiniz ülkenin komşu bölgelerinde kendi biriminizin olduğu bir toprak bulunamadı. Saldırı yapılamıyor.', 'warning');
+        }
     }
 
     // Saldırı ikonunu kaldır
@@ -960,6 +975,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const attackingUnits = territoryUnits[attackingNutsId] || 0;
         const defendingUnits = territoryUnits[defendingNutsId] || 0;
 
+        // Saldıran bölgede birim yoksa modalı açma
+        if (attackingUnits === 0) {
+            addNotification(`Saldıran bölgeniz (${attackingNutsId}) üzerinde hiç birim yok. Birim yerleştirmeden saldıramazsınız.`, 'error');
+            return; // Modalı açma
+        }
+
         attackingRegionNameSpan.textContent = attackingNutsId;
         defendingRegionNameSpan.textContent = defendingNutsId;
         attackingUnitsSpan.textContent = attackingUnits;
@@ -973,7 +994,8 @@ document.addEventListener('DOMContentLoaded', () => {
         warModal.style.display = 'none';
         currentAttackingNutsId = null;
         currentDefendingNutsId = null;
-        applyCountryColorsToMap(); // Savaş bitince renkleri normale döndür
+        applyCountryColorsToMap(); // Savaş bitince renkleri normale döndür (veya modal kapanınca)
+        updateUnitDisplays(); // Birim sayılarını güncelle
     });
 
     // Saldırı Butonu (Savaş Menüsü İçinde)
@@ -988,6 +1010,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (attackingUnits === 0) {
             addNotification('Saldıran bölgede biriminiz yok, saldıramazsınız!', 'error');
+            warModal.style.display = 'none'; // Modalı kapat
             return;
         }
 
@@ -995,8 +1018,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const defenderCountryId = getOwnerCountryId(currentDefendingNutsId);
         const defenderCountryObj = countriesData[defenderCountryId];
 
+        if (!defenderCountryObj) {
+            addNotification('Hedef ülke artık mevcut değil. Saldırı iptal edildi.', 'error');
+            warModal.style.display = 'none'; // Modalı kapat
+            applyCountryColorsToMap(); // Haritayı eski haline getir
+            return;
+        }
+
+
         addNotification(`${playerCountryObj.name} (${currentAttackingNutsId} - ${attackingUnits} birim) -> ${defenderCountryObj.name} (${currentDefendingNutsId} - ${defendingUnits} birim) saldırıyor!`, 'info');
 
+        // Basit savaş simulasyonu: Saldıran birim > Savunan birim ise fetih
         if (attackingUnits > defendingUnits) {
             // Oyuncu kazanır
             addNotification(`${playerCountryObj.name} ülkesi ${currentDefendingNutsId} bölgesini FETHETTİ!`, 'success');
@@ -1010,9 +1042,12 @@ document.addEventListener('DOMContentLoaded', () => {
             playerCountryObj.nuts2.push(currentDefendingNutsId);
 
             // Birim transferi: Saldıran birimlerin bir kısmı kaybedilir, kalanı yeni bölgeye geçer
-            const remainingUnits = attackingUnits - Math.floor(defendingUnits / 2); // Örneğin, savunandaki birimlerin yarısı kadar kayıp
-            territoryUnits[currentAttackingNutsId] = Math.max(0, remainingUnits - 1); // Saldıran bölgede 1 birim kalır
-            territoryUnits[currentDefendingNutsId] = Math.max(0, remainingUnits); // Fethedilen bölgeye aktarılır
+            // Daha gelişmiş bir simülasyon yapılabilir (zar atma gibi)
+            const remainingAttackingUnits = Math.max(0, attackingUnits - defendingUnits); // Tüm savunan birimler yok olur
+            // Yeni fethedilen bölgeye en az 1 birim aktarılır, kalanlar saldıran bölgede kalır
+            territoryUnits[currentDefendingNutsId] = Math.max(1, Math.floor(remainingAttackingUnits / 2)); // Fethedilen bölgeye birim aktar
+            territoryUnits[currentAttackingNutsId] = Math.max(0, remainingAttackingUnits - territoryUnits[currentDefendingNutsId]); // Kalan birimler saldıran bölgede kalır
+
 
             // Eğer savunan ülkenin hiç bölgesi kalmadıysa, oyundan sil
             if (defenderCountryObj && defenderCountryObj.nuts2.length === 0) {
@@ -1021,20 +1056,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 populateTargetCountrySelection(); // Hedef listesini güncelle
             }
 
-        } else if (attackingUnits <= defendingUnits) {
+        } else {
             // Savunan kazanır (veya berabere)
             addNotification(`Saldırı BAŞARISIZ OLDU! ${defenderCountryObj.name} ülkesi ${currentDefendingNutsId} bölgesini savundu.`, 'error');
 
             // Saldıran birimlerin bir kısmını kaybet
-            territoryUnits[currentAttackingNutsId] = Math.max(0, attackingUnits - Math.floor(defendingUnits / 2)); // Örneğin, savunandaki birimlerin yarısı kadar kayıp
+            territoryUnits[currentAttackingNutsId] = Math.max(0, attackingUnits - Math.floor(defendingUnits * 0.5)); // Örneğin, savunandaki birimlerin yarısı kadar kayıp
 
-            // Savunan birimler de bir miktar kayıp yaşayabilir (isteğe bağlı)
-            territoryUnits[currentDefendingNutsId] = Math.max(0, defendingUnits - Math.floor(attackingUnits / 2));
+            // Savunan birimler de bir miktar kayıp yaşayabilir
+            territoryUnits[currentDefendingNutsId] = Math.max(0, defendingUnits - Math.floor(attackingUnits * 0.3)); // Örneğin, saldıran birimlerin 30%u kadar kayıp
         }
 
         updatePlayerStatsDisplay();
         updateUnitDisplays(); // Haritadaki birim sayılarını güncelle
-        applyCountryColorsToMap(); // Renkleri güncelle
+        applyCountryColorsToMap(); // Renkleri güncelle (fetih sonrası veya savaş bitiminde)
 
         warModal.style.display = 'none'; // Modalı kapat
         currentAttackingNutsId = null;
@@ -1056,17 +1091,30 @@ document.addEventListener('DOMContentLoaded', () => {
         countriesData[playerCountry].coins += playerIncome;
         addNotification(`${countriesData[playerCountry].name} bu tur ${playerIncome} coin kazandı. Toplam coin: ${countriesData[playerCountry].coins}`, 'info');
 
-        // AI geliri hesapla
-        for (const countryId in countriesData) {
-            if (countryId !== playerCountry) { // Oyuncu dışındaki ülkeler
-                const aiCountry = countriesData[countryId];
-                if (aiCountry && aiCountry.nuts2) { // Ülke hala var mı kontrol et
-                    const aiRegionCount = aiCountry.nuts2.length;
-                    const aiIncome = aiRegionCount * INCOME_PER_REGION;
-                    aiCountry.coins += aiIncome;
+        // AI geliri ve birim üretimi
+        const aiCountryIds = Object.keys(countriesData).filter(id => !countriesData[id].isPlayer);
+        aiCountryIds.forEach(countryId => {
+            const aiCountry = countriesData[countryId];
+            if (!aiCountry || aiCountry.nuts2.length === 0) return; // Ülke daha önce silinmiş veya toprağı yoksa devam etme
+
+            const aiRegionCount = aiCountry.nuts2.length;
+            const aiIncome = aiRegionCount * INCOME_PER_REGION;
+            aiCountry.coins += aiIncome;
+
+            // AI her 3 turda bir veya %30 ihtimalle birim satın alır ve yerleştirir
+            if (currentTurn % 3 === 0 || Math.random() < 0.30) {
+                if (aiCountry.coins >= UNIT_COST) {
+                    aiCountry.coins -= UNIT_COST;
+                    // Birimi doğrudan rastgele bir kendi bölgesine yerleştir
+                    if (aiCountry.nuts2.length > 0) {
+                        const randomRegion = aiCountry.nuts2[Math.floor(Math.random() * aiCountry.nuts2.length)];
+                        territoryUnits[randomRegion] = (territoryUnits[randomRegion] || 0) + 1;
+                        addNotification(`${aiCountry.name}, ${randomRegion} bölgesine 1 birim yerleştirdi.`, 'info');
+                    }
                 }
             }
-        }
+        });
+
 
         updatePlayerStatsDisplay(); // Oyuncu istatistiklerini güncelle (AI'larınki panlde gözükmez)
 
@@ -1078,8 +1126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- AI Kontrolü (Basit Saldırı ve Fetih Örneği) ---
     function runAILogic() {
-        const WAR_CHANCE_BASE = 0.15; // AI'nın savaş ilan etme temel şansı
-        // const CONQUER_CHANCE_PER_UNIT_ADVANTAGE = 0.05; // Şu an kullanılmıyor ama savaş mantığına eklenebilir
+        const WAR_CHANCE_BASE = 0.20; // AI'nın savaş ilan etme temel şansı (biraz artırıldı)
 
         // AI'ların saldırı sırasını rastgele karıştır (aynı anda saldırmamaları için)
         const aiCountryIds = Object.keys(countriesData).filter(id => !countriesData[id].isPlayer);
@@ -1089,45 +1136,45 @@ document.addEventListener('DOMContentLoaded', () => {
             const aiCountry = countriesData[countryId];
             if (!aiCountry || aiCountry.nuts2.length === 0) return; // Ülke daha önce silinmiş veya toprağı yoksa devam etme
 
-            // AI birim satın alabilir (her 3 turda bir 1 birim alır ve yeterli coini varsa)
-            // Ya da her tur %30 ihtimalle 1 birim alır
-            if (Math.random() < 0.30 && aiCountry.coins >= UNIT_COST) {
-                aiCountry.coins -= UNIT_COST;
-                aiCountry.units += 1; // Satın alınan birimler, birim havuzuna eklenir
-                addNotification(`${aiCountry.name} 1 birim satın aldı.`, 'info');
-
-                // Satın alınan birimi rastgele kendi toprağına yerleştir
-                if (aiCountry.nuts2.length > 0) {
-                    const randomRegion = aiCountry.nuts2[Math.floor(Math.random() * aiCountry.nuts2.length)];
-                    territoryUnits[randomRegion] = (territoryUnits[randomRegion] || 0) + 1;
-                    aiCountry.units -= 1; // Birim havuzundan düş (eğer oyuncuda olduğu gibi bir havuzdan geliyorsa)
-                    addNotification(`${aiCountry.name}, ${randomRegion} bölgesine 1 birim yerleştirdi.`, 'info');
-                }
-            }
-
             // Basit AI davranışı: rastgele başka bir ülkeye saldır
             if (Math.random() < WAR_CHANCE_BASE && Object.keys(countriesData).length > 1) {
                 const potentialTargets = Object.keys(countriesData).filter(id => id !== countryId && countriesData[id] && countriesData[id].nuts2 && countriesData[id].nuts2.length > 0); // Kendisi dışındaki ve bölgesi olan tüm ülkeler
                 if (potentialTargets.length === 0) return; // Hedef yoksa devam etme
 
-                const targetCountryId = potentialTargets[Math.floor(Math.random() * potentialTargets.length)];
-                const targetCountry = countriesData[targetCountryId];
+                // Hedef ülkeyi komşu ülkeler arasından seçmeye çalış
+                let targetCountryId = null;
+                let attackingRegionNutsId = null;
+                let defendingRegionNutsId = null;
 
-                if (!targetCountry || targetCountry.nuts2.length === 0) return; // Hedef ülke oyundan silinmiş veya toprağı yoksa devam etme
+                // Kendi bölgeleri arasında komşusu olan ve birimi olan rastgele bir bölge seç
+                const aiAvailableRegions = aiCountry.nuts2.filter(nutsId => (territoryUnits[nutsId] || 0) > 0);
 
-                // AI sadece komşu bölgelere saldırabilir
-                let aiBorderRegions = aiCountry.nuts2.filter(nutsId => nutsNeighbors[nutsId] && nutsNeighbors[nutsId].some(neighbor => targetCountry.nuts2.includes(neighbor)));
+                if (aiAvailableRegions.length === 0) return; // Saldıracak birimi olan bölge yoksa
 
-                if (aiBorderRegions.length === 0) {
-                    // addNotification(`${aiCountry.name} ülkesinin ${targetCountry.name} ülkesiyle komşu bölgesi yok, saldıramadı.`, 'info');
-                    return; // Komşu bölge yoksa saldırma
+                for (let i = 0; i < aiAvailableRegions.length; i++) {
+                    const tempAttackingRegion = aiAvailableRegions[Math.floor(Math.random() * aiAvailableRegions.length)];
+                    const neighbors = nutsNeighbors[tempAttackingRegion] || [];
+
+                    const potentialDefendingNuts = neighbors.filter(neighborId => {
+                        const ownerId = getOwnerCountryId(neighborId);
+                        return ownerId && ownerId !== countryId && potentialTargets.includes(ownerId);
+                    });
+
+                    if (potentialDefendingNuts.length > 0) {
+                        attackingRegionNutsId = tempAttackingRegion;
+                        defendingRegionNutsId = potentialDefendingNuts[Math.floor(Math.random() * potentialDefendingNuts.length)];
+                        targetCountryId = getOwnerCountryId(defendingRegionNutsId);
+                        break;
+                    }
                 }
 
-                const attackingRegionNutsId = aiBorderRegions[Math.floor(Math.random() * aiBorderRegions.length)];
-                const potentialDefendingRegions = nutsNeighbors[attackingRegionNutsId].filter(neighbor => targetCountry.nuts2.includes(neighbor));
-                if (potentialDefendingRegions.length === 0) return; // Saldırı için uygun savunma bölgesi yoksa
+                if (!attackingRegionNutsId || !defendingRegionNutsId || !targetCountryId) {
+                    // addNotification(`${aiCountry.name} ülkesi saldıracak uygun hedef bulamadı.`, 'info');
+                    return; // Uygun hedef bulunamadı
+                }
 
-                const defendingRegionNutsId = potentialDefendingRegions[Math.floor(Math.random() * potentialDefendingRegions.length)];
+                const targetCountry = countriesData[targetCountryId];
+                if (!targetCountry) return; // Hedef ülke silinmiş olabilir
 
                 // Savaş ilanı
                 if (targetCountryId === playerCountry) {
@@ -1136,14 +1183,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     addNotification(`${aiCountry.name} ülkesi, ${targetCountry.name} ülkesine savaş ilan etti!`, 'danger');
                 }
 
-                // Savaş ilan edilen ülkenin NUTS2 bölgelerinin rengini değiştir
+                // Savaş ilan edilen ülkenin NUTS2 bölgelerinin rengini geçici olarak değiştir
                 changeNuts2ColorForConflict(defendingRegionNutsId, 'darkred', 'yellow'); // Savaş rengi
 
                 // Savaş sonucu: Birim farkına göre basit fetih mantığı
                 const aiAttackingUnits = territoryUnits[attackingRegionNutsId] || 0;
                 const targetDefendingUnits = territoryUnits[defendingRegionNutsId] || 0;
 
-                if (aiAttackingUnits === 0) {
+
+                if (aiAttackingUnits === 0) { // Tekrar kontrol
                     addNotification(`${aiCountry.name} saldıracağı bölgede birimi olmadığı için saldıramadı.`, 'info');
                     applyCountryColorsToMap(); // Eski renklerine döner
                     return;
@@ -1158,9 +1206,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     aiCountry.nuts2.push(defendingRegionNutsId);
 
                     // Birim transferi: Kazanan birimlerin bir kısmı kaybedilir, kalanı yeni bölgeye geçer
-                    const remainingUnits = aiAttackingUnits - Math.floor(targetDefendingUnits / 2);
-                    territoryUnits[attackingRegionNutsId] = Math.max(0, remainingUnits - 1); // Saldıran bölgede 1 birim kalır
-                    territoryUnits[defendingRegionNutsId] = Math.max(0, remainingUnits); // Fethedilen bölgeye aktarılır
+                    const remainingAttackingUnits = Math.max(0, aiAttackingUnits - targetDefendingUnits);
+                    territoryUnits[defendingRegionNutsId] = Math.max(1, Math.floor(remainingAttackingUnits / 2)); // Fethedilen bölgeye birim aktar
+                    territoryUnits[attackingRegionNutsId] = Math.max(0, remainingAttackingUnits - territoryUnits[defendingRegionNutsId]); // Kalan birimler saldıran bölgede kalır
 
                     // Eğer hedef ülkenin hiç bölgesi kalmadıysa, yok et
                     if (targetCountry.nuts2.length === 0) {
@@ -1174,8 +1222,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateUnitDisplays();
                 } else {
                     addNotification(`${aiCountry.name} ülkesinin saldırısı ${targetCountry.name} ülkesine karşı BAŞARISIZ OLDU!`, 'info');
-                    territoryUnits[attackingRegionNutsId] = Math.max(0, aiAttackingUnits - Math.floor(targetDefendingUnits / 2));
-                    territoryUnits[defendingRegionNutsId] = Math.max(0, targetDefendingUnits - Math.floor(aiAttackingUnits / 2));
+                    territoryUnits[attackingRegionNutsId] = Math.max(0, aiAttackingUnits - Math.floor(targetDefendingUnits * 0.5));
+                    territoryUnits[defendingRegionNutsId] = Math.max(0, targetDefendingUnits - Math.floor(aiAttackingUnits * 0.3));
                     applyCountryColorsToMap(); // Eski renklerine döner
                     updateUnitDisplays();
                 }
