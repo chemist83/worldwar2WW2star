@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Batı Avrupa
         'UK': {
             name: 'Birleşik Krallık',
-            nuts2: ['UKI', 'UKD', 'UKJ', 'UKM', 'UKN', 'UKL', 'UKF', 'UKC', 'UKE', 'UKG', 'UKH', 'UKZZ'], // UKZZ bazen genel adadır
+            nuts2: ['UKI3', 'UKD3', 'UKJ1', 'UKM6', 'UKN', 'UKL', 'UKF', 'UKC', 'UKE', 'UKG', 'UKH', 'UKZZ'], // UKZZ bazen genel adadır
             isPlayer: false,
             color: '#19cf0c', // Yeşil
             coins: 100,
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             color: '#e0d253', // Açık Sarımsı
             coins: 100,
             units: 0,
-            attackIconPath: 'icons/de_attack_icon.png' // Sizin verdiğiniz Almanya ikonu
+            attackIconPath: 'germany.png' // Sizin verdiğiniz Almanya ikonu
         },
         'PT': {
             name: 'Portekiz',
