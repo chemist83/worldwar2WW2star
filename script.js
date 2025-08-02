@@ -65,6 +65,16 @@ document.addEventListener('DOMContentLoaded', () => {
             coins: 100,
             units: 0
         },
+        TR': { // Ülke kodu olarak ISO 3166 Alpha-2 kullanıldı
+        name: 'Türkiye',
+        // BURAYA SİZİN MAP.SVG DOSYANIZDAKİ TÜM TÜRKİYE NUTS KODLARINI EKLEYECEKSİNİZ!
+        nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3'], // Bu liste eksiksiz olmalı!
+        isPlayer: false, // Varsayılan olarak oyuncu ülkesi değil
+        color: '#ff0000', // Türkiye için bir renk (kırmızı örnek)
+        coins: 100, // Başlangıç coin miktarı
+        units: 0 // Başlangıç birim sayısı
+    },
+
         'PT': {
             name: 'Portekiz',
             nuts2: ['PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20', 'PT30'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
