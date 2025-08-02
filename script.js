@@ -48,12 +48,12 @@ const selectCountryButton = document.getElementById('selectCountryButton');
 const targetCountrySelect = document.getElementById('targetCountrySelect');
 const declareWarButton = document.getElementById('declareWarButton');
 
-const warModal = document.getElementById('warModal');
+const warModal = document.getElementById('warModal'); // Bu modalı kaldırdım, doğrudan çözüme gideceğiz.
 const warModalTitle = document.getElementById('warModalTitle');
 const attackingRegionInfo = document.getElementById('attackingRegionInfo');
 const defendingRegionInfo = document.getElementById('defendingRegionInfo');
 const conductAttackButton = document.getElementById('conductAttackButton');
-const closeWarModalButton = document.getElementById('closeWarModalButton');
+const closeWarModalButton = document.getElementById('closeWarModalButton'); // Bu butonu da kaldırdım
 
 // ============================================================================
 // Oyun Verileri (CHATGPT VE SİZİN VERDİĞİNİZ LİSTELERE GÖRE GÜNCELLENDİ!)
@@ -296,7 +296,7 @@ const nutsNeighbors = {
     'FR10': ['FR21', 'FR22', 'FR23', 'BE10', 'BE21'], // Paris bölgesi
     'FR21': ['FR10', 'FR22', 'FR30', 'FR41', 'BE10', 'DEB3', 'DEA4', 'DEA5', 'DEB1', 'DEB2'], // Champagne-Ardenne
     'FR22': ['FR10', 'FR21', 'FR23', 'FR24', 'BE21', 'BE22', 'BE23', 'BE31'], // Picardie
-    'FR23': ['FR10', 'FR22', 'FR24', 'FR25', 'BE21', 'BE22', 'BE23', 'BE31'], // Haute-Normandie
+    'FR23': ['FR10', 'FR21', 'FR24', 'FR25', 'BE21', 'BE22', 'BE23', 'BE31'], // Haute-Normandie - FR23 ile FR21 arasında bir komşuluk olup olmadığını kontrol edin
     'FR24': ['FR22', 'FR23', 'FR25', 'FR26', 'FR43', 'FR51'], // Centre (FR)
     'FR25': ['FR23', 'FR24', 'FR26', 'FR51', 'FR52'], // Basse-Normandie
     'FR26': ['FR24', 'FR25', 'FR43', 'FR51', 'FR52', 'FR53', 'FR61'], // Bourgogne
@@ -522,14 +522,15 @@ function updateUI() {
 function renderUnitCounts() {
     unitCountsOverlay.innerHTML = ''; // Mevcut sayıları temizle
 
-    // mapContainer'ın boyutlarını al
+    // Harita SVG'sini kapsayan container'ın boyutlarını al
     const mapContainerRect = mapContainer.getBoundingClientRect();
 
-    // SVG'nin kendisinin boyutlarını al (SVG içindeki koordinatları ölçeklemek için)
-    // Eğer svgDoc.width.baseVal veya svgDoc.height.baseVal tanımsızsa varsayılan değerler kullan.
-    const svgWidth = svgDoc.width.baseVal.value || svgDoc.viewBox.baseVal.width || mapContainerRect.width;
-    const svgHeight = svgDoc.height.baseVal.value || svgDoc.viewBox.baseVal.height || mapContainerRect.height;
-
+    // SVG'nin kendisinin `viewBox` değerlerini al
+    // SVG'nin `viewBox`'ı, iç koordinat sistemini tanımlar.
+    // SVG'nin CSS boyutları (`mapContainerRect`) ise bu koordinat sisteminin ekranda nasıl ölçekleneceğini belirler.
+    const svgViewBox = svgDoc.rootElement.viewBox.baseVal;
+    const svgWidthInViewBox = svgViewBox.width;
+    const svgHeightInViewBox = svgViewBox.height;
 
     for (const countryId in countriesData) {
         if (countriesData.hasOwnProperty(countryId)) {
@@ -542,23 +543,23 @@ function renderUnitCounts() {
                         // Sadece birimi olan bölgelerin sayısını göster
                         if (region && region.units > 0) {
                             try {
-                                const bbox = regionPath.getBBox(); // SVG elementinin bounding box'ı
+                                const bbox = regionPath.getBBox(); // SVG elementinin bounding box'ı (SVG koordinat sisteminde)
 
                                 // Bölgenin merkezini hesapla (SVG koordinat sisteminde)
                                 const centerX = bbox.x + bbox.width / 2;
                                 const centerY = bbox.y + bbox.height / 2;
 
-                                // SVG koordinat sisteminden, CSS / HTML koordinat sistemine dönüştürme
-                                // Bu dönüşüm, SVG'nin viewport'una ve SVG'nin CSS boyutlarına göre ölçeklenir.
-                                const overlayX = (centerX / svgWidth) * mapContainerRect.width;
-                                const overlayY = (centerY / svgHeight) * mapContainerRect.height;
+                                // SVG koordinat sisteminden, HTML / CSS (pixel) koordinat sistemine dönüştürme
+                                // Bu dönüşüm, SVG'nin viewBox'ına ve harita container'ının gerçek boyutlarına göre ölçeklenir.
+                                const overlayX = (centerX / svgWidthInViewBox) * mapContainerRect.width;
+                                const overlayY = (centerY / svgHeightInViewBox) * mapContainerRect.height;
 
                                 const unitCountDiv = document.createElement('div');
                                 unitCountDiv.className = 'unit-count';
                                 unitCountDiv.textContent = region.units;
                                 unitCountDiv.style.left = `${overlayX}px`;
                                 unitCountDiv.style.top = `${overlayY}px`;
-                                unitCountDiv.style.transform = 'translate(-50%, -50%)'; // Merkeze hizala
+                                unitCountDiv.style.transform = 'translate(-50%, -50%)'; // Metni merkeze hizala
 
                                 unitCountsOverlay.appendChild(unitCountDiv);
                             } catch (e) {
@@ -566,7 +567,6 @@ function renderUnitCounts() {
                             }
                         }
                     } else {
-                        // Bu uyarıyı görüyorsanız, script.js'teki NUTS ID listeleriniz yanlış demektir.
                         console.warn(`Haritada bulunamayan NUTS ID: ${nutsId} (Birim Sayısı render edilirken) - Lütfen SVG ve script.js'teki ID'leri eşleştirin.`);
                     }
                 });
@@ -650,51 +650,73 @@ function startGame() {
 }
 
 function loadMapAndInitializeRegions() {
-    gameMapSVG.addEventListener('load', () => {
+    // gameMapSVG'nin yüklendiğinden emin olun
+    if (gameMapSVG.contentDocument) {
         svgDoc = gameMapSVG.contentDocument;
-        console.log("SVG Yüklendi! SVG Document:", svgDoc); // Debug için
+        console.log("SVG Yüklendi! SVG Document:", svgDoc);
 
-        // Tüm NUTS ID'lerini konsola yazdır (SVG'nizdeki ID'leri görmek için)
-        console.log("SVG'den bulunan tüm NUTS ID'leri:");
-        svgDoc.querySelectorAll('path[data-nuts-id]').forEach(path => {
-            console.log(path.getAttribute('data-nuts-id'));
+        initializeRegions();
+    } else {
+        gameMapSVG.addEventListener('load', () => {
+            svgDoc = gameMapSVG.contentDocument;
+            console.log("SVG Yüklendi (Event Listener)! SVG Document:", svgDoc);
+            initializeRegions();
         });
-
-
-        // Her ülkeye başlangıç birimleri ata ve bölgeleri haritada renklendir
-        for (const countryId in countriesData) {
-            const country = countriesData[countryId];
-            country.regions = {}; // Her ülkenin sahip olduğu bölgeleri tutacak obje
-
-            if (country.nuts2 && country.nuts2.length > 0) {
-                country.nuts2.forEach(nutsId => {
-                    const regionPath = svgDoc.querySelector(`path[data-nuts-id="${nutsId}"]`);
-                    if (regionPath) {
-                        regionPath.style.fill = country.color;
-                        country.regions[nutsId] = { units: STARTING_UNITS_PER_REGION }; // Her bölgeye başlangıç birimi
-                        
-                        // Bölgeye tıklama olayını ekle
-                        regionPath.addEventListener('click', () => onRegionClick(nutsId));
+        // Eğer SVG zaten yüklüyse ve event listener tetiklenmediyse
+        if (gameMapSVG.readyState === "complete" || gameMapSVG.readyState === "interactive") {
+            setTimeout(() => {
+                if (!svgDoc) { // Eğer hala svgDoc ayarlanmamışsa
+                    svgDoc = gameMapSVG.contentDocument;
+                    if (svgDoc) {
+                        console.log("SVG Yüklendi (Fallback Timeout)! SVG Document:", svgDoc);
+                        initializeRegions();
                     } else {
-                        // BU UYARIYI GÖRÜYORSANIZ, SCRIPT.JS'TEKİ NUTS ID'LERİNİZ YANLIŞTIR.
-                        console.warn(`Haritada bulunamayan NUTS ID: ${nutsId} (Ülke: ${country.name}) - Lütfen SVG ve script.js'teki ID'leri eşleştirin.`);
+                        console.error("SVG dökümanına erişilemiyor. Lütfen gameMap.svg dosyasının doğru yolu ve içeriği olduğundan emin olun.");
                     }
-                });
-            } else {
-                console.warn(`Ülke ${country.name} için tanımlı NUTS2 bölgesi bulunamadı veya boş. Bu ülke oyuna dahil edilmeyecek.`);
-            }
+                }
+            }, 100); // Küçük bir gecikme ekle
         }
+    }
+}
 
-        updateUI(); // Başlangıç UI güncellemesi
-        addNotification("Oyun başladı! Birim satın alıp ülkenizi güçlendirin.");
+function initializeRegions() {
+    // Tüm NUTS ID'lerini konsola yazdır (SVG'nizdeki ID'leri görmek için)
+    console.log("SVG'den bulunan tüm NUTS ID'leri:");
+    svgDoc.querySelectorAll('path[data-nuts-id]').forEach(path => {
+        console.log(path.getAttribute('data-nuts-id'));
     });
+
+    // Her ülkeye başlangıç birimleri ata ve bölgeleri haritada renklendir
+    for (const countryId in countriesData) {
+        const country = countriesData[countryId];
+        country.regions = {}; // Her ülkenin sahip olduğu bölgeleri tutacak obje
+
+        if (country.nuts2 && country.nuts2.length > 0) {
+            country.nuts2.forEach(nutsId => {
+                const regionPath = svgDoc.querySelector(`path[data-nuts-id="${nutsId}"]`);
+                if (regionPath) {
+                    regionPath.style.fill = country.color;
+                    country.regions[nutsId] = { units: STARTING_UNITS_PER_REGION }; // Her bölgeye başlangıç birimi
+                    
+                    // Bölgeye tıklama olayını ekle
+                    regionPath.addEventListener('click', () => onRegionClick(nutsId));
+                } else {
+                    console.warn(`Haritada bulunamayan NUTS ID: ${nutsId} (Ülke: ${country.name}) - Lütfen SVG ve script.js'teki ID'leri eşleştirin.`);
+                }
+            });
+        } else {
+            console.warn(`Ülke ${country.name} için tanımlı NUTS2 bölgesi bulunamadı veya boş. Bu ülke oyuna dahil edilmeyecek.`);
+        }
+    }
+
+    updateUI(); // Başlangıç UI güncellemesi (birim sayıları da burada render edilecek)
+    addNotification("Oyun başladı! Birim satın alıp ülkenizi güçlendirin.");
 }
 
 function onRegionClick(nutsId) {
     const clickedRegionPath = svgDoc.querySelector(`path[data-nuts-id="${nutsId}"]`);
     const regionCountryId = getCountryIdFromNutsId(nutsId);
 
-    // Eğer tıklanan bölge haritada bulunamazsa (hatalı NUTS ID veya SVG sorunu)
     if (!clickedRegionPath || !regionCountryId) {
         addNotification(`Hata: Tıklanan bölge (${nutsId}) haritada bulunamadı veya bir ülkeye ait değil.`);
         return;
@@ -703,21 +725,20 @@ function onRegionClick(nutsId) {
     // Birim yerleştirme aşaması
     if (countriesData[playerCountryId].unitsReady > 0) {
         if (regionCountryId === playerCountryId) {
-            // Birim yerleştirilecek bölgenin 'regions' içinde olduğundan emin ol
             if (!countriesData[playerCountryId].regions[nutsId]) {
                 countriesData[playerCountryId].regions[nutsId] = { units: 0 };
             }
             countriesData[playerCountryId].regions[nutsId].units++;
             countriesData[playerCountryId].unitsReady--;
             addNotification(`${nutsId} bölgesine 1 birim yerleştirildi. Kalan hazır birim: ${countriesData[playerCountryId].unitsReady}`);
-            updateUI(); // Birim sayısı güncellensin
+            updateUI();
         } else {
             addNotification("Birimleri sadece kendi bölgelerinize yerleştirebilirsiniz.");
         }
-        return; // Birim yerleştirme işlemi yapıldıysa diğer işlemlere geçme
+        return;
     }
 
-    // Saldırı modu (eğer birim yerleştirme yapılmıyorsa)
+    // Saldırı modu
     if (currentAttackMode && targetCountryIdForWar) {
         // Eğer tıklanan bölge, kendi bölgemiz ise (saldırı başlangıcı için)
         if (regionCountryId === playerCountryId) {
@@ -727,8 +748,7 @@ function onRegionClick(nutsId) {
 
                 // Yeni saldıran bölgeyi ayarla
                 selectedAttackingRegionNutsId = nutsId;
-                currentActiveCountryPath = clickedRegionPath; // Aktif yolu güncelle
-
+                
                 // Komşu düşman bölgeleri parlat
                 highlightEnemyNeighbors(nutsId, targetCountryIdForWar);
                 addNotification(`${nutsId} bölgesinden saldırı başlatmak için hazır. Hedef ülkeye ait parlayan bir komşu bölgeye tıklayın.`);
@@ -736,8 +756,7 @@ function onRegionClick(nutsId) {
                 addNotification("Saldırmak için seçtiğiniz bölgede birimleriniz olmalı.");
             }
         } else if (regionCountryId === targetCountryIdForWar && selectedAttackingRegionNutsId) {
-            // Eğer tıklanan bölge hedef ülkeye ait ve parlayan bir düşman bölgesi ise (yani saldırı hedefi)
-            // Ayrıca, tıklanan düşman bölgesinin gerçekten seçili saldırı bölgesine komşu olduğundan emin olmalıyız.
+            // Eğer tıklanan bölge hedef ülkeye ait ve seçili saldırı bölgesine komşu ise
             const neighborsOfAttacker = nutsNeighbors[selectedAttackingRegionNutsId] || [];
             if (!neighborsOfAttacker.includes(nutsId)) {
                 addNotification("Seçtiğiniz düşman bölgesi, saldırı başlattığınız bölgeye komşu değil.");
@@ -751,17 +770,19 @@ function onRegionClick(nutsId) {
             const attackingUnits = attackingCountry.regions[selectedAttackingRegionNutsId].units;
             const defendingUnits = defendingCountry.regions[defendingRegionNutsId] ? defendingCountry.regions[defendingRegionNutsId].units : 0;
 
+            if (attackingUnits === 0) {
+                addNotification("Saldırmak için seçtiğiniz bölgede birim kalmadı!");
+                resetAttackMode();
+                return;
+            }
+            
             // Savaş Modalı göstermeye gerek yok, doğrudan savaş sonucunu göster
             resolveCombat(
                 playerCountryId, selectedAttackingRegionNutsId, attackingUnits,
                 targetCountryIdForWar, defendingRegionNutsId, defendingUnits
             );
             
-            // Savaş bitti, saldırı modunu kapat
-            currentAttackMode = false;
-            selectedAttackingRegionNutsId = null;
-            targetCountryIdForWar = null;
-            clearHighlights(); // Parlamaları kaldır
+            resetAttackMode(); // Savaş bitti, saldırı modunu kapat
             addNotification("Saldırı modu kapatıldı.");
 
         } else {
@@ -771,12 +792,19 @@ function onRegionClick(nutsId) {
         // Normal modda bölgeye tıklama
         if (regionCountryId === playerCountryId) {
             const regionUnits = countriesData[playerCountryId].regions[nutsId] ? countriesData[playerCountryId].regions[nutsId].units : 0;
-            addNotification(`Kendi bölgeniz: ${nutsId}. Birim sayısı: ${regionUnits}`);
+            addNotification(`Kendi bölgeniz: ${nutsId}. Birim sayısı: ${regionUnits}.`);
         } else { // Eğer tıklanan bölge kendi ülkemize ait değilse
             const regionUnits = countriesData[regionCountryId].regions[nutsId] ? countriesData[regionCountryId].regions[nutsId].units : 0;
-            addNotification(`Düşman bölgesi: ${nutsId} (${countriesData[regionCountryId].name}). Birim sayısı: ${regionUnits}`);
+            addNotification(`Düşman bölgesi: ${nutsId} (${countriesData[regionCountryId].name}). Birim sayısı: ${regionUnits}.`);
         }
     }
+}
+
+function resetAttackMode() {
+    currentAttackMode = false;
+    selectedAttackingRegionNutsId = null;
+    targetCountryIdForWar = null;
+    clearHighlights(); // Parlamaları kaldır
 }
 
 function clearHighlights() {
@@ -785,6 +813,12 @@ function clearHighlights() {
         path.style.stroke = ''; // Sınır rengini sıfırla
         path.style.strokeWidth = ''; // Sınır kalınlığını sıfırla
     });
+    // Saldıran bölgenin de vurgusunu kaldır (eğer varsa)
+    if (currentActiveCountryPath) {
+        currentActiveCountryPath.classList.remove('active-attack-origin');
+        currentActiveCountryPath.style.stroke = '';
+        currentActiveCountryPath.style.strokeWidth = '';
+    }
 }
 
 function highlightEnemyNeighbors(playerNutsId, enemyCountryId) {
@@ -796,10 +830,15 @@ function highlightEnemyNeighbors(playerNutsId, enemyCountryId) {
             if (neighborCountryId === enemyCountryId) {
                 const neighborPath = svgDoc.querySelector(`path[data-nuts-id="${neighborNutsId}"]`);
                 if (neighborPath) {
-                    neighborPath.classList.add('highlight-target');
+                    neighborPath.classList.add('highlight-target'); // CSS ile kenarlık verilecek
                 }
             }
         });
+    }
+    // Saldıran bölgeyi de özel olarak vurgula
+    const attackingRegionPath = svgDoc.querySelector(`path[data-nuts-id="${playerNutsId}"]`);
+    if (attackingRegionPath) {
+        attackingRegionPath.classList.add('active-attack-origin'); // CSS ile farklı kenarlık verilecek
     }
 }
 
@@ -809,7 +848,7 @@ function buyUnit() {
     if (player.coins >= UNIT_COST) {
         player.coins -= UNIT_COST;
         player.unitsReady = (player.unitsReady || 0) + 1;
-        addNotification(`1 birim satın alındı. Kalan coin: ${player.coins}`);
+        addNotification(`1 birim satın alındı. Kalan coin: ${player.coins}.`);
         addNotification("Lütfen birim yerleştirmek istediğiniz bir bölgeye tıklayın. (Sadece kendi bölgeleriniz)");
     } else {
         addNotification("Yeterli coininiz yok!");
@@ -818,16 +857,6 @@ function buyUnit() {
 }
 
 function declareWar() {
-    targetCountrySelect.innerHTML = '<option value="none">Ülke Seçin</option>'; // Opsiyonları her seferinde yeniden doldur
-    for (const countryId in countriesData) {
-        if (countriesData.hasOwnProperty(countryId) && countryId !== playerCountryId && countriesData[countryId].nuts2.length > 0) {
-            const option = document.createElement('option');
-            option.value = countryId;
-            option.textContent = countriesData[countryId].name;
-            targetCountrySelect.appendChild(option);
-        }
-    }
-
     targetCountryIdForWar = targetCountrySelect.value;
     if (!targetCountryIdForWar || targetCountryIdForWar === 'none') {
         addNotification("Lütfen savaş ilan etmek için bir ülke seçin.");
@@ -859,7 +888,7 @@ function resolveCombat(
     attackingCountryId, attackingRegionNutsId, attackingUnits,
     defendingCountryId, defendingRegionNutsId, defendingUnits
 ) {
-    addNotification(`Savaş: ${attackingCountryId}'nin ${attackingRegionNutsId} (${attackingUnits} birim) vs ${defendingCountryId}'nin ${defendingRegionNutsId} (${defendingUnits} birim)`);
+    addNotification(`Savaş: ${countriesData[attackingCountryId].name}'nin ${attackingRegionNutsId} (${attackingUnits} birim) vs ${countriesData[defendingCountryId].name}'nin ${defendingRegionNutsId} (${defendingUnits} birim)`);
 
     const attackingCountry = countriesData[attackingCountryId];
     const defendingCountry = countriesData[defendingCountryId];
@@ -868,7 +897,7 @@ function resolveCombat(
         addNotification("Savaş için gerekli saldırı bölgesi bulunamadı. Hata!");
         return;
     }
-    // Savunan bölge her zaman exists diye varsaymıyoruz (yeni fethedilen vs. olabilir)
+    // Savunan bölge yoksa bile objesini oluştur, units 0 olsun
     if (!defendingCountry.regions[defendingRegionNutsId]) {
         defendingCountry.regions[defendingRegionNutsId] = { units: 0 };
     }
@@ -890,19 +919,22 @@ function resolveCombat(
         // Fethettiği bölgeyi kendi ülkesine dahil et
         const conqueredRegionPath = svgDoc.querySelector(`path[data-nuts-id="${defendingRegionNutsId}"]`);
         if (conqueredRegionPath) {
-            conqueredRegionPath.style.fill = attackingCountry.color;
-
             // Önceki sahibinden bölgeyi çıkar
-            const oldDefendingCountry = countriesData[defendingCountryId];
-            if (oldDefendingCountry) {
-                oldDefendingCountry.nuts2 = oldDefendingCountry.nuts2.filter(id => id !== defendingRegionNutsId);
-                delete oldDefendingCountry.regions[defendingRegionNutsId];
-            }
-
-            // Yeni sahibine bölgeyi ekle
-            attackingCountry.nuts2.push(defendingRegionNutsId);
+            // Ancak önce bölgeye yeni birim ataması yapalım, sonra sahibini değiştirelim.
+            // Çünkü bölge el değiştirdiğinde unit transferi yapılır.
+            
             // Fethedilen bölgeye saldırı yapan bölgeden birim aktar
             const unitsToMove = Math.max(1, Math.floor(attackingUnits * 0.5)); // En az 1 birim aktar
+            
+            // Savunan bölgenin birimlerini sıfırla
+            defendingCountry.regions[defendingRegionNutsId].units = 0;
+
+            // Savunan ülkeden bölgeyi kaldır
+            defendingCountry.nuts2 = defendingCountry.nuts2.filter(id => id !== defendingRegionNutsId);
+            delete defendingCountry.regions[defendingRegionNutsId];
+
+            // Saldıran ülkeye bölgeyi ekle
+            attackingCountry.nuts2.push(defendingRegionNutsId);
             attackingCountry.regions[defendingRegionNutsId] = { units: unitsToMove };
 
             // Saldıran bölgeden aktarılan birimleri düş
@@ -910,6 +942,9 @@ function resolveCombat(
             if (attackingCountry.regions[attackingRegionNutsId].units < 0) {
                 attackingCountry.regions[attackingRegionNutsId].units = 0;
             }
+
+            // Bölgenin rengini yeni sahibine göre güncelle
+            conqueredRegionPath.style.fill = attackingCountry.color;
         }
 
     } else {
@@ -938,7 +973,22 @@ function checkCountryElimination(countryId) {
     const country = countriesData[countryId];
     if (country && country.nuts2.length === 0) {
         addNotification(`${country.name} tüm topraklarını kaybetti ve oyundan elendi!`);
+        
+        // Elenen ülkenin harita üzerindeki tüm bölgelerinin rengini gri yap
+        // (Eğer başka bir ülke tarafından fethedilmediyse ve haritada hala görünüyorsa)
+        if (svgDoc) {
+            svgDoc.querySelectorAll(`path[data-nuts-id]`).forEach(path => {
+                // Eğer bu path hala elenen ülkenin bir bölgesi olarak kayıtlıysa (ki nuts2'den çıkarılmalıydı)
+                // veya fetih sırasında renk değiştirilemediyse, burası son temizlik.
+                const pathNutsId = path.getAttribute('data-nuts-id');
+                // Eğer bu nutsId'nin sahibi hala elenen ülke olarak görünüyorsa
+                if (getCountryIdFromNutsId(pathNutsId) === countryId) {
+                     path.style.fill = '#888888'; // Griye çevir
+                }
+            });
+        }
         delete countriesData[countryId]; // Ülkeyi ülkeler listesinden sil
+        
         // Eğer elenen ülke oyuncunun ülkesi ise oyun biter.
         if (countryId === playerCountryId) {
             alert("Oyun Bitti! Tüm topraklarınızı kaybettiniz.");
@@ -986,11 +1036,10 @@ function nextTurn() {
     if (player) {
         const playerIncome = player.nuts2.length * INCOME_PER_REGION;
         player.coins += playerIncome;
-        addNotification(`Ülkeniz ${playerIncome} coin gelir elde etti. Toplam coin: ${player.coins}`);
+        addNotification(`Ülkeniz ${playerIncome} coin gelir elde etti. Toplam coin: ${player.coins}.`);
     } else {
         addNotification("Ülkeniz elendiği için gelir elde edemedi.");
     }
-
 
     // AI'ların hareketleri
     runAILogic();
@@ -1000,11 +1049,7 @@ function nextTurn() {
         countriesData[playerCountryId].unitsReady = 0; // Hazır birimleri sıfırla
     }
     
-    currentAttackMode = false;
-    selectedAttackingRegionNutsId = null;
-    targetCountryIdForWar = null;
-    clearHighlights(); // Parlamaları kaldır
-    addNotification("Saldırı modu kapatıldı.");
+    resetAttackMode(); // Her tur sonunda saldırı modunu sıfırla
 
     updateUI();
 }
@@ -1040,7 +1085,7 @@ function runAILogic() {
             // Birim yerleştirecek uygun bölgeleri filtrele (eğer regions objesinde yoksa oluştur)
             let ownedRegionsWithUnits = aiCountry.nuts2.filter(nutsId => aiCountry.regions[nutsId]);
             if (ownedRegionsWithUnits.length === 0) { // Eğer hiçbir bölge units içermiyorsa, tüm bölgeleri kullan
-                ownedRegionsWithUnits = aiCountry.nuts2;
+                ownedRegionsWithUnits = aiCountry.nuts2; // Tüm bölgeleri hedef olarak al
             }
             
             const targetRegionForPlacement = ownedRegionsWithUnits[Math.floor(Math.random() * ownedRegionsWithUnits.length)];
@@ -1073,7 +1118,7 @@ function runAILogic() {
 
                     const possibleDefendingRegions = (nutsNeighbors[attackingRegionNutsId] || []).filter(neighborNutsId => {
                         return getCountryIdFromNutsId(neighborNutsId) === targetCountryId && 
-                               (targetCountry.regions[neighborNutsId] && targetCountry.regions[neighborNutsId].units >= 0); // Savunan bölgede birim olmalı veya 0
+                               (targetCountry.regions[neighborNutsId] && targetCountry.regions[neighborNutsId].units >= 0); 
                     });
 
                     if (possibleDefendingRegions.length > 0) {
@@ -1117,12 +1162,10 @@ selectCountryButton.addEventListener('click', startGame);
 buyUnitButton.addEventListener('click', buyUnit);
 nextTurnButton.addEventListener('click', nextTurn);
 declareWarButton.addEventListener('click', declareWar);
-closeWarModalButton.addEventListener('click', () => warModal.style.display = 'none');
-
 
 // İlk yüklemede UI'ı gizle
 document.addEventListener('DOMContentLoaded', () => {
     gameScreen.style.display = 'none';
     countrySelectionModal.style.display = 'none';
-    warModal.style.display = 'none';
+    // warModal'ı artık kullanmıyoruz, gizlemeye gerek yok.
 });
