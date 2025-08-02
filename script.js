@@ -61,23 +61,66 @@ const selectCountryButton = document.getElementById('selectCountryButton');
 
 const targetCountrySelect = document.getElementById('targetCountrySelect');
 const declareWarButton = document.getElementById('declareWarButton');
+const attackButton = document.getElementById('attackButton');
 
 // ============================================================================
 // Gelişmiş Ülke Verileri - Tüm SVG Bölgeleri İçin Güncellenmiş
 // ============================================================================
 let countriesData = {
-    // Sovyet Sosyalist Cumhuriyetler Birliği (USSR)
-    'USSR': { 
-        name: 'Sovyet Sosyalist Cumhuriyetler Birliği', 
-        nuts2: ['EE00', 'LV00', 'LT00', 'FI13', 'FI18', 'FI19', 'FI1A', 'FI20'], // Balık ülkeleri ve Finlandiya'nın doğusu temsili
+    // Rusya Federasyonu - Batı Bölgesi (Moskova)
+    'RUSSIA_WEST': { 
+        name: 'Rusya Federasyonu - Batı', 
+        nuts2: ['EE00', 'LV00', 'LT00', 'FI13', 'FI18', 'FI19', 'FI1A', 'FI20'], // Baltık ülkeleri ve Finlandiya'nın doğusu
         isPlayer: false, 
         color: '#CC0000', 
-        coins: INITIAL_AI_COINS * 2, // Büyük güç
+        coins: INITIAL_AI_COINS * 1.5,
         units: 0,
         personality: 'AGGRESSIVE',
         capital: 'LV00', // Moskova temsili
         era: '1936',
         type: 'major_power'
+    },
+    
+    // Rusya Federasyonu - Orta Bölgesi (Sibirya)
+    'RUSSIA_CENTRAL': { 
+        name: 'Rusya Federasyonu - Orta', 
+        nuts2: ['RU11', 'RU12', 'RU13', 'RU14', 'RU21', 'RU22', 'RU23', 'RU24'], // Orta Rusya bölgeleri
+        isPlayer: false, 
+        color: '#8B0000', 
+        coins: INITIAL_AI_COINS * 1.2,
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'RU12', // Novosibirsk temsili
+        era: '1936',
+        type: 'major_power'
+    },
+    
+    // Rusya Federasyonu - Doğu Bölgesi (Uzak Doğu)
+    'RUSSIA_EAST': { 
+        name: 'Rusya Federasyonu - Doğu', 
+        nuts2: ['RU31', 'RU32', 'RU33', 'RU34', 'RU41', 'RU42', 'RU43', 'RU44'], // Uzak Doğu bölgeleri
+        isPlayer: false, 
+        color: '#A00000', 
+        coins: INITIAL_AI_COINS * 1.0,
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'RU32', // Vladivostok temsili
+        era: '1936',
+        type: 'major_power'
+    },
+    
+    // Rusya Federasyonu - Kuzey Bölgesi (Arktik)
+    'RUSSIA_NORTH': { 
+        name: 'Rusya Federasyonu - Kuzey', 
+        nuts2: ['RU51', 'RU52', 'RU53', 'RU54', 'RU61', 'RU62', 'RU63', 'RU64'], // Arktik bölgeleri
+        isPlayer: false, 
+        color: '#800000', 
+        coins: INITIAL_AI_COINS * 0.8,
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'RU52', // Murmansk temsili
+        era: '1936',
+        type: 'minor_power'
     },
     
     // Alman Reich (Nazi Almanya)
@@ -1035,7 +1078,7 @@ function onRegionClick(nutsId) {
             showWarModal(selectedAttackingRegionNutsId, defendingRegionNutsId, attackingUnits, defendingUnits);
 
         } else {
-            addNotification("Lütfen birim yerleştirmek için kendi bölgelerinize, saldırı için ise parlayan düşman bölgelerine tıklayın.");
+            addNotification("Saldırı modunda: Kendi bölgelerinizden birine tıklayarak saldırı başlatın, sonra parlayan düşman bölgelerine tıklayın.");
         }
     } else {
         // Normal modda bölgeye tıklama
@@ -1054,6 +1097,12 @@ function resetAttackMode() {
     selectedAttackingRegionNutsId = null;
     targetCountryIdForWar = null;
     clearHighlights(); // Parlamaları kaldır
+    
+    // Saldırma butonunu sıfırla
+    if (attackButton) {
+        attackButton.disabled = true;
+        attackButton.textContent = "⚔️ SALDIRI MODU";
+    }
 }
 
 function clearHighlights() {
@@ -1128,12 +1177,33 @@ function declareWar() {
     }
 
     addNotification(`${targetCountry.name} ülkesine savaş ilan edildi!`);
-    addNotification(`Saldırı başlatmak için, kendi birimli bölgelerinizden birine tıklayın. Sonra düşman bölgesini seçin.`);
-    currentAttackMode = true; // Saldırı modunu aktif et
-    selectedAttackingRegionNutsId = null; // Saldıracak bölgeyi sıfırla
-    clearHighlights(); // Önceki vurguları temizle
+    addNotification(`Saldırı modunu aktifleştirin ve kendi birimli bölgelerinizden birine tıklayın.`);
+    
+    // Saldırma butonunu aktifleştir
+    attackButton.disabled = false;
+    attackButton.textContent = "⚔️ SALDIRI MODU AKTİF";
     
     updateUI();
+}
+
+// Saldırma butonu işlevi
+function toggleAttackMode() {
+    if (currentAttackMode) {
+        // Saldırı modunu kapat
+        resetAttackMode();
+        attackButton.disabled = true;
+        attackButton.textContent = "⚔️ SALDIRI MODU";
+        addNotification("Saldırı modu kapatıldı.");
+    } else {
+        // Saldırı modunu aç
+        if (targetCountryIdForWar) {
+            currentAttackMode = true;
+            attackButton.textContent = "⚔️ SALDIRI MODU AKTİF";
+            addNotification("Saldırı modu aktif! Kendi bölgelerinizden birine tıklayarak saldırı başlatın.");
+        } else {
+            addNotification("Önce bir devlete savaş ilan etmelisiniz.");
+        }
+    }
 }
 
 
@@ -1467,6 +1537,11 @@ if (document.getElementById('conductAttackButton')) {
 }
 if (document.getElementById('closeWarModalButton')) {
     document.getElementById('closeWarModalButton').addEventListener('click', closeWarModal);
+}
+
+// Saldırma butonu event listener
+if (attackButton) {
+    attackButton.addEventListener('click', toggleAttackMode);
 }
 
 // ============================================================================
