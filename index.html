@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <!-- ANA HARİTA -->
+        <!-- ANA HARİTA - Büyütülmüş -->
         <div id="mapContainer">
             <object id="gameMapObject" type="image/svg+xml" data="map_fixed.svg"></object>
             <div id="unitCountsOverlay"></div>
@@ -119,6 +119,61 @@
             <button id="selectCountryButton">
                 👑 Seçilen Devletin Liderliğini Üstlen
             </button>
+        </div>
+    </div>
+
+    <!-- ÜLKE DETAY MODALI - Age of History Tarzı -->
+    <div id="countryDetailModal" class="modal" style="display:none;">
+        <div class="modal-content country-detail-modal">
+            <div class="country-header">
+                <div class="country-flag" id="countryFlag">🏳️</div>
+                <div class="country-info">
+                    <h2 id="countryDetailName">Ülke Adı</h2>
+                    <p id="countryDetailType">Yönetim Biçimi</p>
+                </div>
+            </div>
+            
+            <div class="country-leader">
+                <img id="countryLeaderImage" src="" alt="Lider" class="leader-image">
+                <div class="leader-info">
+                    <h3 id="countryLeaderName">Lider Adı</h3>
+                    <p id="countryLeaderTitle">Lider Unvanı</p>
+                </div>
+            </div>
+
+            <div class="country-stats">
+                <div class="stat-item">
+                    <span class="stat-label">💰 Hazine:</span>
+                    <span id="countryDetailCoins" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">⚔️ Birlikler:</span>
+                    <span id="countryDetailUnits" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">🌍 Bölgeler:</span>
+                    <span id="countryDetailRegions" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div class="country-actions">
+                <h4>🏛️ Yönetim Biçimi Değiştir</h4>
+                <select id="governmentTypeSelect">
+                    <option value="democracy">Demokrasi</option>
+                    <option value="monarchy">Monarşi</option>
+                    <option value="dictatorship">Diktatörlük</option>
+                    <option value="communism">Komünizm</option>
+                    <option value="fascism">Faşizm</option>
+                </select>
+                <button id="changeGovernmentButton">Değiştir</button>
+            </div>
+
+            <div class="country-relations">
+                <h4>🤝 Diplomatik İlişkiler</h4>
+                <div id="relationsList"></div>
+            </div>
+
+            <button id="closeCountryDetailButton" class="close-button">✕ Kapat</button>
         </div>
     </div>
 
