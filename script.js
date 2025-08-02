@@ -587,7 +587,7 @@ function renderUnitCounts() {
             const country = countriesData[countryId];
             if (country.nuts2 && country.regions) { // regions objesi olduğundan emin ol
                 country.nuts2.forEach(nutsId => {
-                    const regionPath = svgDoc.querySelector(`path[data-nuts-id="${nutsId}"]`);
+                    const regionPath = svgDoc.querySelector(`path[data-nuts-id="${nutsId}"]`) || svgDoc.querySelector(`path#${nutsId}`);
                     if (regionPath) {
                         const region = country.regions[nutsId];
                         if (region && region.units > 0) {
@@ -712,22 +712,30 @@ function loadMapAndInitializeRegions() {
     } else {
         gameMapSVG.addEventListener('load', () => {
             svgDoc = gameMapSVG.contentDocument;
-            console.log("SVG Yüklendi (Event Listener)! SVG Document:", svgDoc);
-            initializeRegions();
+            if (svgDoc) { // Event listener tetiklendiğinde de kontrol et
+                console.log("SVG Yüklendi (Event Listener)! SVG Document:", svgDoc);
+                initializeRegions();
+            } else {
+                console.error("SVG dökümanına event listener ile erişilemiyor. Dosya yolu veya içeriği sorunlu olabilir.");
+            }
         });
-        // Eğer SVG zaten yüklüyse ve event listener tetiklenmediyse
-        if (gameMapSVG.readyState === "complete" || gameMapSVG.readyState === "interactive") {
-            setTimeout(() => {
-                if (!svgDoc) { // Eğer hala svgDoc ayarlanmamışsa
+        // Eğer SVG zaten yüklüyse (readyState kontrolü güvenilir olmayabilir, ama bir şans verelim)
+        // Bu kısım, bazı tarayıcılarda `load` event'inin beklenen şekilde tetiklenmeyebileceği durumlar içindir.
+        if (gameMapSVG.contentDocument && !svgDoc) { // SVG zaten yüklü ama `svgDoc` hala null ise
+            svgDoc = gameMapSVG.contentDocument;
+            console.log("SVG Yüklendi (Immediate Check)! SVG Document:", svgDoc);
+            initializeRegions();
+        } else if (!gameMapSVG.contentDocument && (gameMapSVG.readyState === "complete" || gameMapSVG.readyState === "interactive")) {
+             // Eğer hala contentDocument yoksa ve doküman hazırsa, bir gecikme ile tekrar dene
+             setTimeout(() => {
+                if (gameMapSVG.contentDocument && !svgDoc) {
                     svgDoc = gameMapSVG.contentDocument;
-                    if (svgDoc) {
-                        console.log("SVG Yüklendi (Fallback Timeout)! SVG Document:", svgDoc);
-                        initializeRegions();
-                    } else {
-                        console.error("SVG dökümanına erişilemiyor. Lütfen gameMap.svg dosyasının doğru yolu ve içeriği olduğundan emin olun.");
-                    }
+                    console.log("SVG Yüklendi (Fallback Timeout)! SVG Document:", svgDoc);
+                    initializeRegions();
+                } else if (!svgDoc) {
+                    console.error("SVG dökümanına hala erişilemiyor. Lütfen gameMap.svg dosyasının doğru yolu ve içeriği olduğundan emin olun.");
                 }
-            }, 100); // Küçük bir gecikme ekle
+            }, 500); // 500ms gecikme
         }
     }
 }
@@ -736,33 +744,43 @@ function initializeRegions() {
     // Tüm NUTS ID'lerini konsola yazdır (SVG'nizdeki ID'leri görmek için)
     console.log("SVG'den bulunan tüm NUTS ID'leri:");
     const svgNutsIds = new Set();
-    svgDoc.querySelectorAll('path[data-nuts-id]').forEach(path => {
+    svgDoc.querySelectorAll('path').forEach(path => {
         const nutsId = path.getAttribute('data-nuts-id');
-        svgNutsIds.add(nutsId);
-        // console.log(nutsId); // Hata ayıklama için her birini de yazdır
+        if (nutsId) {
+            svgNutsIds.add(nutsId);
+            // console.log(nutsId); // Hata ayıklama için her birini de yazdır
+        }
     });
     console.log("Toplam SVG NUTS ID sayısı:", svgNutsIds.size);
 
     // Her ülkeye başlangıç birimleri ata ve bölgeleri haritada renklendir
     for (const countryId in countriesData) {
-        const country = countriesData[countryId];
-        country.regions = {}; // Her ülkenin sahip olduğu bölgeleri tutacak obje
+        const country = countriesData.hasOwnProperty(countryId) ? countriesData[countryId] : null; // Burayı düzelttim: countriesData[countryId] olmalı
+        if (country) {
+            country.regions = {}; // Her ülkenin sahip olduğu bölgeleri tutacak obje
 
-        if (country.nuts2 && country.nuts2.length > 0) {
-            country.nuts2.forEach(nutsId => {
-                const regionPath = svgDoc.querySelector(`path[data-nuts-id="${nutsId}"]`);
-                if (regionPath) {
-                    regionPath.style.fill = country.color;
-                    country.regions[nutsId] = { units: STARTING_UNITS_PER_REGION }; // Her bölgeye başlangıç birimi
+            if (country.nuts2 && country.nuts2.length > 0) {
+                country.nuts2.forEach(nutsId => {
+                    // Hem ID hem de data-nuts-id ile aramayı dene
+                    let regionPath = svgDoc.querySelector(`path#${nutsId}`); 
+                    if (!regionPath) {
+                        regionPath = svgDoc.querySelector(`path[data-nuts-id="${nutsId}"]`); 
+                    }
                     
-                    // Bölgeye tıklama olayını ekle
-                    regionPath.addEventListener('click', () => onRegionClick(nutsId));
-                } else {
-                    console.warn(`Haritada bulunamayan NUTS ID: ${nutsId} (Ülke: ${country.name}) - Lütfen SVG ve script.js'teki ID'leri eşleştirin.`);
-                }
-            });
-        } else {
-            console.warn(`Ülke ${country.name} için tanımlı NUTS2 bölgesi bulunamadı veya boş. Bu ülke oyuna dahil edilmeyecek.`);
+                    if (regionPath && regionPath.style) {
+                        // Rengi ayarla ve !important ile diğer CSS kurallarını geçersiz kıl
+                        regionPath.style.setProperty('fill', country.color, 'important');
+                        country.regions[nutsId] = { units: STARTING_UNITS_PER_REGION }; // Her bölgeye başlangıç birimi
+
+                        // Bölgeye tıklama olayını ekle
+                        regionPath.addEventListener('click', () => onRegionClick(nutsId));
+                    } else {
+                        console.warn(`Haritada bulunamayan NUTS ID: ${nutsId} (Ülke: ${country.name}) - Lütfen SVG ve script.js'teki ID'leri eşleştirin.`);
+                    }
+                });
+            } else {
+                console.warn(`Ülke ${country.name} için tanımlı NUTS2 bölgesi bulunamadı veya boş. Bu ülke oyuna dahil edilmeyecek.`);
+            }
         }
     }
 
@@ -770,8 +788,9 @@ function initializeRegions() {
     addNotification("Oyun başladı! Birim satın alıp ülkenizi güçlendirin.");
 }
 
+
 function onRegionClick(nutsId) {
-    const clickedRegionPath = svgDoc.querySelector(`path[data-nuts-id="${nutsId}"]`);
+    const clickedRegionPath = svgDoc.querySelector(`path[data-nuts-id="${nutsId}"]`) || svgDoc.querySelector(`path#${nutsId}`);
     const regionCountryId = getCountryIdFromNutsId(nutsId);
 
     if (!clickedRegionPath || !regionCountryId) {
@@ -883,7 +902,7 @@ function highlightEnemyNeighbors(playerNutsId, enemyCountryId) {
             const neighborCountryId = getCountryIdFromNutsId(neighborNutsId);
             // Sadece komşu olan ve savaş ilan edilen ülkeye ait olan bölgeleri parlat
             if (neighborCountryId === enemyCountryId) {
-                const neighborPath = svgDoc.querySelector(`path[data-nuts-id="${neighborNutsId}"]`);
+                const neighborPath = svgDoc.querySelector(`path[data-nuts-id="${neighborNutsId}"]`) || svgDoc.querySelector(`path#${neighborNutsId}`);
                 if (neighborPath) {
                     neighborPath.classList.add('highlight-target'); // CSS ile kenarlık verilecek
                 }
@@ -891,7 +910,7 @@ function highlightEnemyNeighbors(playerNutsId, enemyCountryId) {
         });
     }
     // Saldıran bölgeyi de özel olarak vurgula
-    const attackingRegionPath = svgDoc.querySelector(`path[data-nuts-id="${playerNutsId}"]`);
+    const attackingRegionPath = svgDoc.querySelector(`path[data-nuts-id="${playerNutsId}"]`) || svgDoc.querySelector(`path#${playerNutsId}`);
     if (attackingRegionPath) {
         attackingRegionPath.classList.add('active-attack-origin'); // CSS ile farklı kenarlık verilecek
     }
@@ -980,7 +999,7 @@ function resolveCombat(
         }
 
         // Fethettiği bölgeyi kendi ülkesine dahil et
-        const conqueredRegionPath = svgDoc.querySelector(`path[data-nuts-id="${defendingRegionNutsId}"]`);
+        const conqueredRegionPath = svgDoc.querySelector(`path[data-nuts-id="${defendingRegionNutsId}"]`) || svgDoc.querySelector(`path#${defendingRegionNutsId}`);
         if (conqueredRegionPath) {
             // Eski sahibinden bölgeyi çıkar
             defendingCountry.nuts2 = defendingCountry.nuts2.filter(id => id !== defendingRegionNutsId);
@@ -1002,7 +1021,7 @@ function resolveCombat(
             }
 
             // Bölgenin rengini yeni sahibine göre güncelle
-            conqueredRegionPath.style.fill = attackingCountry.color;
+            conqueredRegionPath.style.setProperty('fill', attackingCountry.color, 'important'); // !important burada da önemli
         }
 
     } else {
@@ -1040,7 +1059,7 @@ function checkCountryElimination(countryId) {
                 // (getCountryIdFromNutsId çağrısı, `nuts2` listesi güncellendiği için doğru sonucu vermeli)
                 const currentOwnerId = getCountryIdFromNutsId(pathNutsId);
                 if (currentOwnerId === null || currentOwnerId === countryId) { // Eğer zaten sahibi yoksa veya elenen ülke ise
-                     path.style.fill = '#888888'; // Griye çevir
+                     path.style.setProperty('fill', '#888888', 'important'); // Griye çevir, !important ile
                 }
             });
         }
