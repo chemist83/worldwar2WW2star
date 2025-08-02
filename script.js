@@ -56,7 +56,7 @@ const conductAttackButton = document.getElementById('conductAttackButton');
 const closeWarModalButton = document.getElementById('closeWarModalButton');
 
 // ============================================================================
-// Oyun Verileri (CHATGPT'NİN VERDİĞİ LİSTEYE GÖRE GÜNCELLENDİ!)
+// Oyun Verileri (CHATGPT VE SİZİN VERDİĞİNİZ LİSTELERE GÖRE GÜNCELLENDİ!)
 // ============================================================================
 let countriesData = {
     // Türkiye NUTS-2
@@ -65,8 +65,8 @@ let countriesData = {
     'UK': { name: 'Birleşik Krallık', nuts2: ['UKI', 'UKF', 'UKD', 'UKG', 'UKH', 'UKK', 'UKM', 'UKL', 'UKJ', 'UKN'], isPlayer: false, color: '#0000FF', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/uk_attack_icon.png' },
     // Almanya NUTS-2
     'DE': { name: 'Almanya', nuts2: ['DE11', 'DE12', 'DE13', 'DE14', 'DE21', 'DE22', 'DE23', 'DE24', 'DE25', 'DE26', 'DE27', 'DE30', 'DE40', 'DE50', 'DE60', 'DE71', 'DE72', 'DE73', 'DE80', 'DE91', 'DE92', 'DE93', 'DE94', 'DEA1', 'DEA2', 'DEA3', 'DEA4', 'DEA5', 'DEB1', 'DEB2', 'DEB3', 'DEC0', 'DED2', 'DED4', 'DED5', 'DED6', 'DEG0'], isPlayer: false, color: '#FFFF00', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/de_attack_icon.png' },
-    // Fransa NUTS-2
-    'FR': { name: 'Fransa', nuts2: ['FR10', 'FRB0', 'FRC1', 'FRC2', 'FRD1', 'FRD2', 'FRE1', 'FRE2', 'FRF1', 'FRF2', 'FRF3'], isPlayer: false, color: '#FF4500', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/fr_attack_icon.png' },
+    // Fransa NUTS-2 (Sizin verdiğiniz listeye göre güncellendi!)
+    'FR': { name: 'Fransa', nuts2: ['FR10', 'FR21', 'FR22', 'FR23', 'FR24', 'FR25', 'FR26', 'FR30', 'FR41', 'FR42', 'FR43', 'FR51', 'FR52', 'FR53', 'FR61', 'FR62', 'FR63', 'FR71', 'FR72', 'FR81', 'FR82', 'FR83', 'FRA1', 'FRA2', 'FRA3', 'FRA4', 'FRA5'], isPlayer: false, color: '#FF4500', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/fr_attack_icon.png' },
     // İtalya NUTS-2
     'IT': { name: 'İtalya', nuts2: ['ITC1', 'ITC2', 'ITC3', 'ITC4', 'ITC5', 'ITD1', 'ITD2', 'ITD3', 'ITD4', 'ITE1', 'ITE2', 'ITE3', 'ITE4', 'ITF1', 'ITF2', 'ITF3', 'ITF4', 'ITF5', 'ITG1', 'ITG2'], isPlayer: false, color: '#00FF00', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/it_attack_icon.png' },
     // İspanya NUTS-2
@@ -116,26 +116,26 @@ let countriesData = {
     // Estonya NUTS-2
     'EE': { name: 'Estonya', nuts2: ['EE00'], isPlayer: false, color: '#FFFAF0', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/ee_attack_icon.png' },
 
-    // TEK TOPRAKLI ÜLKELER (CHATGPT LİSTESİNDEKİ HALİYLE)
+    // TEK TOPRAKLI ÜLKELER (veya daha az parçalı)
     'LU': { name: 'Lüksemburg', nuts2: ['LU00'], isPlayer: false, color: '#800080', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/lu_attack_icon.png' },
     'CY': { name: 'Kıbrıs', nuts2: ['CY00'], isPlayer: false, color: '#19cf0c', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/cy_attack_icon.png' },
     'IS': { name: 'İzlanda', nuts2: ['IS00'], isPlayer: false, color: '#A9A9A9', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/is_attack_icon.png' },
     'MT': { name: 'Malta', nuts2: ['MT00'], isPlayer: false, color: '#D3D3D3', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/mt_attack_icon.png' },
     'MD': { name: 'Moldova', nuts2: ['MD00'], isPlayer: false, color: '#98FB98', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/md_attack_icon.png' },
-    'BA': { name: 'Bosna-Hersek', nuts2: ['BA01', 'BA02'], isPlayer: false, color: '#4B0082', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/ba_attack_icon.png' }, // NUTS-2 listesindeki hali
+    'BA': { name: 'Bosna-Hersek', nuts2: ['BA01', 'BA02'], isPlayer: false, color: '#4B0082', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/ba_attack_icon.png' },
     'ME': { name: 'Karadağ', nuts2: ['ME00'], isPlayer: false, color: '#CD853F', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/me_attack_icon.png' },
     'MK': { name: 'Kuzey Makedonya', nuts2: ['MK00'], isPlayer: false, color: '#FF6347', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/mk_attack_icon.png' },
     'RS': { name: 'Sırbistan', nuts2: ['RS11', 'RS12', 'RS21', 'RS22'], isPlayer: false, color: '#483D8B', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/rs_attack_icon.png' },
     'BY': { name: 'Belarus', nuts2: ['BY00'], isPlayer: false, color: '#BDB76B', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/by_attack_icon.png' },
-    'UA': { name: 'Ukrayna', nuts2: ['UA30', 'UA40', 'UA50'], isPlayer: false, color: '#DAA520', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/ua_attack_icon.png' }, // Örnek NUTS2'ler
+    'UA': { name: 'Ukrayna', nuts2: ['UA30', 'UA40', 'UA50'], isPlayer: false, color: '#DAA520', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/ua_attack_icon.png' },
+    'RU': { name: 'Rusya', nuts2: ['RU00'], isPlayer: false, color: '#006400', coins: INITIAL_AI_COINS, units: 0, attackIconPath: 'icons/ru_attack_icon.png' }, // Varsayımsal tek bir RU00 NUTS ID'si ile temsil edildi
 };
 
-// NUTS Bölgeleri ve Komşulukları (BU KISIM KESİNLİKLE KENDİ SVG HARİTANIZA GÖRE DÜZENLENMELİ VE EKSİKLER TAMAMLANMALI!)
-// ChatGPT'nin verdiği NUTS ID'lerine göre güncellendi.
-// Ancak, komşuluk ilişkilerini kendi haritanızdaki görsel komşuluklara göre MUTLAKA DÜZENLEMELİSİNİZ!
+// NUTS Bölgeleri ve Komşulukları (BU KISIM KENDİ SVG HARİTANIZA GÖRE DÜZENLENMELİ VE EKSİKLER TAMAMLANMALI!)
+// Lütfen buradaki komşulukları SVG'nizdeki sınırlar doğrultusunda tekrar kontrol edin.
 const nutsNeighbors = {
     // Türkiye NUTS2 komşulukları (örnek, kendi SVG'nize göre doldurun)
-    'TR10': ['TR21', 'TR41'],
+    'TR10': ['TR21', 'TR41', 'BG34', 'EL43'], // Bulgaristan ve Yunanistan ile komşu
     'TR21': ['TR10', 'TR22', 'TR31'],
     'TR22': ['TR21', 'TR31', 'TR41'],
     'TR31': ['TR21', 'TR22', 'TR32', 'TR41', 'TR42'],
@@ -147,9 +147,9 @@ const nutsNeighbors = {
     'TR52': ['TR33', 'TR42', 'TR51', 'TR61', 'TR62', 'TR63'],
     'TR61': ['TR33', 'TR42', 'TR51', 'TR52', 'TR71', 'TR81'],
     'TR62': ['TR42', 'TR52', 'TR61', 'TR63', 'TR81', 'TR82'],
-    'TR63': ['TR52', 'TR62', 'TR71', 'TR82', 'TR83', 'TRC1', 'CY00'], // CY00: Kıbrıs'ın komşusu (denizden)
+    'TR63': ['TR52', 'TR62', 'TR71', 'TR82', 'TR83', 'TRC1', 'CY00'], // CY00: Kıbrıs ile denizden komşu
     'TR71': ['TR51', 'TR61', 'TR63', 'TR81', 'TR90'],
-    'TR72': ['TR71'], // Eğer TR72 de listeye eklendiyse
+    'TR72': ['TR71', 'BG34'], // BG34 ile komşu
     'TR81': ['TR61', 'TR62', 'TR71', 'TR82', 'TR90', 'TRA1'],
     'TR82': ['TR62', 'TR63', 'TR81', 'TR83', 'TRA1', 'TRA2'],
     'TR83': ['TR63', 'TR82', 'TRB1', 'TRC1', 'TRA2'],
@@ -160,59 +160,59 @@ const nutsNeighbors = {
     'TRB2': ['TR90', 'TRA1', 'TRB1', 'TRC2', 'TRC3'],
     'TRC1': ['TR63', 'TR83', 'TRA1', 'TRA2', 'TRB1', 'TRC2'],
     'TRC2': ['TRB1', 'TRB2', 'TRC1', 'TRC3'],
-    'TRC3': ['TRB2', 'TRC2'], // Komşuları listede olmayan diğer ülkeler olabilir
+    'TRC3': ['TRB2', 'TRC2'],
 
     // Avusturya Komşulukları
-    'AT11': ['AT12', 'AT13', 'CZ01', 'CZ02', 'DE21'],
-    'AT12': ['AT11', 'AT21', 'DE21'], // ... diğer komşular
-    'AT13': ['AT11', 'AT21', 'AT31'], // ...
-    'AT21': ['AT12', 'AT13', 'AT22', 'AT31', 'ITD4', 'SI03'], // SI03 ile komşu
-    'AT22': ['AT21', 'AT31', 'HU10', 'SK01'], // HU10, SK01 ile komşu
-    'AT31': ['AT13', 'AT21', 'AT22', 'AT32', 'AT33', 'AT34', 'CH01', 'DE27', 'ITD4', 'SI03'], // CH01, SI03 ile komşu
+    'AT11': ['AT12', 'AT13', 'CZ01', 'CZ02', 'DE21', 'DE22', 'DE23', 'DE24', 'SK01'],
+    'AT12': ['AT11', 'AT21', 'DE21'],
+    'AT13': ['AT11', 'AT21', 'AT31'],
+    'AT21': ['AT12', 'AT13', 'AT22', 'AT31', 'ITD4', 'SI03'],
+    'AT22': ['AT21', 'AT31', 'HU10', 'SK01'],
+    'AT31': ['AT13', 'AT21', 'AT22', 'AT32', 'AT33', 'AT34', 'CH01', 'DE27', 'ITD4', 'SI03'],
     'AT32': ['AT31', 'AT33'],
     'AT33': ['AT31', 'AT32', 'DE27'],
-    'AT34': ['AT31', 'SI03'], // SI03 ile komşu
+    'AT34': ['AT31', 'SI03'],
 
     // Belçika Komşulukları
-    'BE10': ['BE21', 'BE22', 'BE23', 'NL11', 'NL21', 'FRC1'],
-    'BE21': ['BE10', 'BE22', 'BE31', 'NL13', 'LU00'], // LU00 ile komşu
+    'BE10': ['BE21', 'BE22', 'BE23', 'NL11', 'NL21', 'FR21', 'FR30'],
+    'BE21': ['BE10', 'BE22', 'BE31', 'NL13', 'LU00', 'FR22', 'FR23'],
     'BE22': ['BE10', 'BE21', 'BE23', 'BE24', 'BE31', 'NL13'],
     'BE23': ['BE10', 'BE22', 'BE24', 'BE31', 'NL13'],
-    'BE24': ['BE22', 'BE23', 'BE32', 'FRC1'],
-    'BE25': ['BE34', 'FRC1'], // ...
-    'BE31': ['BE21', 'BE22', 'BE23', 'BE32', 'BE33', 'FRC1', 'DE71', 'LU00'], // DE71, LU00 ile komşu
-    'BE32': ['BE24', 'BE31', 'BE33', 'FRC1'],
-    'BE33': ['BE31', 'BE32', 'BE34', 'DE71'], // DE71 ile komşu
-    'BE34': ['BE25', 'BE33', 'DE71'], // DE71 ile komşu
-    'BE35': ['BE24', 'FRC1'], // ...
+    'BE24': ['BE22', 'BE23', 'BE32', 'FR30'],
+    'BE25': ['BE34', 'FR30'],
+    'BE31': ['BE21', 'BE22', 'BE23', 'BE32', 'BE33', 'FR22', 'FR23', 'DE71', 'LU00'],
+    'BE32': ['BE24', 'BE31', 'BE33', 'FR30'],
+    'BE33': ['BE31', 'BE32', 'BE34', 'DE71'],
+    'BE34': ['BE25', 'BE33', 'DE71'],
+    'BE35': ['BE24', 'FR30'],
 
     // Bulgaristan Komşulukları
-    'BG31': ['BG32', 'RO42', 'RS12'], // RO42, RS12 ile komşu
+    'BG31': ['BG32', 'RO42', 'RS12'],
     'BG32': ['BG31', 'BG33', 'RO42'],
-    'BG33': ['BG32', 'BG34', 'EL41', 'MK00'], // EL41, MK00 ile komşu
-    'BG34': ['BG33', 'EL41', 'TR72'], // EL41, TR72 ile komşu
-    'BG41': ['BG42', 'RS21'], // RS21 ile komşu
-    'BG42': ['BG41', 'RO42', 'RS12', 'MK00'], // RO42, RS12, MK00 ile komşu
+    'BG33': ['BG32', 'BG34', 'EL41', 'MK00'],
+    'BG34': ['BG33', 'EL41', 'TR72', 'TR10'], // TR10 ile komşu
+    'BG41': ['BG42', 'RS21'],
+    'BG42': ['BG41', 'RO42', 'RS12', 'MK00'],
 
     // İsviçre Komşulukları
-    'CH01': ['CH02', 'CH03', 'DE27', 'FRF3', 'ITG2'], // DE27, FRF3, ITG2 ile komşu
-    'CH02': ['CH01', 'CH04', 'FRF3', 'ITG2'],
-    'CH03': ['CH01', 'CH05', 'DE27'],
+    'CH01': ['CH02', 'CH03', 'DE40', 'FR71', 'ITG2', 'AT31'],
+    'CH02': ['CH01', 'CH04', 'FR71', 'ITG2'],
+    'CH03': ['CH01', 'CH05', 'DE40'],
     'CH04': ['CH02', 'CH06', 'ITG2'],
-    'CH05': ['CH03', 'CH07', 'DE27'],
+    'CH05': ['CH03', 'CH07', 'DE40'],
     'CH06': ['CH04', 'CH07', 'ITG2'],
     'CH07': ['CH05', 'CH06', 'ITG2'],
 
     // Kıbrıs Komşulukları
-    'CY00': ['TR63'], // Sadece Türkiye ile denizden komşu varsayıldı
+    'CY00': ['TR63'],
 
     // Çekya Komşulukları
-    'CZ01': ['CZ02', 'DE40', 'AT11'], // DE40, AT11 ile komşu
+    'CZ01': ['CZ02', 'DE40', 'AT11', 'DE91'],
     'CZ02': ['CZ01', 'CZ03', 'AT11', 'DE40'],
-    'CZ03': ['CZ02', 'CZ04', 'PL82', 'PL84', 'DE40'], // PL82, PL84, DE40 ile komşu
-    'CZ04': ['CZ03', 'CZ05', 'PL84', 'SK04'], // PL84, SK04 ile komşu
-    'CZ05': ['CZ04', 'CZ06', 'SK04'], // SK04 ile komşu
-    'CZ06': ['CZ05', 'CZ07', 'DE91'], // DE91 ile komşu
+    'CZ03': ['CZ02', 'CZ04', 'PL82', 'PL84', 'DE40'],
+    'CZ04': ['CZ03', 'CZ05', 'PL84', 'SK04'],
+    'CZ05': ['CZ04', 'CZ06', 'SK04'],
+    'CZ06': ['CZ05', 'CZ07', 'DE91'],
     'CZ07': ['CZ06', 'CZ08', 'DE91'],
     'CZ08': ['CZ07', 'AT11', 'DE91'],
 
@@ -220,140 +220,280 @@ const nutsNeighbors = {
     'DE11': ['DE12', 'DE13', 'NL11', 'NL12', 'DK01'],
     'DE12': ['DE11', 'DE13', 'DE21', 'NL12', 'DK01', 'DK02'],
     'DE13': ['DE11', 'DE12', 'DE14', 'DE21', 'DK02'],
-    'DE14': ['DE13', 'DE21', 'PL92'], // PL92 ile komşu
-    'DE21': ['DE12', 'DE13', 'DE14', 'DE22', 'DE23', 'DE24', 'AT11', 'CZ01'], // AT11, CZ01 ile komşu
-    // ... Diğer tüm Almanya NUTS-2 bölgeleri ve komşuları buraya eklenecek
+    'DE14': ['DE13', 'DE21', 'PL92'],
+    'DE21': ['DE12', 'DE13', 'DE14', 'DE22', 'DE23', 'DE24', 'AT11', 'CZ01', 'PL92'],
+    'DE22': ['DE21', 'DE23', 'AT11', 'CZ01'],
+    'DE23': ['DE21', 'DE22', 'DE24', 'AT11', 'CZ01'],
+    'DE24': ['DE21', 'DE23', 'AT11', 'CZ01'],
+    'DE25': ['DE26', 'DE27', 'DE50', 'NL21', 'BE31'],
+    'DE26': ['DE25', 'DE27', 'DE50', 'NL21', 'BE31'],
+    'DE27': ['DE25', 'DE26', 'DE50', 'DE71', 'CH01', 'AT31', 'PL91'],
+    'DE30': ['DE40', 'DE50', 'DE60', 'CZ01', 'CZ02', 'PL84', 'PL91'],
+    'DE40': ['DE30', 'CZ01', 'CZ02', 'CZ03', 'PL84', 'CH01'],
+    'DE50': ['DE25', 'DE26', 'DE27', 'DE30', 'DE60', 'FR41', 'FR42', 'FR43', 'LU00', 'BE31'],
+    'DE60': ['DE30', 'DE50', 'FR41', 'FR42', 'LU00'],
+    'DE71': ['DE27', 'DE33', 'BE31', 'LU00', 'FR43', 'FR51', 'FR52', 'FR53'],
+    'DE72': ['DE71', 'DE73', 'FR43'],
+    'DE73': ['DE72', 'CH01'],
+    'DE80': ['AT11', 'AT12', 'AT13', 'AT21', 'AT31'], // Genel Bavyera bölgesi komşulukları
+    'DE91': ['DE92', 'CZ06', 'CZ07', 'CZ08', 'PL81'],
+    'DE92': ['DE91', 'DE93', 'PL81', 'PL82'],
+    'DE93': ['DE92', 'DE94', 'PL82'],
+    'DE94': ['DE93', 'CZ03', 'PL84'],
+    'DEA1': ['DEA2', 'DEA3', 'DEB1', 'NL31', 'NL32'],
+    'DEA2': ['DEA1', 'DEA3', 'DEB1'],
+    'DEA3': ['DEA1', 'DEA2', 'DEB1', 'NL31'],
+    'DEA4': ['DEA5', 'DEB2', 'LU00', 'FR21'],
+    'DEA5': ['DEA4', 'DEB2', 'FR21', 'BE31'],
+    'DEB1': ['DEB2', 'DEB3', 'LU00', 'FR21'],
+    'DEB2': ['DEB1', 'DEB3', 'LU00', 'FR21'],
+    'DEB3': ['DEB1', 'DEB2', 'FR21', 'FR30'],
+    'DEC0': ['DE40', 'PL91', 'PL92', 'CZ01'],
+    'DED2': ['DED4', 'DED5', 'DED6'], // Bu NUTS'lar arası komşuluklar iç
+    'DED4': ['DED2', 'DED5', 'DED6'],
+    'DED5': ['DED2', 'DED4', 'DED6'],
+    'DED6': ['DED2', 'DED4', 'DED5'],
+    'DEG0': ['DE71', 'DE72', 'DE73', 'FR43', 'CH01', 'ITG2'], // Baden-Württemberg
 
     // Danimarka Komşulukları
-    'DK01': ['DK02', 'DE11', 'DE12'], // DE11, DE12 ile komşu
-    'DK02': ['DK01', 'DK03', 'DE12', 'DE13'], // DE12, DE13 ile komşu
+    'DK01': ['DK02', 'DE11', 'DE12'],
+    'DK02': ['DK01', 'DK03', 'DE12', 'DE13'],
     'DK03': ['DK02', 'DK04'],
     'DK04': ['DK03', 'DK05'],
-    'DK05': ['DK04', 'SE21', 'SE23'], // SE21, SE23 ile komşu
+    'DK05': ['DK04', 'SE21', 'SE23'],
 
     // Estonya Komşulukları
-    'EE00': ['LV00', 'RU00'], // LV00, RU00 ile komşu varsayıldı (Eğer RU00 varsa)
+    'EE00': ['LV00', 'RU00'],
 
     // İspanya Komşulukları
-    'ES11': ['ES12', 'ES21', 'PT11', 'PT15'], // PT11, PT15 ile komşu
+    'ES11': ['ES12', 'ES21', 'PT11', 'PT15'],
     'ES12': ['ES11', 'ES13', 'ES21', 'PT15', 'PT16'],
-    // ... Diğer İspanya NUTS-2 bölgeleri ve komşuları
+    'ES13': ['ES12', 'ES22', 'PT16'],
+    'ES21': ['ES11', 'ES12', 'ES22', 'ES23', 'FR61'], // FR61 ile komşu
+    'ES22': ['ES13', 'ES21', 'ES23', 'ES24', 'FR61', 'FR62', 'FR63'],
+    'ES23': ['ES21', 'ES22', 'ES24', 'FR62', 'FR63'],
+    'ES24': ['ES22', 'ES23', 'ES30', 'FR62', 'FR63'],
+    'ES30': ['ES24', 'ES41', 'ES42', 'ES43', 'FR81', 'FR82'],
+    'ES41': ['ES30', 'ES42', 'ES51'],
+    'ES42': ['ES30', 'ES41', 'ES43', 'ES51', 'ES52', 'ES53'],
+    'ES43': ['ES30', 'ES42', 'ES53'],
+    'ES51': ['ES41', 'ES42', 'ES52', 'ES61'],
+    'ES52': ['ES42', 'ES51', 'ES53', 'ES61', 'ES62', 'ES63'],
+    'ES53': ['ES42', 'ES43', 'ES52', 'ES63', 'ES64'],
+    'ES61': ['ES51', 'ES52', 'ES62', 'PT17'],
+    'ES62': ['ES52', 'ES61', 'ES63', 'PT17'],
+    'ES63': ['ES52', 'ES53', 'ES62', 'ES64', 'PT17', 'PT18'],
+    'ES64': ['ES53', 'ES63', 'PT18'],
+    'ES70': [], // Adalar (Kanarya Adaları), kara komşusu yok
 
     // Finlandiya Komşulukları
-    'FI19': ['FI1B', 'FI1C', 'NO08', 'SE33', 'RU00'], // NO08, SE33, RU00 ile komşu
+    'FI19': ['FI1B', 'FI1C', 'NO08', 'SE33', 'RU00'],
     'FI1B': ['FI19', 'FI1C'],
     'FI1C': ['FI19', 'FI1B', 'FI20', 'RU00'],
     'FI20': ['FI1C', 'RU00'],
 
-    // Fransa Komşulukları
-    'FR10': ['FRB0', 'FRC1', 'FRD1', 'BE10', 'BE21'], // BE10, BE21 ile komşu
-    'FRB0': ['FR10', 'FRC1', 'FRD1', 'BE10'],
-    'FRC1': ['FR10', 'FRB0', 'FRC2', 'BE10', 'BE21', 'BE31', 'LU00', 'DE60'], // BE, LU00, DE60 ile komşu
-    'FRC2': ['FRC1', 'FRD1', 'FRD2', 'CH01'], // CH01 ile komşu
-    // ... Diğer Fransa NUTS-2 bölgeleri ve komşuları
+    // Fransa Komşulukları (Sizin verdiğiniz listeye göre güncellendi!)
+    'FR10': ['FR21', 'FR22', 'FR23', 'BE10', 'BE21'], // Paris bölgesi
+    'FR21': ['FR10', 'FR22', 'FR30', 'FR41', 'BE10', 'DEB3', 'DEA4', 'DEA5', 'DEB1', 'DEB2'], // Champagne-Ardenne
+    'FR22': ['FR10', 'FR21', 'FR23', 'FR24', 'BE21', 'BE22', 'BE23', 'BE31'], // Picardie
+    'FR23': ['FR10', 'FR22', 'FR24', 'FR25', 'BE21', 'BE22', 'BE23', 'BE31'], // Haute-Normandie
+    'FR24': ['FR22', 'FR23', 'FR25', 'FR26', 'FR43', 'FR51'], // Centre (FR)
+    'FR25': ['FR23', 'FR24', 'FR26', 'FR51', 'FR52'], // Basse-Normandie
+    'FR26': ['FR24', 'FR25', 'FR43', 'FR51', 'FR52', 'FR53', 'FR61'], // Bourgogne
+    'FR30': ['FR21', 'FR41', 'BE10', 'BE24', 'BE25', 'BE32', 'BE35', 'DEB3'], // Nord-Pas-de-Calais
+    'FR41': ['FR21', 'FR30', 'FR42', 'FR43', 'DE50', 'DE60', 'LU00'], // Lorraine
+    'FR42': ['FR41', 'FR43', 'DE50', 'DE60', 'CH01'], // Alsace
+    'FR43': ['FR24', 'FR26', 'FR41', 'FR42', 'FR61', 'FR62', 'CH01', 'DE50', 'DE60', 'DEG0'], // Franche-Comté
+    'FR51': ['FR24', 'FR25', 'FR26', 'FR52', 'FR53', 'FR61', 'FR62'], // Pays de la Loire
+    'FR52': ['FR25', 'FR26', 'FR51', 'FR53', 'FR61'], // Bretagne
+    'FR53': ['FR26', 'FR51', 'FR52', 'FR61', 'FR62'], // Poitou-Charentes
+    'FR61': ['FR26', 'FR51', 'FR53', 'FR62', 'FR63', 'FR71', 'ES21', 'ES22'], // Aquitaine
+    'FR62': ['FR26', 'FR43', 'FR61', 'FR63', 'FR71', 'FR72', 'ES22', 'ES23', 'ES24', 'ES30'], // Midi-Pyrénées
+    'FR63': ['FR61', 'FR62', 'FR72', 'ES22', 'ES23', 'ES24'], // Limousin
+    'FR71': ['FR61', 'FR62', 'FR72', 'FR81', 'CH01', 'CH02', 'CH04', 'ITG1', 'ITG2'], // Rhône-Alpes
+    'FR72': ['FR62', 'FR63', 'FR71', 'FR81', 'FR82'], // Auvergne
+    'FR81': ['FR62', 'FR71', 'FR72', 'FR82', 'FR83', 'ES30'], // Languedoc-Roussillon
+    'FR82': ['FR72', 'FR81', 'FR83', 'ITF3', 'ITF4', 'ES30'], // Provence-Alpes-Côte d'Azur
+    'FR83': ['FR81', 'FR82', 'ITF5'], // Korsika (Denizden İtalya ile komşu)
+    'FRA1': [], // Guadeloupe (Denizaşırı, kara komşusu yok)
+    'FRA2': [], // Martinique (Denizaşırı, kara komşusu yok)
+    'FRA3': [], // Guyane (Denizaşırı, kara komşusu yok)
+    'FRA4': [], // La Réunion (Denizaşırı, kara komşusu yok)
+    'FRA5': [], // Mayotte (Denizaşırı, kara komşusu yok)
 
     // Yunanistan Komşulukları (EL kodları kullanıldı)
-    'EL30': ['EL41', 'EL42', 'AL00', 'MK00'], // AL00, MK00 ile komşu
-    'EL41': ['EL30', 'EL42', 'EL43', 'BG33', 'BG34', 'MK00'], // BG33, BG34, MK00 ile komşu
-    // ... Diğer Yunanistan NUTS-2 bölgeleri ve komşuları
+    'EL30': ['EL41', 'EL42', 'MK00', 'AL00'],
+    'EL41': ['EL30', 'EL42', 'EL43', 'BG33', 'BG34', 'MK00'],
+    'EL42': ['EL30', 'EL41', 'EL51'],
+    'EL43': ['EL41', 'EL51', 'EL52', 'TR10'], // TR10 ile komşu
+    'EL51': ['EL42', 'EL43', 'EL52', 'EL53'],
+    'EL52': ['EL43', 'EL51', 'EL53', 'EL54'],
+    'EL53': ['EL51', 'EL52', 'EL54'],
+    'EL54': ['EL52', 'EL53'],
 
     // Hırvatistan Komşulukları
-    'HR03': ['HR04', 'SI03', 'SI04', 'HU31', 'BA01', 'RS11'], // SI03, SI04, HU31, BA01, RS11 ile komşu
-    'HR04': ['HR03', 'HU31', 'BA01', 'BA02', 'ME00', 'RS11'], // HU31, BA01, BA02, ME00, RS11 ile komşu
+    'HR03': ['HR04', 'SI03', 'SI04', 'HU31', 'BA01', 'RS11'],
+    'HR04': ['HR03', 'HU31', 'BA01', 'BA02', 'ME00', 'RS11'],
 
     // Macaristan Komşulukları
-    'HU10': ['HU21', 'HU22', 'AT22', 'SK01'], // AT22, SK01 ile komşu
-    'HU21': ['HU10', 'HU22', 'HU23', 'SK02', 'RO11'], // SK02, RO11 ile komşu
-    'HU22': ['HU10', 'HU21', 'HU23', 'AT22', 'RO11', 'RS11'], // AT22, RO11, RS11 ile komşu
-    'HU23': ['HU21', 'HU22', 'SK02', 'RO12'], // SK02, RO12 ile komşu
-    'HU31': ['HU32', 'HR03', 'HR04', 'RS11', 'RS12'], // HR03, HR04, RS11, RS12 ile komşu
-    'HU32': ['HU31', 'HU33', 'RS22', 'RO12'], // RS22, RO12 ile komşu
-    'HU33': ['HU32', 'UA30', 'RO12'], // UA30, RO12 ile komşu
+    'HU10': ['HU21', 'HU22', 'AT22', 'SK01'],
+    'HU21': ['HU10', 'HU22', 'HU23', 'SK02', 'RO11'],
+    'HU22': ['HU10', 'HU21', 'HU23', 'AT22', 'RO11', 'RS11'],
+    'HU23': ['HU21', 'HU22', 'SK02', 'RO12'],
+    'HU31': ['HU32', 'HR03', 'HR04', 'RS11', 'RS12'],
+    'HU32': ['HU31', 'HU33', 'RS22', 'RO12'],
+    'HU33': ['HU32', 'UA30', 'RO12'],
 
     // İzlanda Komşulukları
-    'IS00': [], // Kara komşusu yok
+    'IS00': [],
 
     // İrlanda Komşulukları
-    'IE04': ['IE05', 'UKN0'], // UKN0 ile komşu (Kuzey İrlanda)
+    'IE04': ['IE05', 'UKN0'], // UKN0 ile komşu (Kuzey İrlanda) - Bu NUTS ID'sinin SVG'nizde olduğundan emin olun
     'IE05': ['IE04', 'IE06'],
     'IE06': ['IE05'],
 
     // İtalya Komşulukları
-    'ITC1': ['ITC2', 'ITD1', 'FRF3', 'CH01', 'AT31'], // FRF3, CH01, AT31 ile komşu
-    // ... Diğer İtalya NUTS-2 bölgeleri ve komşuları
+    'ITC1': ['ITC2', 'ITD1', 'FR71', 'CH01', 'AT31'],
+    'ITC2': ['ITC1', 'ITC3', 'ITD1', 'ITD2'],
+    'ITC3': ['ITC2', 'ITC4', 'ITD2', 'ITD3'],
+    'ITC4': ['ITC3', 'ITC5', 'ITD3', 'ITD4', 'SI03'],
+    'ITC5': ['ITC4', 'ITD4', 'SI03'],
+    'ITD1': ['ITC1', 'ITC2', 'ITD2', 'ITF1', 'FR82'],
+    'ITD2': ['ITC2', 'ITC3', 'ITD1', 'ITD3', 'ITF1', 'ITF2'],
+    'ITD3': ['ITC3', 'ITC4', 'ITD2', 'ITD4', 'ITF2', 'ITF3'],
+    'ITD4': ['ITC4', 'ITC5', 'ITD3', 'AT21', 'AT31', 'SI03', 'SI04'],
+    'ITE1': ['ITE2', 'ITE3', 'ITF1', 'ITF2', 'ITG1'],
+    'ITE2': ['ITE1', 'ITE3', 'ITF1', 'ITF2', 'ITF3', 'ITG1'],
+    'ITE3': ['ITE1', 'ITE2', 'ITE4', 'ITF3', 'ITF4'],
+    'ITE4': ['ITE3', 'ITF4', 'ITF5'],
+    'ITF1': ['ITD1', 'ITD2', 'ITE1', 'ITE2', 'ITF2'],
+    'ITF2': ['ITD2', 'ITD3', 'ITE1', 'ITE2', 'ITE3', 'ITF1', 'ITF3'],
+    'ITF3': ['ITD3', 'ITE2', 'ITE3', 'ITE4', 'ITF2', 'ITF4', 'FR82', 'SI04'],
+    'ITF4': ['ITE3', 'ITE4', 'ITF3', 'ITF5', 'FR82'],
+    'ITF5': ['ITE4', 'ITF4', 'FR83'], // Korsika (deniz komşusu)
+    'ITG1': ['ITG2', 'ITE1', 'ITE2', 'CH01', 'CH02', 'CH04', 'CH06', 'CH07'],
+    'ITG2': ['ITG1', 'CH01', 'CH02', 'CH04', 'CH06', 'CH07', 'AT31', 'SI03', 'SI04'],
 
     // Letonya Komşulukları
-    'LV00': ['EE00', 'LT01', 'BY00', 'RU00'], // EE00, LT01, BY00, RU00 ile komşu
+    'LV00': ['EE00', 'LT01', 'BY00', 'RU00'],
 
     // Litvanya Komşulukları
-    'LT01': ['LT02', 'LV00', 'BY00', 'PL92', 'RU00'], // LV00, BY00, PL92, RU00 ile komşu
-    'LT02': ['LT01', 'PL92'],
+    'LT01': ['LT02', 'LV00', 'BY00', 'PL92', 'RU00'],
+    'LT02': ['LT01', 'PL92', 'RU00'], // Kaliningrad bölgesi ile RU00 komşu varsayıldı
 
     // Lüksemburg Komşulukları
-    'LU00': ['BE21', 'BE31', 'FRC1', 'DEB1', 'DEB2'], // BE, FR, DE ile komşu
+    'LU00': ['BE21', 'BE31', 'FR41', 'FR21', 'DEB1', 'DEB2', 'DE60'],
 
     // Karadağ Komşulukları
-    'ME00': ['BA01', 'BA02', 'RS22', 'AL00'], // BA, RS, AL00 ile komşu
+    'ME00': ['BA01', 'BA02', 'RS22', 'AL00'], // AL00 Eğer haritada varsa
 
     // Malta Komşulukları
-    'MT00': [], // Kara komşusu yok
+    'MT00': [],
 
     // Kuzey Makedonya Komşulukları
-    'MK00': ['AL00', 'EL41', 'BG33', 'BG42', 'RS22'], // AL00, EL41, BG, RS ile komşu
+    'MK00': ['AL00', 'EL41', 'BG33', 'BG42', 'RS22'], // AL00 Eğer haritada varsa
 
     // Moldova Komşulukları
-    'MD00': ['RO41', 'UA30', 'UA40'], // RO41, UA30, UA40 ile komşu
+    'MD00': ['RO41', 'UA30', 'UA40'],
 
     // Hollanda Komşulukları
-    'NL11': ['NL12', 'BE10', 'DE11'], // BE10, DE11 ile komşu
+    'NL11': ['NL12', 'BE10', 'DE11'],
     'NL12': ['NL11', 'NL13', 'DE11', 'DE12'],
-    // ... Diğer Hollanda NUTS-2 bölgeleri ve komşuları
+    'NL13': ['NL12', 'NL21', 'NL22', 'DE12', 'DE13', 'BE21', 'BE22', 'BE23'],
+    'NL21': ['NL13', 'NL22', 'BE10', 'DE25'],
+    'NL22': ['NL13', 'NL21', 'NL23', 'DE25'],
+    'NL23': ['NL22', 'DE25', 'DE26'],
+    'NL31': ['NL32', 'NL33', 'DEA1', 'DEA2', 'DEA3'],
+    'NL32': ['NL31', 'NL33', 'DEA1', 'DEA2', 'DEA3'],
+    'NL33': ['NL31', 'NL32', 'NL34', 'DEA1'],
+    'NL34': ['NL33', 'DEA1'],
 
     // Norveç Komşulukları
-    'NO01': ['NO02', 'SE11', 'SE12'], // SE ile komşu
-    // ... Diğer Norveç NUTS-2 bölgeleri ve komşuları
+    'NO01': ['NO02', 'SE11', 'SE12'],
+    'NO02': ['NO01', 'NO03', 'SE11', 'SE12', 'SE21'],
+    'NO03': ['NO02', 'NO04', 'SE21', 'SE22'],
+    'NO04': ['NO03', 'NO05', 'SE22', 'SE23'],
+    'NO05': ['NO04', 'NO06', 'SE23', 'SE31'],
+    'NO06': ['NO05', 'NO07', 'SE31', 'SE32'],
+    'NO07': ['NO06', 'NO08', 'SE32', 'SE33'],
+    'NO08': ['NO07', 'SE33', 'FI19'],
 
     // Polonya Komşulukları
-    'PL21': ['PL22', 'DE14', 'DE27', 'CZ03'], // DE, CZ ile komşu
-    // ... Diğer Polonya NUTS-2 bölgeleri ve komşuları
+    'PL21': ['PL22', 'DE14', 'DE27', 'CZ03', 'PL41'],
+    'PL22': ['PL21', 'PL41', 'PL42', 'DE27'],
+    'PL41': ['PL21', 'PL22', 'PL42', 'PL43', 'PL51', 'BY00', 'UA30'],
+    'PL42': ['PL41', 'PL43', 'PL52', 'PL61', 'PL62', 'UA30'],
+    'PL43': ['PL41', 'PL42', 'PL52', 'PL61', 'UA30'],
+    'PL51': ['PL41', 'PL52', 'PL61', 'PL71', 'PL81', 'CZ03'],
+    'PL52': ['PL42', 'PL43', 'PL51', 'PL61', 'PL62', 'PL72', 'PL81', 'CZ03'],
+    'PL61': ['PL42', 'PL43', 'PL51', 'PL52', 'PL62', 'PL71', 'UA30'],
+    'PL62': ['PL42', 'PL52', 'PL61', 'PL63', 'PL72', 'UA30'],
+    'PL63': ['PL62', 'UA30', 'UA40', 'BY00'],
+    'PL71': ['PL51', 'PL61', 'PL72', 'PL81', 'PL82', 'CZ03'],
+    'PL72': ['PL52', 'PL62', 'PL71', 'PL82', 'PL84', 'CZ04'],
+    'PL81': ['PL51', 'PL52', 'PL71', 'PL72', 'PL82', 'CZ06', 'CZ07'],
+    'PL82': ['PL52', 'PL71', 'PL72', 'PL81', 'PL84', 'CZ03', 'CZ04'],
+    'PL84': ['PL72', 'PL82', 'CZ03', 'CZ04', 'SK04'],
+    'PL91': ['PL92', 'DE91', 'DE92', 'DE93', 'CZ01'],
+    'PL92': ['PL91', 'DE14', 'DE21', 'DE92', 'DE93', 'LT01', 'LT02', 'BY00', 'RU00'],
 
     // Portekiz Komşulukları
-    'PT11': ['PT15', 'ES11', 'ES12'], // ES ile komşu
-    // ... Diğer Portekiz NUTS-2 bölgeleri ve komşuları
+    'PT11': ['PT15', 'ES11', 'ES12'],
+    'PT15': ['PT11', 'PT16', 'ES11', 'ES12'],
+    'PT16': ['PT15', 'PT17', 'ES12', 'ES13', 'ES21'],
+    'PT17': ['PT16', 'PT18', 'PT20', 'ES61', 'ES62', 'ES63'],
+    'PT18': ['PT17', 'PT20', 'ES63', 'ES64'],
+    'PT20': ['PT17', 'PT18', 'ES61'], // Madeira - denizaşırı
+    'PT30': [], // Azorlar - denizaşırı
 
     // Romanya Komşulukları
-    'RO11': ['RO12', 'HU21', 'HU22', 'UA30'], // HU, UA ile komşu
-    // ... Diğer Romanya NUTS-2 bölgeleri ve komşuları
+    'RO11': ['RO12', 'HU21', 'HU22', 'UA30', 'MD00'],
+    'RO12': ['RO11', 'HU23', 'HU32', 'HU33', 'MD00', 'UA30', 'UA40'],
+    'RO21': ['RO22', 'RO31', 'BG31', 'RS12'],
+    'RO22': ['RO21', 'RO31', 'RO32', 'BG31'],
+    'RO31': ['RO21', 'RO22', 'RO32', 'RO41', 'RO42', 'BG31'],
+    'RO32': ['RO22', 'RO31', 'RO41', 'RO42', 'BG31', 'BG32'],
+    'RO41': ['RO31', 'RO32', 'RO42', 'MD00', 'UA40', 'UA50'],
+    'RO42': ['RO31', 'RO32', 'RO41', 'BG31', 'BG32', 'MD00', 'UA50'],
 
     // Sırbistan Komşulukları
-    'RS11': ['RS12', 'RS21', 'HR03', 'HR04', 'HU22', 'HU31', 'BA01', 'BA02', 'ME00', 'MK00'], // HR, HU, BA, ME, MK ile komşu
-    'RS12': ['RS11', 'BG31', 'BG42'], // BG ile komşu
-    'RS21': ['RS11', 'RS22', 'BG41'],
-    'RS22': ['RS11', 'RS21', 'HU32', 'BA02', 'ME00', 'MK00'], // HU, BA, ME, MK ile komşu
+    'RS11': ['RS12', 'RS21', 'HR03', 'HR04', 'HU22', 'HU31', 'BA01', 'BA02', 'ME00', 'MK00'],
+    'RS12': ['RS11', 'BG31', 'BG42', 'RO21', 'HU31'],
+    'RS21': ['RS11', 'RS22', 'BG41', 'MK00'],
+    'RS22': ['RS11', 'RS21', 'HU32', 'BA02', 'ME00', 'MK00'],
 
     // Slovakya Komşulukları
-    'SK01': ['SK02', 'HU10', 'AT22', 'CZ05'], // HU, AT, CZ ile komşu
-    // ... Diğer Slovakya NUTS-2 bölgeleri ve komşuları
+    'SK01': ['SK02', 'HU10', 'AT22', 'CZ05', 'PL84'],
+    'SK02': ['SK01', 'SK03', 'HU21', 'HU22', 'HU23', 'PL84'],
+    'SK03': ['SK02', 'SK04', 'PL84', 'UA30'],
+    'SK04': ['SK03', 'CZ04', 'CZ05', 'PL84', 'UA30', 'HU33'],
 
     // Slovenya Komşulukları
-    'SI03': ['SI04', 'HR03', 'AT21', 'AT31', 'ITG2'], // HR, AT, IT ile komşu
-    'SI04': ['SI03', 'HR03'],
+    'SI03': ['SI04', 'HR03', 'AT21', 'AT31', 'ITC4', 'ITC5', 'ITG2'],
+    'SI04': ['SI03', 'HR03', 'ITD4', 'ITF3'],
 
     // İsveç Komşulukları
-    'SE11': ['SE12', 'NO01', 'NO02'], // NO ile komşu
-    // ... Diğer İsveç NUTS-2 bölgeleri ve komşuları
+    'SE11': ['SE12', 'NO01', 'NO02'],
+    'SE12': ['SE11', 'SE21', 'NO01', 'NO02'],
+    'SE21': ['SE12', 'SE22', 'NO02', 'NO03', 'DK05'],
+    'SE22': ['SE21', 'SE23', 'NO03', 'NO04'],
+    'SE23': ['SE22', 'SE31', 'NO04', 'NO05', 'DK05'],
+    'SE31': ['SE23', 'SE32', 'NO05', 'NO06'],
+    'SE32': ['SE31', 'SE33', 'NO06', 'NO07'],
+    'SE33': ['SE32', 'NO07', 'NO08', 'FI19'],
 
     // Ukrayna Komşulukları
-    'UA30': ['UA40', 'MD00', 'RO11', 'HU33', 'SK04', 'PL63', 'BY00'], // MD, RO, HU, SK, PL, BY ile komşu
-    'UA40': ['UA30', 'UA50', 'MD00', 'RO11'], // MD, RO ile komşu
-    'UA50': ['UA40', 'RU00'], // RU00 ile komşu (Eğer RU00 varsa)
+    'UA30': ['UA40', 'MD00', 'RO11', 'HU33', 'SK03', 'SK04', 'PL41', 'PL42', 'PL43', 'PL61', 'PL62', 'PL63', 'BY00', 'RU00'],
+    'UA40': ['UA30', 'UA50', 'MD00', 'RO11', 'RO12'],
+    'UA50': ['UA40', 'RO41', 'RO42', 'RU00'],
 
-    // Belarus (BY) ve Rusya (RU) gibi bölgeler (NUTS-2 listesinde sadece BY00 ve UA bölgeleri var)
-    // Eğer SVG'nizde Rusya'nın daha fazla bölgesi varsa, onları buraya manuel olarak eklemelisiniz.
-    'BY00': ['LT01', 'LV00', 'PL92', 'UA30', 'RU00'], // LT, LV, PL, UA, RU00 ile komşu
-    'RU00': ['EE00', 'LV00', 'LT01', 'FI19', 'FI1C', 'FI20', 'NO08', 'BY00', 'UA50'], // Komşuları
+    // Belarus (BY) ve Rusya (RU) gibi bölgeler
+    'BY00': ['LT01', 'LV00', 'PL41', 'PL63', 'PL92', 'UA30', 'RU00'],
+    'RU00': ['EE00', 'LV00', 'LT01', 'LT02', 'FI19', 'FI1C', 'FI20', 'NO08', 'BY00', 'UA30', 'UA50'],
 
-    // BU NOKTADAN SONRA LİSTEDE OLMAYAN DİĞER ÜLKELERİ SİLİN VEYA KENDİ SVG ID'LERİNİZE GÖRE EKLEYİN!
+    // Bosna-Hersek Komşulukları
+    'BA01': ['BA02', 'HR03', 'HR04', 'RS11'],
+    'BA02': ['BA01', 'HR04', 'ME00', 'RS11', 'RS22'],
 };
 
 // ============================================================================
@@ -386,8 +526,10 @@ function renderUnitCounts() {
     const mapContainerRect = mapContainer.getBoundingClientRect();
 
     // SVG'nin kendisinin boyutlarını al (SVG içindeki koordinatları ölçeklemek için)
-    const svgWidth = svgDoc.width.baseVal.value;
-    const svgHeight = svgDoc.height.baseVal.value;
+    // Eğer svgDoc.width.baseVal veya svgDoc.height.baseVal tanımsızsa varsayılan değerler kullan.
+    const svgWidth = svgDoc.width.baseVal.value || svgDoc.viewBox.baseVal.width || mapContainerRect.width;
+    const svgHeight = svgDoc.height.baseVal.value || svgDoc.viewBox.baseVal.height || mapContainerRect.height;
+
 
     for (const countryId in countriesData) {
         if (countriesData.hasOwnProperty(countryId)) {
@@ -741,7 +883,7 @@ function resolveCombat(
         attackerLosses = Math.floor(defendingUnits * 0.5); // Kazanan %50 düşman birimi kadar kaybeder
         
         attackingCountry.regions[attackingRegionNutsId].units -= attackerLosses;
-        if (attackingCountry.regions[attackingRegionRegionNutsId].units < 0) { // Hata düzeltme: attackingRegionNutsId kullanıldı
+        if (attackingCountry.regions[attackingRegionNutsId].units < 0) {
             attackingCountry.regions[attackingRegionNutsId].units = 0;
         }
 
@@ -984,4 +1126,3 @@ document.addEventListener('DOMContentLoaded', () => {
     countrySelectionModal.style.display = 'none';
     warModal.style.display = 'none';
 });
-
