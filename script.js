@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // HTML elementlerine referanslar
     const startScreen = document.getElementById('start-screen');
     const playerNameInput = document.getElementById('playerNameInput');
     const startGameButton = document.getElementById('startGameButton');
@@ -17,13 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetCountrySelect = document.getElementById('targetCountrySelect');
     const declareWarButton = document.getElementById('declareWarButton');
 
-    // Yeni eklenen HTML elementleri için referanslar
     const playerCoinsSpan = document.getElementById('playerCoins');
     const playerUnitsSpan = document.getElementById('playerUnits');
     const buyUnitButton = document.getElementById('buyUnitButton');
     const unitPriceSpan = document.getElementById('unitPrice');
 
-
+    // Oyun değişkenleri
     let playerName = '';
     let playerCountry = ''; // Örn: "UK"
     let currentTurn = 1;
@@ -33,163 +33,469 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedRegionForUnitPlacement = null; // Birim yerleştirmek için seçilen bölgeyi tutacak
     let nuts2RegionElements = {}; // data-nuts-id'ye göre SVG path elemanlarını tutacak
     let nuts2UnitTextElements = {}; // data-nuts-id'ye göre SVG text elemanlarını (birim sayıları) tutacak
-    // Her NUTS2 bölgesindeki birim sayısını tutacak yapı
-    let territoryUnits = {}; // Örn: { 'FRC1': 5, 'DE71': 3 }
+    let territoryUnits = {}; // Her NUTS2 bölgesindeki birim sayısını tutacak yapı. Örn: { 'FRC1': 5, 'DE71': 3 }
 
-
-    // ----------- BURAYI DOLDURUN: Ülke ve NUTS2 bölgeleri arasındaki ilişkiyi tutacak obje -----------
+    // ----------- ÜLKE VERİLERİ (countriesData) -----------
     // ÖNEMLİ: 'nuts2' dizilerine kendi map.svg dosyanızdaki data-nuts-id değerlerini YAZMALISINIZ!
-    // Her ülkenin NUTS2 bölgeleri aynı renkte olacak şekilde ayarlanmıştır.
+    // Renkleri siz dolduracaksınız.
     let countriesData = {
+        // Batı Avrupa
         'UK': {
             name: 'Birleşik Krallık',
-            nuts2: ['UKK1', 'UKI1', 'UKI2', 'UKJ4', 'UKD5', 'UKD3', 'UKD2', 'UKM2', 'UKM6', 'UKG', 'UKH'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
+            nuts2: ['UKI', 'UKD', 'UKJ', 'UKM', 'UKN', 'UKL', 'UKF', 'UKC', 'UKE', 'UKG', 'UKH', 'UKZZ'], // UKZZ bazen genel adadır
             isPlayer: false,
-            color: '#19cf0c', // Sizin verdiğiniz renk: Yeşil
-            coins: 100, // Başlangıç coin miktarı
-            units: 0 // Başlangıç birim sayısı
+            color: '#19cf0c', // Yeşil
+            coins: 100,
+            units: 0
         },
         'FR': {
             name: 'Fransa',
-            nuts2: ['FRC1', 'FR23', /* BURAYA DİĞER TÜM FRANSA NUTS2 KODLARINI EKLEYİN */ 'FR1', 'FR2', 'FR3', 'FR4', 'FR5', 'FR6', 'FR7', 'FR8', 'FR9', 'FRA', 'FRB', 'FRC', 'FRD', 'FRE', 'FRF', 'FRG', 'FRH', 'FRI', 'FRJ', 'FRK', 'FRL', 'FRM', 'FRN'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
+            nuts2: ['FR10', 'FRB0', 'FRC1', 'FRC2', 'FRC3', 'FRD1', 'FRD2', 'FRD3', 'FRE1', 'FRE2', 'FRE3', 'FRF1', 'FRF2', 'FRF3', 'FRG0', 'FRH0', 'FRI0', 'FRJ0', 'FRK0', 'FRL0', 'FRM0', 'FRN0', 'FRP0'],
             isPlayer: false,
-            color: '#947119', // Sizin verdiğiniz renk: Kahverengimsi
+            color: '#947119', // Kahverengimsi
             coins: 100,
             units: 0
         },
         'DE': {
             name: 'Almanya',
-            nuts2: ['DE71', /* BURAYA DİĞER TÜM ALMANYA NUTS2 KODLARINI EKLEYİN */ 'DE1', 'DE2', 'DE3', 'DE4', 'DE5', 'DE6', 'DE8', 'DE9', 'DEA', 'DEB', 'DEC', 'DED', 'DEE', 'DEF', 'DEG'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
+            nuts2: ['DE11', 'DE12', 'DE13', 'DE14', 'DE21', 'DE22', 'DE23', 'DE24', 'DE25', 'DE26', 'DE27', 'DE30', 'DE40', 'DE50', 'DE60', 'DE71', 'DE72', 'DE80', 'DE91', 'DE92', 'DE93', 'DE94', 'DEA1', 'DEA2', 'DEA3', 'DEA4', 'DEA5', 'DEB1', 'DEB2', 'DEB3', 'DEB4', 'DEC0', 'DED1', 'DED2', 'DED3', 'DED4', 'DEE0', 'DEF0', 'DEG0'],
             isPlayer: false,
-            color: '#e0d253', // Sizin verdiğiniz renk: Açık Sarımsı
+            color: '#e0d253', // Açık Sarımsı
             coins: 100,
             units: 0
         },
-        'TR': { // Ülke kodu olarak ISO 3166 Alpha-2 kullanıldı
-        name: 'Türkiye',
-        // BURAYA SİZİN MAP.SVG DOSYANIZDAKİ TÜM TÜRKİYE NUTS KODLARINI EKLEYECEKSİNİZ!
-        nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3'], // Bu liste eksiksiz olmalı!
-        isPlayer: false, // Varsayılan olarak oyuncu ülkesi değil
-        color: '#4682B4', // Türkiye için bir renk (kırmızı örnek)
-        coins: 100, // Başlangıç coin miktarı
-        units: 0 // Başlangıç birim sayısı
-    },
-
         'PT': {
             name: 'Portekiz',
-            nuts2: ['PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20', 'PT30'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
+            nuts2: ['PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20', 'PT30'],
             isPlayer: false,
-            color: '#dc2ee6', // Sizin verdiğiniz renk: Morumsu Pembe
+            color: '#dc2ee6', // Morumsu Pembe
             coins: 100,
             units: 0
         },
         'ES': {
             name: 'İspanya',
-            nuts2: ['ES1', 'ES2', 'ES3', 'ES4', 'ES5', 'ES6', 'ES7'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
+            nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62', 'ES63', 'ES70', 'ESZZ'], // ESZZ bazen genel adadır
             isPlayer: false,
-            color: '#62d9d5', // Sizin verdiğiniz renk: Turkuaz
+            color: '#62d9d5', // Turkuaz
             coins: 100,
             units: 0
         },
         'IT': {
             name: 'İtalya',
-            nuts2: ['ITC', 'ITD', 'ITE', 'ITF', 'ITG', 'ITH', 'ITI', 'ITJ'], // ÖRNEK NUTS2 ID'leri, KENDİ SVG'NİZE GÖRE DOLDURUN!
+            nuts2: ['ITC1', 'ITC2', 'ITC3', 'ITC4', 'ITD1', 'ITD2', 'ITD3', 'ITD4', 'ITD5', 'ITE1', 'ITE2', 'ITE3', 'ITE4', 'ITF1', 'ITF2', 'ITF3', 'ITF4', 'ITF5', 'ITF6', 'ITG1', 'ITG2', 'ITH1', 'ITH2', 'ITH3', 'ITH4', 'ITH5', 'ITI1', 'ITI2', 'ITI3', 'ITI4', 'ITJ1', 'ITJ2', 'ITJ3', 'ITJ4'],
             isPlayer: false,
-            color: '#9c9b6a', // Sizin verdiğiniz renk: Grimsi Yeşil
+            color: '#9c9b6a', // Grimsi Yeşil
             coins: 100,
             units: 0
         },
-        // --- Tek Topraklı Ülkeler (ISO 3166 Alpha-3 kodları veya benzeri ID'ler) ---
-        // ÖNEMLİ: Bu ülkelerin SVG'de hangi data-nuts-id'lere sahip olduğunu KONTROL ETMELİSİNİZ.
-        // Eğer ISO 3166 Alpha-3 kodu kullanılıyorsa, nuts2 dizisine o ISO kodunun kendisini ekleyebilirsiniz.
-        // Örneğin, <path data-nuts-id="MAR" ... /> ise.
-
-        'MAR': { // Fas
-            name: 'Fas',
-            nuts2: ['MAR'], // KONTROL EDİN: SVG'de MAR ID'li bir path mi var? Yoksa MAR1 gibi mi?
+        'NL': { // Hollanda
+            name: 'Hollanda',
+            nuts2: ['NL11', 'NL12', 'NL13', 'NL21', 'NL22', 'NL23', 'NL31', 'NL32', 'NL33', 'NL34', 'NL41', 'NL42'],
             isPlayer: false,
-            color: '#8b0000', // Örnek renk: Koyu Kırmızı
-            coins: 50,
+            color: '#FFD700', // Altın Sarısı
+            coins: 80,
             units: 0
         },
-        'DZA': { // Cezayir
-            name: 'Cezayir',
-            nuts2: ['DZA'], // KONTROL EDİN
+        'BE': { // Belçika
+            name: 'Belçika',
+            nuts2: ['BE10', 'BE21', 'BE22', 'BE23', 'BE24', 'BE25', 'BE31', 'BE32', 'BE33', 'BE34', 'BE35'],
             isPlayer: false,
-            color: '#006400', // Örnek renk: Koyu Yeşil
-            coins: 50,
+            color: '#FFA500', // Turuncu
+            coins: 80,
             units: 0
         },
-        'SYR': { // Suriye
-            name: 'Suriye',
-            nuts2: ['SYR'], // KONTROL EDİN
+        'LU': { // Lüksemburg (Tek Topraklı)
+            name: 'Lüksemburg',
+            nuts2: ['LU00'], // Lüksemburg NUTS2 kodu
             isPlayer: false,
-            color: '#4682b4', // Örnek renk: Çelik Mavi
-            coins: 50,
+            color: '#800080', // Mor
+            coins: 30,
             units: 0
         },
-        'LBN': { // Lübnan (Fransa'nın renginde olacak)
-            name: 'Lübnan',
-            nuts2: ['LBN'], // KONTROL EDİN
+        'AT': { // Avusturya
+            name: 'Avusturya',
+            nuts2: ['AT11', 'AT12', 'AT13', 'AT21', 'AT22', 'AT31', 'AT32', 'AT33', 'AT34'],
             isPlayer: false,
-            color: '#947119', // Fransa'nın rengi
-            coins: 20,
+            color: '#FF4500', // Koyu Turuncu
+            coins: 90,
             units: 0
         },
-        'IRQ': { // Irak
-            name: 'Irak',
-            nuts2: ['IRQ'], // KONTROL EDİN
+        'CH': { // İsviçre (NUTS'a dahil değil, ama genellikle coğrafi bölgelere ayrılır)
+            name: 'İsviçre',
+            nuts2: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05', 'CH06', 'CH07'], // Tahmini bölgeler
             isPlayer: false,
-            color: '#d2691e', // Örnek renk: Çikolata Kahve
-            coins: 50,
-            units: 0
-        },
-        'CYP': { // Kıbrıs (UK'nin renginde olacak)
-            name: 'Kıbrıs',
-            nuts2: ['CYP'], // KONTROL EDİN
-            isPlayer: false,
-            color: '#19cf0c', // Birleşik Krallık'ın rengi
-            coins: 20,
-            units: 0
-        },
-        'LBY': { // Libya (İtalya'nın renginde olacak)
-            name: 'Libya',
-            nuts2: ['LBY'], // KONTROL EDİN
-            isPlayer: false,
-            color: '#9c9b6a', // İtalya'nın rengi
-            coins: 50,
+            color: '#DC143C', // Koyu Kırmızı
+            coins: 90,
             units: 0
         },
 
-        // --- Baltık Ülkeleri ---
-        // Verdiğiniz format: EE00, LV00, LT00
-        'EST': { // Estonya
+        // İskandinavya ve Baltıklar
+        'NO': { // Norveç
+            name: 'Norveç',
+            nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07'], // Tahmini NUTS2 benzeri bölgeler
+            isPlayer: false,
+            color: '#008080', // Teal
+            coins: 80,
+            units: 0
+        },
+        'SE': { // İsveç
+            name: 'İsveç',
+            nuts2: ['SE11', 'SE12', 'SE21', 'SE22', 'SE23', 'SE31', 'SE32', 'SE33'],
+            isPlayer: false,
+            color: '#ADD8E6', // Açık Mavi
+            coins: 80,
+            units: 0
+        },
+        'FI': { // Finlandiya
+            name: 'Finlandiya',
+            nuts2: ['FI19', 'FI1A', 'FI1B', 'FI1C', 'FI1D', 'FI20'],
+            isPlayer: false,
+            color: '#87CEEB', // Gök Mavisi
+            coins: 70,
+            units: 0
+        },
+        'DK': { // Danimarka (Tek Topraklı olabilir veya birkaç NUTS2)
+            name: 'Danimarka',
+            nuts2: ['DK01', 'DK02', 'DK03', 'DK04', 'DK05'], // Danimarka NUTS2
+            isPlayer: false,
+            color: '#FF6347', // Domates Kırmızısı
+            coins: 60,
+            units: 0
+        },
+        'IS': { // İzlanda (Tek Topraklı)
+            name: 'İzlanda',
+            nuts2: ['IS00'], // İzlanda NUTS2 kodu
+            isPlayer: false,
+            color: '#6A5ACD', // Slate Blue
+            coins: 40,
+            units: 0
+        },
+        'IE': { // İrlanda (Tek Topraklı veya birkaç NUTS2)
+            name: 'İrlanda',
+            nuts2: ['IE04', 'IE05', 'IE06'], // İrlanda NUTS2 kodları
+            isPlayer: false,
+            color: '#32CD32', // Lime Green
+            coins: 70,
+            units: 0
+        },
+        'EE': { // Estonya (Tek Topraklı)
             name: 'Estonya',
-            nuts2: ['EE00'], // KONTROL EDİN: SVG'de EE00 ID'li bir path mi var?
+            nuts2: ['EE00'], // Estonya NUTS2 kodu
             isPlayer: false,
             color: '#346369', // Sizin verdiğiniz renk
             coins: 50,
             units: 0
         },
-        'LVA': { // Letonya
+        'LV': { // Letonya (Tek Topraklı)
             name: 'Letonya',
-            nuts2: ['LV00'], // KONTROL EDİN
+            nuts2: ['LV00'], // Letonya NUTS2 kodu
             isPlayer: false,
             color: '#4a398f', // Sizin verdiğiniz renk
             coins: 50,
             units: 0
         },
-        'LTU': { // Litvanya
+        'LT': { // Litvanya (Tek Topraklı)
             name: 'Litvanya',
-            nuts2: ['LT00'], // KONTROL EDİN
+            nuts2: ['LT00'], // Litvanya NUTS2 kodu
             isPlayer: false,
             color: '#4e6644', // Sizin verdiğiniz renk
             coins: 50,
             units: 0
-        }
+        },
 
-        // Diğer tüm ülkeler buraya kendi NUTS2 ID'leri ve renkleriyle eklenecek.
-        // Her ülkenin 'nuts2' dizisini kendi map.svg dosyanızdan kontrol edip DOLDURMALISINIZ.
+        // Doğu Avrupa ve Balkanlar
+        'PL': { // Polonya
+            name: 'Polonya',
+            nuts2: ['PL21', 'PL22', 'PL41', 'PL42', 'PL43', 'PL51', 'PL52', 'PL61', 'PL62', 'PL63'],
+            isPlayer: false,
+            color: '#FF0000', // Kırmızı
+            coins: 90,
+            units: 0
+        },
+        'CZ': { // Çekya
+            name: 'Çekya',
+            nuts2: ['CZ01', 'CZ02', 'CZ03', 'CZ04', 'CZ05', 'CZ06', 'CZ07', 'CZ08'],
+            isPlayer: false,
+            color: '#B0C4DE', // Açık Çelik Mavisi
+            coins: 70,
+            units: 0
+        },
+        'SK': { // Slovakya
+            name: 'Slovakya',
+            nuts2: ['SK01', 'SK02', 'SK03', 'SK04'],
+            isPlayer: false,
+            color: '#4682B4', // Çelik Mavisi
+            coins: 60,
+            units: 0
+        },
+        'HU': { // Macaristan
+            name: 'Macaristan',
+            nuts2: ['HU10', 'HU21', 'HU22', 'HU31', 'HU32', 'HU33'],
+            isPlayer: false,
+            color: '#3CB371', // Medium Sea Green
+            coins: 70,
+            units: 0
+        },
+        'SI': { // Slovenya (Tek Topraklı olabilir veya iki NUTS2)
+            name: 'Slovenya',
+            nuts2: ['SI03', 'SI04'], // Slovenya NUTS2 kodları
+            isPlayer: false,
+            color: '#8A2BE2', // Mavi Menekşe
+            coins: 50,
+            units: 0
+        },
+        'HR': { // Hırvatistan (Tek Topraklı olabilir veya birkaç NUTS2)
+            name: 'Hırvatistan',
+            nuts2: ['HR03', 'HR04'], // Hırvatistan NUTS2 kodları
+            isPlayer: false,
+            color: '#B22222', // Ateş Tuğlası
+            coins: 60,
+            units: 0
+        },
+        'BA': { // Bosna-Hersek (NUTS'a dahil değil, genellikle tek topraklı)
+            name: 'Bosna-Hersek',
+            nuts2: ['BA'], // Tahmini ID
+            isPlayer: false,
+            color: '#5F9EA0', // Cadet Blue
+            coins: 40,
+            units: 0
+        },
+        'RS': { // Sırbistan (NUTS'a dahil değil, genellikle tek topraklı veya birkaç bölge)
+            name: 'Sırbistan',
+            nuts2: ['RS'], // Tahmini ID
+            isPlayer: false,
+            color: '#DDA0DD', // Erik Moru
+            coins: 50,
+            units: 0
+        },
+        'ME': { // Karadağ (Tek Topraklı)
+            name: 'Karadağ',
+            nuts2: ['ME00'], // Tahmini ID
+            isPlayer: false,
+            color: '#6B8E23', // Olive Drab
+            coins: 30,
+            units: 0
+        },
+        'AL': { // Arnavutluk (Tek Topraklı veya birkaç bölge)
+            name: 'Arnavutluk',
+            nuts2: ['AL01', 'AL02', 'AL03'], // Arnavutluk NUTS2
+            isPlayer: false,
+            color: '#CD853F', // Peru
+            coins: 40,
+            units: 0
+        },
+        'MK': { // Kuzey Makedonya (Tek Topraklı)
+            name: 'Kuzey Makedonya',
+            nuts2: ['MK00'], // Tahmini ID
+            isPlayer: false,
+            color: '#A9A9A9', // Koyu Gri
+            coins: 30,
+            units: 0
+        },
+        'GR': { // Yunanistan (Özel İstek: GR olarak!)
+            name: 'Yunanistan',
+            nuts2: ['GR11', 'GR12', 'GR13', 'GR14', 'GR21', 'GR22', 'GR23', 'GR24', 'GR25', 'GR30', 'GR41', 'GR42', 'GR43'],
+            isPlayer: false,
+            color: '#00BFFF', // Derin Gök Mavisi
+            coins: 80,
+            units: 0
+        },
+        'TR': { // Türkiye
+            name: 'Türkiye',
+            nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3'],
+            isPlayer: false,
+            color: '#FF0000', // Kırmızı
+            coins: 100,
+            units: 0
+        },
+        'CY': { // Kıbrıs (Tek Topraklı)
+            name: 'Kıbrıs',
+            nuts2: ['CY00'], // Kıbrıs NUTS2 kodu
+            isPlayer: false,
+            color: '#19cf0c', // UK ile aynı renk (daha önce böyleydi)
+            coins: 20,
+            units: 0
+        },
+        'RO': { // Romanya
+            name: 'Romanya',
+            nuts2: ['RO11', 'RO12', 'RO21', 'RO22', 'RO31', 'RO32', 'RO41', 'RO42'],
+            isPlayer: false,
+            color: '#FFFF00', // Sarı
+            coins: 80,
+            units: 0
+        },
+        'BG': { // Bulgaristan
+            name: 'Bulgaristan',
+            nuts2: ['BG31', 'BG32', 'BG33', 'BG34', 'BG41', 'BG42'],
+            isPlayer: false,
+            color: '#8B0000', // Koyu Kırmızı
+            coins: 70,
+            units: 0
+        },
+
+        // Kuzey Afrika ve Ortadoğu (Genellikle tek topraklı veya NUTS'a dahil değil)
+        'MA': { // Fas (Sizin kodunuzda 'MAR' idi, burada standart ISO kodunu kullandım, SVG'nizi kontrol edin)
+            name: 'Fas',
+            nuts2: ['MA'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#8B0000', // Koyu Kırmızı
+            coins: 50,
+            units: 0
+        },
+        'DZ': { // Cezayir (Sizin kodunuzda 'DZA' idi)
+            name: 'Cezayir',
+            nuts2: ['DZ'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#006400', // Koyu Yeşil
+            coins: 50,
+            units: 0
+        },
+        'TN': { // Tunus (Tek Topraklı)
+            name: 'Tunus',
+            nuts2: ['TN'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#BDB76B', // Koyu Haki
+            coins: 40,
+            units: 0
+        },
+        'LY': { // Libya (Sizin kodunuzda 'LBY' idi)
+            name: 'Libya',
+            nuts2: ['LY'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#9c9b6a', // İtalya'nın rengiyle benzerdi
+            coins: 50,
+            units: 0
+        },
+        'EG': { // Mısır (Genellikle tek topraklı)
+            name: 'Mısır',
+            nuts2: ['EG'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#DAA520', // Altınçubuk
+            coins: 60,
+            units: 0
+        },
+        'SY': { // Suriye (Sizin kodunuzda 'SYR' idi)
+            name: 'Suriye',
+            nuts2: ['SY'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#4682b4', // Çelik Mavi
+            coins: 50,
+            units: 0
+        },
+        'LB': { // Lübnan (Sizin kodunuzda 'LBN' idi)
+            name: 'Lübnan',
+            nuts2: ['LB'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#947119', // Fransa'nın rengi
+            coins: 20,
+            units: 0
+        },
+        'IQ': { // Irak (Sizin kodunuzda 'IRQ' idi)
+            name: 'Irak',
+            nuts2: ['IQ'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#d2691e', // Çikolata Kahve
+            coins: 50,
+            units: 0
+        },
+        'IR': { // İran (Genellikle tek topraklı veya birkaç bölge)
+            name: 'İran',
+            nuts2: ['IR'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#008000', // Yeşil
+            coins: 70,
+            units: 0
+        },
+        'SA': { // Suudi Arabistan (Genellikle tek topraklı)
+            name: 'Suudi Arabistan',
+            nuts2: ['SA'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#228B22', // Orman Yeşili
+            coins: 80,
+            units: 0
+        },
+        'YE': { // Yemen (Genellikle tek topraklı)
+            name: 'Yemen',
+            nuts2: ['YE'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#7CFC00', // Çim Yeşili
+            coins: 30,
+            units: 0
+        },
+        'OM': { // Umman (Genellikle tek topraklı)
+            name: 'Umman',
+            nuts2: ['OM'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#00CED1', // Koyu Turkuaz
+            coins: 40,
+            units: 0
+        },
+        'AE': { // Birleşik Arap Emirlikleri (Tek Topraklı)
+            name: 'Birleşik Arap Emirlikleri',
+            nuts2: ['AE'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#8B4513', // Sepya
+            coins: 50,
+            units: 0
+        },
+        'QA': { // Katar (Tek Topraklı)
+            name: 'Katar',
+            nuts2: ['QA'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#FFDAB9', // Şeftali Kreması
+            coins: 30,
+            units: 0
+        },
+        'KW': { // Kuveyt (Tek Topraklı)
+            name: 'Kuveyt',
+            nuts2: ['KW'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#FFFAF0', // Karbeyazı
+            coins: 30,
+            units: 0
+        },
+        'BH': { // Bahreyn (Tek Topraklı)
+            name: 'Bahreyn',
+            nuts2: ['BH'], // Genellikle tek ID, SVG'nizi kontrol edin
+            isPlayer: false,
+            color: '#F0E68C', // Haki
+            coins: 30,
+            units: 0
+        },
+
+        // Doğu Avrupa - Geniş Ülkeler
+        'UA': { // Ukrayna
+            name: 'Ukrayna',
+            nuts2: ['UA11', 'UA12', 'UA13', 'UA14', 'UA15', 'UA16', 'UA17', 'UA18', 'UA19', 'UA20', 'UA21', 'UA22', 'UA23', 'UA24', 'UA25', 'UA26', 'UA27'], // Tahmini NUTS2 benzeri
+            isPlayer: false,
+            color: '#FFD700', // Altın Sarısı
+            coins: 90,
+            units: 0
+        },
+        'BY': { // Belarus (Genellikle birkaç bölgeye ayrılır)
+            name: 'Belarus',
+            nuts2: ['BY10', 'BY20', 'BY30', 'BY40', 'BY50', 'BY60', 'BY70'], // Tahmini NUTS2 benzeri
+            isPlayer: false,
+            color: '#7FFF00', // Chartreuse
+            coins: 70,
+            units: 0
+        },
+        'MD': { // Moldova (Tek Topraklı veya birkaç bölge)
+            name: 'Moldova',
+            nuts2: ['MD00'], // Tahmini ID
+            isPlayer: false,
+            color: '#8B0000', // Koyu Kırmızı
+            coins: 30,
+            units: 0
+        },
+        'RU': { // Rusya (Avrupa Kısmı - NUTS'a dahil değil, geniş bölgeler)
+            name: 'Rusya',
+            nuts2: ['RU-MOS', 'RU-SPE', 'RU-KGD', 'RU-LEN', 'RU-MUR', 'RU-ARK', 'RU-VLG', 'RU-NGR', 'RU-PSK', 'RU-TVE', 'RU-SMO', 'RU-BRY', 'RU-KLU', 'RU-ORL', 'RU-LIP', 'RU-TUL', 'RU-RYA', 'RU-VLA', 'RU-IVA', 'RU-KOS', 'RU-YAR', 'RU-TVL', 'RU-KDA', 'RU-ROS', 'RU-VGG', 'RU-AST', 'RU-DA', 'RU-CHE', 'RU-KAB', 'RU-KC', 'RU-AD', 'RU-ME', 'RU-KOS', 'RU-STV', 'RU-VOR', 'RU-TAM', 'RU-BEL', 'RU-KRS', 'RU-RYA', 'RU-NIZ', 'RU-PNZ', 'RU-SAM', 'RU-SAR', 'RU-ULY', 'RU-ORE', 'RU-PER', 'RU-KIR', 'RU-UD', 'RU-MOR', 'RU-CHU', 'RU-TA', 'RU-BA'], // Avrupa Rusya'sının tahmini bazı federal bölgeleri/oblastları
+            isPlayer: false,
+            color: '#808080', // Gri
+            coins: 120,
+            units: 0
+        },
     };
     // --------------------------------------------------------------------------------------
 
@@ -230,13 +536,13 @@ document.addEventListener('DOMContentLoaded', () => {
             playerCountryNameSpan.textContent = countriesData[playerCountry].name;
             countrySelectionScreen.classList.remove('active');
             gameScreen.classList.add('active');
-            // Harita yüklendiğinde çalışacak initializeGameMap'i manuel tetikleyelim
+
+            // Harita yüklendiğinde çalışacak fonksiyonu tetikle
             // Eğer SVG zaten yüklendiyse, load olayını manuel olarak tetikle
             if (gameMapObject.contentDocument && gameMapObject.contentDocument.documentElement && gameMapObject.contentDocument.documentElement.nodeName === 'svg') {
                 gameMapObject.dispatchEvent(new Event('load'));
             } else {
                  // Eğer henüz yüklenmediyse, load event listener'ı devreye girecektir.
-                 // Bu durumda initializeGameMap'i doğrudan çağırmıyoruz, load event'ini bekliyoruz.
             }
 
             populateTargetCountrySelection(); // Savaş ilan edilecek ülkeleri doldur
@@ -271,16 +577,21 @@ document.addEventListener('DOMContentLoaded', () => {
             textElement.style.pointerEvents = "none"; // Metin elementine tıklanmayı engelle, path'e tıklansın
 
             // Path'in merkezini bulup text'i oraya yerleştirme
-            const bbox = path.getBBox(); // Path'in bounding box'ını al
-            const centerX = bbox.x + bbox.width / 2;
-            const centerY = bbox.y + bbox.height / 2;
-            textElement.setAttribute("x", centerX);
-            textElement.setAttribute("y", centerY);
+            try {
+                const bbox = path.getBBox(); // Path'in bounding box'ını al
+                const centerX = bbox.x + bbox.width / 2;
+                const centerY = bbox.y + bbox.height / 2;
+                textElement.setAttribute("x", centerX);
+                textElement.setAttribute("y", centerY);
+            } catch (e) {
+                console.warn(`Error getting bounding box for NUTS ID ${nutsId}:`, e);
+                // Eğer getBBox hata verirse varsayılan bir konum belirle veya atla
+                textElement.setAttribute("x", 0);
+                textElement.setAttribute("y", 0);
+            }
+
 
             // Tüm text elementlerini SVG'nin kök elementine veya uygun bir gruba ekle
-            // Örneğin, SVG içinde id="texts" olan bir grup oluşturabilirsiniz.
-            // Yoksa, doğrudan svgDoc.documentElement.appendChild(textElement); yapabilirsiniz.
-            // Daha düzenli olması için bir 'texts' grubu oluşturalım (manuel olarak SVG'ye eklemeniz gerekebilir)
             let textsGroup = svgDoc.getElementById('texts');
             if (!textsGroup) {
                 textsGroup = svgDoc.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -298,7 +609,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const clickedNutsId = event.target.getAttribute('data-nuts-id');
                 let ownerCountryId = null;
                 for (const countryId in countriesData) {
-                    if (countriesData[countryId].nuts2 && countriesData[countryId].nuts2.includes(clickedNutsId)) {
+                    // countriesData'da ilgili ülke ve nuts2 dizisi var mı kontrol et
+                    if (countriesData[countryId] && countriesData[countryId].nuts2 && countriesData[countryId].nuts2.includes(clickedNutsId)) {
                         ownerCountryId = countryId;
                         break;
                     }
@@ -326,7 +638,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyCountryColorsToMap() {
         for (const countryId in countriesData) {
             const countryInfo = countriesData[countryId];
-            if (countryInfo.nuts2) { // nuts2 tanımı varsa
+            // Ülke hala var mı ve nuts2 tanımı var mı kontrol et
+            if (countryInfo && countryInfo.nuts2) {
                 countryInfo.nuts2.forEach(nutsId => {
                     const nutsPath = nuts2RegionElements[nutsId];
                     if (nutsPath) {
@@ -393,6 +706,11 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Hedef ülke seçilmedi, işlem durduruldu.");
             return;
         }
+        if (!countriesData[targetCountryId]) {
+             addNotification('Hedef ülke bulunamadı veya oyundan silinmiş.', 'error');
+             return;
+        }
+
 
         const playerCountryName = countriesData[playerCountry].name;
         const targetCountryName = countriesData[targetCountryId].name;
@@ -442,7 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function placeUnits(nutsId) {
         const player = countriesData[playerCountry];
         // Tıklanan bölgenin oyuncuya ait olup olmadığını kontrol et
-        if (countriesData[playerCountry].nuts2 && countriesData[playerCountry].nuts2.includes(nutsId)) {
+        if (countriesData[playerCountry] && countriesData[playerCountry].nuts2 && countriesData[playerCountry].nuts2.includes(nutsId)) {
             if (player.units > 0) { // Oyuncunun yerleştirilebilir birimi varsa
                 territoryUnits[nutsId] = (territoryUnits[nutsId] || 0) + 1; // Bölgeye 1 birim ekle
                 player.units -= 1; // Oyuncunun toplam yerleştirilebilir biriminden düş
@@ -483,7 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const countryId in countriesData) {
             if (countryId !== playerCountry) { // Oyuncu dışındaki ülkeler
                 const aiCountry = countriesData[countryId];
-                if (aiCountry.nuts2) {
+                if (aiCountry && aiCountry.nuts2) { // Ülke hala var mı kontrol et
                     const aiRegionCount = aiCountry.nuts2.length;
                     const aiIncome = aiRegionCount * INCOME_PER_REGION;
                     aiCountry.coins += aiIncome;
@@ -510,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         aiCountryIds.forEach(countryId => {
             const aiCountry = countriesData[countryId];
-            if (!aiCountry) return; // Ülke daha önce silinmiş olabilir
+            if (!aiCountry || aiCountry.nuts2.length === 0) return; // Ülke daha önce silinmiş veya toprağı yoksa devam etme
 
             // AI birim satın alabilir (her 3 turda bir 1 birim alır ve yeterli coini varsa)
             if (currentTurn % 3 === 0 && aiCountry.coins >= UNIT_COST) {
@@ -519,23 +837,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 addNotification(`${aiCountry.name} 1 birim satın aldı.`, 'info');
 
                 // Satın alınan birimi rastgele kendi toprağına yerleştir
-                if (aiCountry.nuts2 && aiCountry.nuts2.length > 0) {
+                if (aiCountry.nuts2.length > 0) {
                     const randomRegion = aiCountry.nuts2[Math.floor(Math.random() * aiCountry.nuts2.length)];
                     territoryUnits[randomRegion] = (territoryUnits[randomRegion] || 0) + 1;
-                    aiCountry.units -= 1; // Birim havuzundan düş
+                    aiCountry.units -= 1; // Birim havuzundan düş (eğer oyuncuda olduğu gibi bir havuzdan geliyorsa)
                     addNotification(`${aiCountry.name}, ${randomRegion} bölgesine 1 birim yerleştirdi.`, 'info');
                 }
             }
 
             // Basit AI davranışı: rastgele başka bir ülkeye saldır
             if (Math.random() < WAR_CHANCE_BASE && Object.keys(countriesData).length > 1) {
-                const potentialTargets = Object.keys(countriesData).filter(id => id !== countryId && countriesData[id].nuts2 && countriesData[id].nuts2.length > 0); // Kendisi dışındaki ve bölgesi olan tüm ülkeler
+                const potentialTargets = Object.keys(countriesData).filter(id => id !== countryId && countriesData[id] && countriesData[id].nuts2 && countriesData[id].nuts2.length > 0); // Kendisi dışındaki ve bölgesi olan tüm ülkeler
                 if (potentialTargets.length === 0) return; // Hedef yoksa devam etme
 
                 const targetCountryId = potentialTargets[Math.floor(Math.random() * potentialTargets.length)];
                 const targetCountry = countriesData[targetCountryId];
 
-                if (!targetCountry) return; // Hedef ülke oyundan silinmiş olabilir
+                if (!targetCountry || targetCountry.nuts2.length === 0) return; // Hedef ülke oyundan silinmiş veya toprağı yoksa devam etme
 
                 if (targetCountryId === playerCountry) {
                     addNotification(`${aiCountry.name} ülkesi, size (${playerCountryNameSpan.textContent}) savaş ilan etti!`, 'danger');
@@ -547,74 +865,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 changeNuts2ColorForConflict(targetCountryId, 'darkred', 'yellow'); // Savaş rengi
 
                 // Savaş sonucu: Birim farkına göre basit fetih mantığı
-                // Hedef ülkenin NUTS2 bölgesi varsa ve birimleri varsa
-                if (targetCountry.nuts2 && targetCountry.nuts2.length > 0) {
-                    // AI ve hedefin toplam harita üzerindeki birimlerini hesapla
-                    let aiTotalDeployedUnits = 0;
-                    aiCountry.nuts2.forEach(nutsId => aiTotalDeployedUnits += (territoryUnits[nutsId] || 0));
+                // AI ve hedefin toplam harita üzerindeki birimlerini hesapla
+                let aiTotalDeployedUnits = 0;
+                aiCountry.nuts2.forEach(nutsId => aiTotalDeployedUnits += (territoryUnits[nutsId] || 0));
 
-                    let targetTotalDeployedUnits = 0;
-                    targetCountry.nuts2.forEach(nutsId => targetTotalDeployedUnits += (territoryUnits[nutsId] || 0));
+                let targetTotalDeployedUnits = 0;
+                targetCountry.nuts2.forEach(nutsId => targetTotalDeployedUnits += (territoryUnits[nutsId] || 0));
 
-                    // Eğer AI'ın harita üzerinde hiç birimi yoksa, saldırmasın veya zayıf kalsın
-                    if (aiTotalDeployedUnits === 0) {
-                        addNotification(`${aiCountry.name} birimleri olmadığı için saldıramadı.`, 'info');
-                        applyCountryColorsToMap(); // Eski renklerine döner
-                        return;
+                // Eğer AI'ın harita üzerinde hiç birimi yoksa veya çok zayıfsa, saldırmasın
+                if (aiTotalDeployedUnits === 0 && targetTotalDeployedUnits > 0) {
+                    addNotification(`${aiCountry.name} birimleri olmadığı için saldıramadı.`, 'info');
+                    applyCountryColorsToMap(); // Eski renklerine döner
+                    return;
+                }
+
+                let unitAdvantage = aiTotalDeployedUnits - targetTotalDeployedUnits;
+                let conquestChance = 0.5 + (unitAdvantage * CONQUER_CHANCE_PER_UNIT_ADVANTAGE); // Temel %50 şans + birim avantajı
+                conquestChance = Math.max(0.1, Math.min(0.9, conquestChance)); // Şansı %10-90 arasında tut
+
+                if (Math.random() < conquestChance) {
+                    // Fetih başarılı! Rastgele bir bölgeyi al
+                    const conqueredRegionNutsId = targetCountry.nuts2[Math.floor(Math.random() * targetCountry.nuts2.length)];
+
+                    // Bölgenin sahibini değiştir
+                    // Eski sahibin nuts2 listesinden çıkar
+                    targetCountry.nuts2 = targetCountry.nuts2.filter(nutsId => nutsId !== conqueredRegionNutsId);
+                    // Yeni sahibin nuts2 listesine ekle
+                    aiCountry.nuts2.push(conqueredRegionNutsId);
+
+                    // Birimlerin durumu: Fethedilen bölgedeki birimleri sıfırla veya yeniden ata
+                    territoryUnits[conqueredRegionNutsId] = 0; // Fethedilen bölgenin birimini sıfırla
+
+                    // AI, yeni fethedilen bölgeye kendi birimlerinden bir miktar aktarabilir
+                    // (oyuncudaki 'units' mantığı gibi AI'ın da bir birim havuzu varsa oradan aktarılabilir)
+                    // Şimdilik, sadece bölgedeki birim sayısını ayarla
+                    const unitsToPlaceOnConquered = Math.min(aiTotalDeployedUnits, Math.floor(Math.random() * 3) + 1); // Max 3 birim
+                    if (unitsToPlaceOnConquered > 0) {
+                        territoryUnits[conqueredRegionNutsId] = unitsToPlaceOnConquered;
                     }
 
-                    let unitAdvantage = aiTotalDeployedUnits - targetTotalDeployedUnits;
-                    let conquestChance = 0.5 + (unitAdvantage * CONQUER_CHANCE_PER_UNIT_ADVANTAGE); // Temel %50 şans + birim avantajı
-                    conquestChance = Math.max(0.1, Math.min(0.9, conquestChance)); // Şansı %10-90 arasında tut
+                    addNotification(`${aiCountry.name} ülkesi, ${targetCountry.name} ülkesinden ${conqueredRegionNutsId} bölgesini FETHETTİ!`, 'success');
 
-                    if (Math.random() < conquestChance) {
-                        // Fetih başarılı! Rastgele bir bölgeyi al
-                        const conqueredRegionNutsId = targetCountry.nuts2[Math.floor(Math.random() * targetCountry.nuts2.length)];
-
-                        // Bölgenin sahibini değiştir
-                        // Eski sahibin nuts2 listesinden çıkar
-                        targetCountry.nuts2 = targetCountry.nuts2.filter(nutsId => nutsId !== conqueredRegionNutsId);
-                        // Yeni sahibin nuts2 listesine ekle
-                        aiCountry.nuts2.push(conqueredRegionNutsId);
-
-                        // Birimleri transfer et/yok et (saldıran birim kaybeder, savunan birim kaybeder)
-                        // Fethedilen bölgedeki birimleri sıfırla veya yeniden ata
-                        const transferredUnits = Math.min(territoryUnits[conqueredRegionNutsId] || 0, aiTotalDeployedUnits); // Bölgedeki birimleri al
-                        territoryUnits[conqueredRegionNutsId] = 0; // Fethedilen bölgenin birimini sıfırla
-
-                        // Basitçe: Saldıran birim kaybeder, fetheden ülkenin genel birim havuzuna eklenmez.
-                        // Yeni fethedilen bölgeye AI kendi birimlerinden bir miktar aktarabilir.
-                        const unitsToPlaceOnConquered = Math.min(aiTotalDeployedUnits, Math.floor(Math.random() * 3) + 1); // Max 3 birim
-                        if (unitsToPlaceOnConquered > 0) {
-                            territoryUnits[conqueredRegionNutsId] = unitsToPlaceOnConquered;
-                            // AI'ın toplam birim havuzundan düşürülebilir eğer birimler bir havuzdan geliyorsa
-                        }
-
-
-                        addNotification(`${aiCountry.name} ülkesi, ${targetCountry.name} ülkesinden ${conqueredRegionNutsId} bölgesini FETHETTİ!`, 'success');
-
-                        // Eğer hedef ülkenin hiç bölgesi kalmadıysa, yok et
-                        if (targetCountry.nuts2.length === 0) {
-                            addNotification(`${targetCountry.name} ülkesi oyundan silindi!`, 'warning');
-                            delete countriesData[targetCountryId]; // Ülkeyi ülkeler listesinden kaldır
-                            populateTargetCountrySelection(); // Savaş ilan hedef listesini güncelle
-                        }
-
-                        // Harita renklerini ve birim sayılarını güncelle
-                        applyCountryColorsToMap();
-                        updateUnitDisplays();
-                    } else {
-                        addNotification(`${aiCountry.name} ülkesinin saldırısı ${targetCountry.name} ülkesine karşı BAŞARISIZ OLDU!`, 'info');
-                        applyCountryColorsToMap(); // Eski renklerine döner
+                    // Eğer hedef ülkenin hiç bölgesi kalmadıysa, yok et
+                    if (targetCountry.nuts2.length === 0) {
+                        addNotification(`${targetCountry.name} ülkesi oyundan silindi!`, 'warning');
+                        delete countriesData[targetCountryId]; // Ülkeyi ülkeler listesinden kaldır
+                        populateTargetCountrySelection(); // Savaş ilan hedef listesini güncelle
                     }
+
+                    // Harita renklerini ve birim sayılarını güncelle
+                    applyCountryColorsToMap();
+                    updateUnitDisplays();
                 } else {
-                    addNotification(`${aiCountry.name} hedef ülkede fethedilecek bölge bulamadı.`, 'warning');
+                    addNotification(`${aiCountry.name} ülkesinin saldırısı ${targetCountry.name} ülkesine karşı BAŞARISIZ OLDU!`, 'info');
+                    applyCountryColorsToMap(); // Eski renklerine döner
                 }
             }
         });
     }
 
-    // --- Bildirim Sistemi (tip eklendi) ---
+    // --- Bildirim Sistemi ---
     function addNotification(message, type = 'default') {
         const li = document.createElement('li');
         li.textContent = message;
