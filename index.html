@@ -3,55 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Age of History Web Oyunu</title>
+    <title>Strateji Oyunu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="start-screen" class="game-screen active">
-        <h1>Web Oyunu'na Hoş Geldiniz!</h1>
-        <input type="text" id="playerNameInput" placeholder="Kullanıcı Adınızı Girin">
-        <button id="startGameButton">Oyuna Başla</button>
-    </div>
-
-    <div id="country-selection-screen" class="game-screen">
-        <h2>Ülke Seçin</h2>
-        <select id="countrySelect">
-            </select>
-        <button id="selectCountryButton">Ülkeyi Seç ve Oyna</button>
-    </div>
-
-    <div id="game-screen" class="game-screen">
-        <div id="map-container">
-            <object id="gameMap" type="image/svg+xml" data="map.svg"></object>
+    <div class="container">
+        <div id="start-screen" class="screen active">
+            <h1>Strateji Oyununa Hoş Geldiniz!</h1>
+            <p>Lütfen kullanıcı adınızı girin:</p>
+            <input type="text" id="playerNameInput" placeholder="Kullanıcı Adınız">
+            <button id="startGameButton">Oyunu Başlat</button>
         </div>
-        <div id="control-panel">
-            <h2>Kontrol Paneli</h2>
-            <p>Seçilen Ülke: <span id="playerCountryName"></span></p>
-            <p>Tur: <span id="currentTurn">1</span></p>
-            <p>Coin: <span id="playerCoins">0</span></p>
-            <p>Birimler: <span id="playerUnits">0</span></p>
 
-            <div id="diplomacy-menu" class="menu">
-                <h3>Diplomasi</h3>
-                <button id="nextTurnButton">Tur Atla</button>
-                <hr>
-                <h4>Savaş İlan Et</h4>
-                <select id="targetCountrySelect">
-                    </select>
-                <button id="declareWarButton">Savaş İlan Et!</button>
+        <div id="country-selection-screen" class="screen">
+            <h2>Ülkenizi Seçin</h2>
+            <p>Haritada yöneteceğiniz ülkeyi seçin:</p>
+            <select id="countrySelect">
+                </select>
+            <button id="selectCountryButton">Ülkeyi Seç</button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <h1>Strateji Haritası</h1>
+            <p>Oynayan: <span id="playerCountryName"></span></p>
+
+            <div id="game-map">
+                <object id="gameMap" type="image/svg+xml" data="gameMap.svg"></object>
             </div>
 
-            <div id="unit-menu" class="menu">
-                <h3>Birimler</h3>
-                <p>Birim Fiyatı: <span id="unitPrice">20</span> Coin</p>
-                <button id="buyUnitButton">1 Birim Satın Al</button>
-                <p>Satın aldıktan sonra, birim yerleştirmek için kendi toprağınıza tıklayın.</p>
+            <div class="control-panel">
+                <div class="control-item">
+                    <p>Tur: <span id="currentTurn">1</span></p>
+                </div>
+                <div class="control-item">
+                    <p>Coin: <span id="playerCoins">0</span></p>
+                </div>
+                <div class="control-item">
+                    <p>Birimler: <span id="playerUnits">0</span></p>
+                    <button id="buyUnitButton">Birim Satın Al (<span id="unitPrice">20</span> Coin)</button>
+                </div>
+                <div class="control-item">
+                    <p>Savaş İlan Et:</p>
+                    <select id="targetCountrySelect">
+                        </select>
+                    <button id="declareWarButton">Savaş İlan Et</button>
+                </div>
+                <div class="control-item">
+                    <button id="nextTurnButton">Sonraki Tur</button>
+                </div>
             </div>
 
-            <div id="notifications-menu" class="menu">
-                <h3>Bildirimler</h3>
-                <ul id="notificationList"></ul>
-            </div>
+            <h3>Bildirimler</h3>
+            <ul id="notificationList">
+                </ul>
+        </div>
+    </div>
+
+    <div id="warModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeWarModal">&times;</span>
+            <h2>Savaş İlanı!</h2>
+            <p>
+                Saldıran Bölge: <span id="attackingRegionName"></span> (<span id="attackingUnits"></span> Birim)
+            </p>
+            <p>
+                Savunan Bölge: <span id="defendingRegionName"></span> (<span id="defendingUnits"></span> Birim)
+            </p>
+            <button id="attackButton">SALDIR!</button>
         </div>
     </div>
 
