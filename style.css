@@ -1,137 +1,125 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
     background-color: #f4f4f4;
     color: #333;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Üstten hizala */
+    align-items: center;
     min-height: 100vh;
-    overflow-y: auto; /* Sayfa içeriği taştığında kaydırma çubuğu */
 }
 
-.screen {
-    display: none; /* Varsayılan olarak tüm ekranları gizle */
-    width: 90%;
-    max-width: 1200px;
+#startScreen, #gameScreen {
     background-color: #fff;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
     border-radius: 8px;
-    margin-top: 20px; /* Üstten boşluk bırak */
-    margin-bottom: 20px; /* Alttan boşluk bırak */
-}
-
-.screen.active {
-    display: block; /* Aktif ekranı göster */
-}
-
-#start-screen, #country-selection-screen {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
-    padding: 50px;
-}
-
-#playerNameInput, #countrySelect {
-    padding: 10px;
-    margin: 10px 0;
-    width: calc(100% - 22px);
-    max-width: 300px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-button {
-    padding: 10px 20px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-}
-
-button:hover {
-    background-color: #218838;
-}
-
-/* Oyun Ekranı Düzenlemesi */
-#game-screen .header {
+    max-width: 90%;
+    width: 1200px;
+    min-height: 600px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
+    flex-direction: column;
+    box-sizing: border-box;
 }
 
-#game-screen .game-area {
-    display: flex;
-    flex-wrap: wrap; /* Küçük ekranlarda alt alta geçiş */
+#gameScreen {
+    display: grid;
+    grid-template-areas:
+        "header map"
+        "notifications map";
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: auto 1fr;
     gap: 20px;
 }
 
-.map-container {
-    flex: 3; /* Haritanın daha fazla yer kaplamasını sağlar */
-    min-width: 400px; /* Harita için minimum genişlik */
-    background-color: #e0e0e0;
+#header {
+    grid-area: header;
+    background-color: #e9e9e9;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+}
+
+#mapContainer {
+    grid-area: map;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: 1px solid #ccc;
     border-radius: 8px;
-    overflow: hidden; /* SVG'nin taşmasını engeller */
+    overflow: hidden; /* SVG'nin taşmasını engelle */
 }
 
-#gameMap {
+#gameMapObject {
     width: 100%;
-    height: auto;
-    display: block; /* İçindeki boşluğu kaldırır */
+    height: 100%;
+    display: block;
 }
 
-.controls {
-    flex: 1; /* Kontrol panelinin daha az yer kaplamasını sağlar */
-    min-width: 280px; /* Kontrol paneli için minimum genişlik */
-    background-color: #f9f9f9;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-.control-section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px dashed #eee;
-}
-
-.control-section:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.controls select, .controls button {
+#unitCountsOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    margin-top: 5px;
+    height: 100%;
+    pointer-events: none; /* Üzerine tıklamaları engellemesin */
 }
 
-/* Bildirimler */
-.notifications {
-    margin-top: 20px;
+.unit-count {
+    position: absolute;
+    font-size: 10px; /* Birim sayıları küçük olsun */
+    font-weight: bold;
+    color: #000; /* Siyah renk */
+    pointer-events: none;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7); /* Beyaz gölge */
+    z-index: 10;
+}
+
+.attack-icon {
+    position: absolute;
+    width: 20px; /* İkon boyutu */
+    height: 20px;
+    cursor: pointer;
+    z-index: 20; /* Birim sayılarının üzerinde olsun */
+    pointer-events: auto; /* Tıklanabilir olmasını sağla */
+}
+
+#controls {
+    margin-top: 15px;
+    background-color: #f2f2f2;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.control-group {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+#notifications {
+    grid-area: notifications;
+    background-color: #e9e9e9;
     padding: 15px;
-    background-color: #f0f0f0;
-    border: 1px solid #e0e0e0;
     border-radius: 8px;
+    text-align: left;
+    overflow-y: auto;
+    max-height: 250px; /* Belirli bir yükseklik */
 }
 
 #notificationList {
     list-style-type: none;
     padding: 0;
     margin: 0;
-    max-height: 200px; /* Maksimum yükseklik */
-    overflow-y: auto; /* Dikey kaydırma */
 }
 
 #notificationList li {
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
+    padding: 5px 0;
+    border-bottom: 1px dotted #ccc;
     font-size: 0.9em;
 }
 
@@ -139,113 +127,108 @@ button:hover {
     border-bottom: none;
 }
 
-.notification-info { color: #0056b3; }
-.notification-warning { color: #ffc107; }
-.notification-error { color: #dc3545; }
-.notification-success { color: #28a745; }
-.notification-danger { color: #dc3545; font-weight: bold; }
-
-/* SVG Path Stilleri (gameMap.svg içindeki yollar için) */
-/* Bunlar doğrudan SVG içindeki elementlere uygulanır, genel CSS'te örnek olarak tutulur. */
-path[data-nuts-id] {
-    transition: fill 0.3s ease; /* Renk değişimine yumuşak geçiş */
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-path[data-nuts-id]:hover {
-    filter: brightness(1.1); /* Üzerine gelince biraz daha parlak yap */
-    cursor: pointer;
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+input[type="text"], select {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 
 /* Modal Stilleri */
 .modal {
-    display: none; /* BAŞLANGIÇTA GİZLİ OLMASINI SAĞLAYAN KRİTİK KURAL */
-    position: fixed; /* Ekranın üzerinde sabit kalır */
-    z-index: 100; /* Diğer her şeyin üzerinde görünmesini sağlar */
+    display: none; /* Varsayılan olarak gizli */
+    position: fixed; /* Ekranın üzerinde */
+    z-index: 100; /* Diğer her şeyin üzerinde */
     left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto; /* Gerekirse kaydırma çubuğu */
-    background-color: rgba(0,0,0,0.6); /* Yarı şeffaf arka plan */
-    padding-top: 60px;
+    width: 100%; /* Tam genişlik */
+    height: 100%; /* Tam yükseklik */
+    overflow: auto; /* Gerekirse kaydırma */
+    background-color: rgba(0,0,0,0.7); /* Yarı şeffaf arka plan */
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 5% auto; /* Üstten ve alttan boşluk, ortala */
+    margin: auto; /* Ortalamak için */
     padding: 20px;
     border: 1px solid #888;
-    width: 80%;
-    max-width: 500px; /* Maksimum genişlik */
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    text-align: center; /* İçeriği ortala */
-    position: relative; /* Kapatma butonu için */
+    width: 80%; /* Genişlik */
+    max-width: 500px;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+    animation-name: animatetop;
+    animation-duration: 0.4s
 }
 
-.close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    position: absolute;
-    top: 10px;
-    right: 15px;
+/* Modal Açılış Animasyonu */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+#countryList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.country-option {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
     cursor: pointer;
+    background-color: #f9f9f9;
+    transition: background-color 0.2s;
 }
 
-.close-button:hover,
-.close-button:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
+.country-option.selected {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
 }
 
-.war-modal-content h2 {
-    color: #dc3545;
-    margin-bottom: 15px;
+/* Yeni: Saldırı hedefi parlatma */
+.highlight-target {
+    animation: pulse 1s infinite alternate; /* Parlama animasyonu */
+    stroke: yellow; /* Sınır rengi */
+    stroke-width: 3px; /* Sınır kalınlığı */
 }
 
-.war-modal-content p {
-    font-size: 1.1em;
-    margin-bottom: 10px;
-}
-
-.war-modal-content button {
-    margin-top: 20px;
-    background-color: #dc3545; /* Saldırı butonu için kırmızı */
-}
-
-.war-modal-content button:hover {
-    background-color: #c82333;
-}
-
-
-/* Mobil uyumluluk */
-@media (max-width: 768px) {
-    .screen {
-        width: 95%;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        padding: 15px;
-    }
-
-    #game-screen .header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    #game-screen .game-area {
-        flex-direction: column;
-    }
-
-    .map-container, .controls {
-        min-width: unset;
-        width: 100%;
-    }
-
-    .modal-content {
-        width: 90%;
-        margin: 20% auto;
-    }
+@keyframes pulse {
+    from { opacity: 0.7; }
+    to { opacity: 1; }
 }
