@@ -66,412 +66,256 @@ const declareWarButton = document.getElementById('declareWarButton');
 // Gelişmiş Ülke Verileri - Tüm SVG Bölgeleri İçin Güncellenmiş
 // ============================================================================
 let countriesData = {
-    // Almanya (DE) - 39 bölge
-    'DE': { 
-        name: 'Almanya', 
-        nuts2: ['DE11', 'DE12', 'DE13', 'DE14', 'DE21', 'DE22', 'DE23', 'DE24', 'DE25', 'DE26', 'DE27', 'DE30', 'DE42', 'DE41', 'DE50', 'DE60', 'DE71', 'DE72', 'DE73', 'DE80', 'DE91', 'DE92', 'DE93', 'DE94', 'DEA1', 'DEA2', 'DEA3', 'DEA4', 'DEA5', 'DEB1', 'DEB2', 'DEB3', 'DEC0', 'DED1', 'DED2', 'DED3', 'DEE0', 'DEF0', 'DEG0'], 
+    // Sovyet Sosyalist Cumhuriyetler Birliği (USSR)
+    'USSR': { 
+        name: 'Sovyet Sosyalist Cumhuriyetler Birliği', 
+        nuts2: ['EE00', 'LV00', 'LT00', 'FI13', 'FI18', 'FI19', 'FI1A', 'FI20'], // Balık ülkeleri ve Finlandiya'nın doğusu temsili
+        isPlayer: false, 
+        color: '#CC0000', 
+        coins: INITIAL_AI_COINS * 2, // Büyük güç
+        units: 0,
+        personality: 'AGGRESSIVE',
+        capital: 'LV00', // Moskova temsili
+        era: '1936',
+        type: 'major_power'
+    },
+    
+    // Alman Reich (Nazi Almanya)
+    'GERMAN_REICH': { 
+        name: 'Alman Reich', 
+        nuts2: ['DE11', 'DE12', 'DE13', 'DE14', 'DE21', 'DE22', 'DE23', 'DE24', 'DE25', 'DE26', 'DE27', 'DE30', 'DE42', 'DE41', 'DE50', 'DE60', 'DE71', 'DE72', 'DE73', 'DE80', 'DE91', 'DE92', 'DE93', 'DE94', 'DEA1', 'DEA2', 'DEA3', 'DEA4', 'DEA5', 'DEB1', 'DEB2', 'DEB3', 'DEC0', 'DED1', 'DED2', 'DED3', 'DEE0', 'DEF0', 'DEG0', 'AT11', 'AT12', 'AT13', 'AT21', 'AT22', 'AT31', 'AT32', 'AT33', 'AT34'], // Almanya + Avusturya (Anschluss)
+        isPlayer: false, 
+        color: '#444444', 
+        coins: INITIAL_AI_COINS * 2, 
+        units: 0,
+        personality: 'AGGRESSIVE',
+        capital: 'DE30', // Berlin
+        era: '1936',
+        type: 'major_power'
+    },
+    
+    // Büyük Britanya İmparatorluğu
+    'BRITISH_EMPIRE': { 
+        name: 'Büyük Britanya İmparatorluğu', 
+        nuts2: ['UKC1', 'UKC2', 'UKD1', 'UKD2', 'UKD3', 'UKD4', 'UKD5', 'UKE1', 'UKE2', 'UKE3', 'UKE4', 'UKF1', 'UKF2', 'UKF3', 'UKG1', 'UKG2', 'UKG3', 'UKH1', 'UKH2', 'UKH3', 'UKI1', 'UKI2', 'UKJ1', 'UKJ2', 'UKJ3', 'UKJ4', 'UKK1', 'UKK2', 'UKK3', 'UKK4', 'UKL1', 'UKL2', 'UKM2', 'UKM3', 'UKM5', 'UKM6', 'UKN0', 'IE01', 'IE02'], // UK + İrlanda
+        isPlayer: false, 
+        color: '#000080', 
+        coins: INITIAL_AI_COINS * 2, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'UKI1', // Londra
+        era: '1936',
+        type: 'major_power'
+    },
+    
+    // Fransız Cumhuriyeti
+    'FRENCH_REPUBLIC': { 
+        name: 'Fransız Cumhuriyeti', 
+        nuts2: ['FR10', 'FR21', 'FR22', 'FR23', 'FR24', 'FR25', 'FR26', 'FR30', 'FR41', 'FR42', 'FR43', 'FR51', 'FR52', 'FR53', 'FR61', 'FR62', 'FR63', 'FR71', 'FR72', 'FR81', 'FR82', 'FR83', 'BE10', 'BE21', 'BE22', 'BE23', 'BE24', 'BE25', 'BE31', 'BE32', 'BE33', 'BE34', 'BE35', 'NL11', 'NL12', 'NL13', 'NL21', 'NL22', 'NL23', 'NL31', 'NL32', 'NL33', 'NL34', 'NL41', 'NL42', 'LU00'], // Fransa + Benelux
+        isPlayer: false, 
+        color: '#0066CC', 
+        coins: INITIAL_AI_COINS * 1.5, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'FR10', // Paris
+        era: '1936',
+        type: 'major_power'
+    },
+    
+    // İtalyan Krallığı
+    'KINGDOM_OF_ITALY': { 
+        name: 'İtalyan Krallığı', 
+        nuts2: ['ITC1', 'ITC2', 'ITC3', 'ITC4', 'ITD1', 'ITD2', 'ITD3', 'ITD4', 'ITD5', 'ITE1', 'ITE2', 'ITE3', 'ITE4', 'ITF1', 'ITF2', 'ITF3', 'ITF4', 'ITF5', 'ITF6', 'ITG1', 'ITG2'], 
+        isPlayer: false, 
+        color: '#008000', 
+        coins: INITIAL_AI_COINS * 1.5, 
+        units: 0,
+        personality: 'EXPANSIONIST',
+        capital: 'ITE4', // Roma
+        era: '1936',
+        type: 'major_power'
+    },
+    
+    // Yugoslavya Krallığı
+    'YUGOSLAVIA': { 
+        name: 'Yugoslavya Krallığı', 
+        nuts2: ['HR01', 'HR02', 'HR03', 'SI01', 'SI02', 'MK00', 'BG31', 'BG32'], // Balkan bölgeleri
+        isPlayer: false, 
+        color: '#6B8E23', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'HR01', // Belgrad temsili
+        era: '1936',
+        type: 'minor_power'
+    },
+    
+    // Çekoslovakya Cumhuriyeti
+    'CZECHOSLOVAKIA': { 
+        name: 'Çekoslovakya Cumhuriyeti', 
+        nuts2: ['CZ01', 'CZ02', 'CZ03', 'CZ04', 'CZ05', 'CZ06', 'CZ07', 'CZ08', 'SK01', 'SK02', 'SK03', 'SK04'], 
+        isPlayer: false, 
+        color: '#4169E1', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'CZ01', // Prag
+        era: '1936',
+        type: 'minor_power'
+    },
+    
+    // Polonya Cumhuriyeti
+    'POLAND': { 
+        name: 'Polonya Cumhuriyeti', 
+        nuts2: ['PL11', 'PL12', 'PL21', 'PL22', 'PL31', 'PL32', 'PL33', 'PL34', 'PL41', 'PL42', 'PL43', 'PL51', 'PL52', 'PL61', 'PL62', 'PL63'], 
+        isPlayer: false, 
+        color: '#DC143C', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'PL12', // Varşova
+        era: '1936',
+        type: 'minor_power'
+    },
+    
+    // Romanya Krallığı
+    'ROMANIA': { 
+        name: 'Romanya Krallığı', 
+        nuts2: ['RO11', 'RO12', 'RO21', 'RO22', 'RO31', 'RO32', 'RO41', 'RO42', 'BG33', 'BG34', 'BG41', 'BG42'], // Romanya + Güney Bulgaristan
         isPlayer: false, 
         color: '#FFD700', 
         coins: INITIAL_AI_COINS, 
         units: 0,
         personality: 'BALANCED',
-        capital: 'DE30' // Berlin
+        capital: 'RO32', // Bükreş
+        era: '1936',
+        type: 'minor_power'
     },
     
-    // Fransa (FR) - 26 bölge  
-    'FR': { 
-        name: 'Fransa', 
-        nuts2: ['FR10', 'FR21', 'FR22', 'FR23', 'FR24', 'FR25', 'FR26', 'FR30', 'FR41', 'FR42', 'FR43', 'FR51', 'FR52', 'FR53', 'FR61', 'FR62', 'FR63', 'FR71', 'FR72', 'FR81', 'FR82', 'FR83'], 
-        isPlayer: false, 
-        color: '#0066CC', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'FR10' // Paris
-    },
-    
-    // İspanya (ES) - 19 bölge
-    'ES': { 
-        name: 'İspanya', 
-        nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62'], 
-        isPlayer: false, 
-        color: '#FF6600', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'EXPANSIONIST',
-        capital: 'ES30' // Madrid
-    },
-    
-    // İtalya (IT) - 20 bölge
-    'IT': { 
-        name: 'İtalya', 
-        nuts2: ['ITC1', 'ITC2', 'ITC3', 'ITC4', 'ITD1', 'ITD2', 'ITD3', 'ITD4', 'ITD5', 'ITE1', 'ITE2', 'ITE3', 'ITE4', 'ITF1', 'ITF2', 'ITF3', 'ITF4', 'ITF5', 'ITF6', 'ITG1', 'ITG2'], 
-        isPlayer: false, 
-        color: '#00AA44', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'ITE4' // Roma
-    },
-    
-    // Birleşik Krallık (UK) - 40 bölge
-    'UK': { 
-        name: 'Birleşik Krallık', 
-        nuts2: ['UKC1', 'UKC2', 'UKD1', 'UKD2', 'UKD3', 'UKD4', 'UKD5', 'UKE1', 'UKE2', 'UKE3', 'UKE4', 'UKF1', 'UKF2', 'UKF3', 'UKG1', 'UKG2', 'UKG3', 'UKH1', 'UKH2', 'UKH3', 'UKI1', 'UKI2', 'UKJ1', 'UKJ2', 'UKJ3', 'UKJ4', 'UKK1', 'UKK2', 'UKK3', 'UKK4', 'UKL1', 'UKL2', 'UKM2', 'UKM3', 'UKM5', 'UKM6', 'UKN0'], 
-        isPlayer: false, 
-        color: '#CC0066', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'AGGRESSIVE',
-        capital: 'UKI1' // London
-    },
-    
-    // Polonya (PL) - 16 bölge
-    'PL': { 
-        name: 'Polonya', 
-        nuts2: ['PL11', 'PL12', 'PL21', 'PL22', 'PL31', 'PL32', 'PL33', 'PL34', 'PL41', 'PL42', 'PL43', 'PL51', 'PL52', 'PL61', 'PL62', 'PL63'], 
-        isPlayer: false, 
-        color: '#AA3300', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'PL12' // Warszawa
-    },
-    
-    // Romanya (RO) - 8 bölge
-    'RO': { 
-        name: 'Romanya', 
-        nuts2: ['RO11', 'RO12', 'RO21', 'RO22', 'RO31', 'RO32', 'RO41', 'RO42'], 
-        isPlayer: false, 
-        color: '#6600AA', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'RO32' // Bükreş
-    },
-    
-    // Norveç (NO) - 7 bölge
-    'NO': { 
-        name: 'Norveç', 
-        nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07'], 
-        isPlayer: false, 
-        color: '#0088AA', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'NO01' // Oslo
-    },
-    
-    // İsveç (SE) - 8 bölge
-    'SE': { 
-        name: 'İsveç', 
-        nuts2: ['SE11', 'SE12', 'SE21', 'SE22', 'SE23', 'SE31', 'SE32', 'SE33'], 
-        isPlayer: false, 
-        color: '#FFAA00', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'SE11' // Stockholm
-    },
-    
-    // Finlandiya (FI) - 5 bölge
-    'FI': { 
-        name: 'Finlandiya', 
-        nuts2: ['FI13', 'FI18', 'FI19', 'FI1A', 'FI20'], 
-        isPlayer: false, 
-        color: '#00AAFF', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'FI18' // Helsinki
-    },
-    
-    // Yunanistan (GR) - 13 bölge
-    'GR': { 
-        name: 'Yunanistan', 
-        nuts2: ['GR11', 'GR12', 'GR13', 'GR14', 'GR21', 'GR22', 'GR23', 'GR24', 'GR25', 'GR30', 'GR41', 'GR42', 'GR43'], 
-        isPlayer: false, 
-        color: '#0066FF', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'GR30' // Atina
-    },
-    
-    // Türkiye (TR) - 26 bölge
-    'TR': { 
-        name: 'Türkiye', 
-        nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3'], 
-        isPlayer: false, 
-        color: '#FF3300', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'AGGRESSIVE',
-        capital: 'TR10' // Ankara
-    },
-    
-    // Hollanda (NL) - 12 bölge
-    'NL': { 
-        name: 'Hollanda', 
-        nuts2: ['NL11', 'NL12', 'NL13', 'NL21', 'NL22', 'NL23', 'NL31', 'NL32', 'NL33', 'NL34', 'NL41', 'NL42'], 
-        isPlayer: false, 
-        color: '#FF6600', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'NL32' // Amsterdam
-    },
-    
-    // Belçika (BE) - 11 bölge
-    'BE': { 
-        name: 'Belçika', 
-        nuts2: ['BE10', 'BE21', 'BE22', 'BE23', 'BE24', 'BE25', 'BE31', 'BE32', 'BE33', 'BE34', 'BE35'], 
-        isPlayer: false, 
-        color: '#444444', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'BE10' // Brüksel
-    },
-    
-    // Avusturya (AT) - 9 bölge
-    'AT': { 
-        name: 'Avusturya', 
-        nuts2: ['AT11', 'AT12', 'AT13', 'AT21', 'AT22', 'AT31', 'AT32', 'AT33', 'AT34'], 
-        isPlayer: false, 
-        color: '#AA0000', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'AT13' // Viyana
-    },
-    
-    // İsviçre (CH) - 7 bölge
-    'CH': { 
-        name: 'İsviçre', 
-        nuts2: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05', 'CH06', 'CH07'], 
-        isPlayer: false, 
-        color: '#CC0000', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'CH01' // Bern
-    },
-    
-    // Çekya (CZ) - 8 bölge
-    'CZ': { 
-        name: 'Çekya', 
-        nuts2: ['CZ01', 'CZ02', 'CZ03', 'CZ04', 'CZ05', 'CZ06', 'CZ07', 'CZ08'], 
-        isPlayer: false, 
-        color: '#0044AA', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'CZ01' // Prag
-    },
-    
-    // Slovakya (SK) - 4 bölge
-    'SK': { 
-        name: 'Slovakya', 
-        nuts2: ['SK01', 'SK02', 'SK03', 'SK04'], 
-        isPlayer: false, 
-        color: '#AA6600', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'SK01' // Bratislava
-    },
-    
-    // Slovenya (SI) - 2 bölge
-    'SI': { 
-        name: 'Slovenya', 
-        nuts2: ['SI01', 'SI02'], 
-        isPlayer: false, 
-        color: '#66AA00', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'SI01' // Ljubljana
-    },
-    
-    // Hırvatistan (HR) - 3 bölge
-    'HR': { 
-        name: 'Hırvatistan', 
-        nuts2: ['HR01', 'HR02', 'HR03'], 
-        isPlayer: false, 
-        color: '#00AA66', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'HR01' // Zagreb
-    },
-    
-    // Macaristan (HU) - 7 bölge
-    'HU': { 
-        name: 'Macaristan', 
+    // Macaristan Krallığı
+    'HUNGARY': { 
+        name: 'Macaristan Krallığı', 
         nuts2: ['HU10', 'HU21', 'HU22', 'HU23', 'HU31', 'HU32', 'HU33'], 
         isPlayer: false, 
-        color: '#AA00AA', 
+        color: '#228B22', 
         coins: INITIAL_AI_COINS, 
         units: 0,
         personality: 'BALANCED',
-        capital: 'HU10' // Budapeşte
+        capital: 'HU10', // Budapeşte
+        era: '1936',
+        type: 'minor_power'
     },
     
-    // Bulgaristan (BG) - 6 bölge
-    'BG': { 
-        name: 'Bulgaristan', 
-        nuts2: ['BG31', 'BG32', 'BG33', 'BG34', 'BG41', 'BG42'], 
+    // İspanya Cumhuriyeti (İç Savaş Öncesi)
+    'SPANISH_REPUBLIC': { 
+        name: 'İspanya Cumhuriyeti', 
+        nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62', 'PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20'], // İspanya + Portekiz
         isPlayer: false, 
-        color: '#00CC00', 
+        color: '#FF4500', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'ES30', // Madrid
+        era: '1936',
+        type: 'minor_power'
+    },
+    
+    // Türkiye Cumhuriyeti
+    'TURKEY': { 
+        name: 'Türkiye Cumhuriyeti', 
+        nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3', 'GR11', 'GR12', 'GR13', 'GR14', 'GR21', 'GR22', 'GR23', 'GR24', 'GR25', 'GR30', 'GR41', 'GR42', 'GR43', 'CY00'], // Türkiye + Yunanistan + Kıbrıs
+        isPlayer: false, 
+        color: '#FF0000', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'TR10', // Ankara
+        era: '1936',
+        type: 'minor_power'
+    },
+    
+    // Norveç Krallığı
+    'NORWAY': { 
+        name: 'Norveç Krallığı', 
+        nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07'], 
+        isPlayer: false, 
+        color: '#191970', 
+        coins: INITIAL_AI_COINS * 0.8, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'NO01', // Oslo
+        era: '1936',
+        type: 'minor_power'
+    },
+    
+    // İsveç Krallığı
+    'SWEDEN': { 
+        name: 'İsveç Krallığı', 
+        nuts2: ['SE11', 'SE12', 'SE21', 'SE22', 'SE23', 'SE31', 'SE32', 'SE33'], 
+        isPlayer: false, 
+        color: '#FFD700', 
         coins: INITIAL_AI_COINS, 
         units: 0,
         personality: 'DEFENSIVE',
-        capital: 'BG41' // Sofya
+        capital: 'SE11', // Stockholm
+        era: '1936',
+        type: 'minor_power'
     },
     
-    // Danimarka (DK) - 5 bölge
-    'DK': { 
-        name: 'Danimarka', 
+    // Danimarka Krallığı
+    'DENMARK': { 
+        name: 'Danimarka Krallığı', 
         nuts2: ['DK01', 'DK02', 'DK03', 'DK04', 'DK05'], 
         isPlayer: false, 
-        color: '#AA0066', 
-        coins: INITIAL_AI_COINS, 
+        color: '#8B0000', 
+        coins: INITIAL_AI_COINS * 0.8, 
         units: 0,
-        personality: 'BALANCED',
-        capital: 'DK01' // Kopenhag
+        personality: 'DEFENSIVE',
+        capital: 'DK01', // Kopenhag
+        era: '1936',
+        type: 'minor_power'
     },
     
-    // Portekiz (PT) - 7 bölge
-    'PT': { 
-        name: 'Portekiz', 
-        nuts2: ['PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20'], 
+    // İsviçre Konfederasyonu
+    'SWITZERLAND': { 
+        name: 'İsviçre Konfederasyonu', 
+        nuts2: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05', 'CH06', 'CH07', 'LI00'], 
         isPlayer: false, 
-        color: '#006600', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'PT17' // Lizbon
-    },
-    
-    // İrlanda (IE) - 3 bölge
-    'IE': { 
-        name: 'İrlanda', 
-        nuts2: ['IE01', 'IE02'], 
-        isPlayer: false, 
-        color: '#00AA00', 
+        color: '#FF0000', 
         coins: INITIAL_AI_COINS, 
         units: 0,
         personality: 'DEFENSIVE',
-        capital: 'IE02' // Dublin
+        capital: 'CH01', // Bern
+        era: '1936',
+        type: 'minor_power'
     },
     
-    // İzlanda (IS) - 1 bölge
-    'IS': { 
-        name: 'İzlanda', 
+    // İzlanda Krallığı
+    'ICELAND': { 
+        name: 'İzlanda Krallığı', 
         nuts2: ['IS00'], 
         isPlayer: false, 
-        color: '#6666AA', 
-        coins: INITIAL_AI_COINS, 
+        color: '#4682B4', 
+        coins: INITIAL_AI_COINS * 0.5, 
         units: 0,
         personality: 'DEFENSIVE',
-        capital: 'IS00' // Reykjavik
+        capital: 'IS00', // Reykjavik
+        era: '1936',
+        type: 'minor_power'
     },
     
-    // Estonya (EE) - 1 bölge
-    'EE': { 
-        name: 'Estonya', 
-        nuts2: ['EE00'], 
-        isPlayer: false, 
-        color: '#0099CC', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'EE00' // Tallinn
-    },
-    
-    // Letonya (LV) - 1 bölge
-    'LV': { 
-        name: 'Letonya', 
-        nuts2: ['LV00'], 
-        isPlayer: false, 
-        color: '#CC6600', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'LV00' // Riga
-    },
-    
-    // Litvanya (LT) - 1 bölge
-    'LT': { 
-        name: 'Litvanya', 
-        nuts2: ['LT00'], 
-        isPlayer: false, 
-        color: '#CCAA00', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'LT00' // Vilnius
-    },
-    
-    // Lüksemburg (LU) - 1 bölge
-    'LU': { 
-        name: 'Lüksemburg', 
-        nuts2: ['LU00'], 
-        isPlayer: false, 
-        color: '#9966CC', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'LU00' // Luxembourg
-    },
-    
-    // Malta (MT) - 1 bölge
-    'MT': { 
+    // Malta
+    'MALTA': { 
         name: 'Malta', 
         nuts2: ['MT00'], 
         isPlayer: false, 
-        color: '#CCCCCC', 
-        coins: INITIAL_AI_COINS, 
+        color: '#D2691E', 
+        coins: INITIAL_AI_COINS * 0.3, 
         units: 0,
         personality: 'DEFENSIVE',
-        capital: 'MT00' // Valletta
-    },
-    
-    // Kıbrıs (CY) - 1 bölge
-    'CY': { 
-        name: 'Kıbrıs', 
-        nuts2: ['CY00'], 
-        isPlayer: false, 
-        color: '#66CCAA', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'CY00' // Lefkoşa
-    },
-    
-    // Kuzey Makedonya (MK) - 1 bölge
-    'MK': { 
-        name: 'Kuzey Makedonya', 
-        nuts2: ['MK00'], 
-        isPlayer: false, 
-        color: '#AA6666', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'MK00' // Üsküp
-    },
-    
-    // Liechtenstein (LI) - 1 bölge
-    'LI': { 
-        name: 'Liechtenstein', 
-        nuts2: ['LI00'], 
-        isPlayer: false, 
-        color: '#AA99CC', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'LI00' // Vaduz
+        capital: 'MT00', // Valletta
+        era: '1936',
+        type: 'minor_power'
     }
 };
 
