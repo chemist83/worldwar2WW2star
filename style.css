@@ -1,179 +1,137 @@
-/* Genel Stil Ayarlamaları */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #2c3e50; /* Koyu arka plan */
-    color: #ecf0f1; /* Açık metin rengi */
+    background-color: #f4f4f4;
+    color: #333;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Üstten hizala */
     min-height: 100vh;
-    overflow: hidden; /* Taşmaları önlemek için */
+    overflow-y: auto; /* Sayfa içeriği taştığında kaydırma çubuğu */
 }
 
-.container {
-    background-color: #34495e; /* Koyu gri, ana konteyner arka planı */
-    padding: 20px 30px;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    width: 100%;
-    max-width: 900px; /* Geniş ekranlar için max genişlik */
-    display: flex; /* İçindeki ekranları düzenlemek için */
-    flex-direction: column;
-    align-items: center;
-    box-sizing: border-box;
-}
-
-/* Ekran Yönetimi */
 .screen {
-    display: none; /* Varsayılan olarak tüm ekranlar gizli */
-    width: 100%;
-    text-align: center;
+    display: none; /* Varsayılan olarak tüm ekranları gizle */
+    width: 90%;
+    max-width: 1200px;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    margin-top: 20px; /* Üstten boşluk bırak */
+    margin-bottom: 20px; /* Alttan boşluk bırak */
 }
 
 .screen.active {
     display: block; /* Aktif ekranı göster */
 }
 
-/* Başlıklar */
-h1, h2, h3 {
-    color: #e74c3c; /* Kırmızımsı başlık rengi */
-    margin-bottom: 20px;
+#start-screen, #country-selection-screen {
+    text-align: center;
+    padding: 50px;
 }
 
-/* Giriş Alanları ve Select Kutuları */
-input[type="text"], select {
-    width: calc(100% - 20px);
+#playerNameInput, #countrySelect {
     padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #7f8c8d;
-    border-radius: 5px;
-    background-color: #ecf0f1; /* Açık arka plan */
-    color: #2c3e50; /* Koyu metin */
-    font-size: 16px;
+    margin: 10px 0;
+    width: calc(100% - 22px);
+    max-width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
-/* Butonlar */
 button {
-    background-color: #2ecc71; /* Yeşil buton */
+    padding: 10px 20px;
+    background-color: #28a745;
     color: white;
-    padding: 12px 25px;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 18px;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-    margin: 5px; /* Butonlar arası boşluk */
+    font-size: 16px;
+    margin-top: 10px;
 }
 
 button:hover {
-    background-color: #27ae60;
+    background-color: #218838;
 }
 
-button:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-}
-
-/* Oyun Ekranı Özel Stilleri */
-#game-screen {
+/* Oyun Ekranı Düzenlemesi */
+#game-screen .header {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+#game-screen .game-area {
+    display: flex;
+    flex-wrap: wrap; /* Küçük ekranlarda alt alta geçiş */
     gap: 20px;
 }
 
-#game-map {
-    width: 100%;
-    max-width: 800px; /* Haritanın maksimum genişliği */
-    height: auto; /* Yüksekliği otomatik ayarla */
-    border: 2px solid #3498db;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    border-radius: 5px;
+.map-container {
+    flex: 3; /* Haritanın daha fazla yer kaplamasını sağlar */
+    min-width: 400px; /* Harita için minimum genişlik */
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden; /* SVG'nin taşmasını engeller */
 }
 
 #gameMap {
-    display: block; /* Objeyi block yap */
     width: 100%;
-    height: 100%; /* SVG içeriğini doldurmasını sağlar */
+    height: auto;
+    display: block; /* İçindeki boşluğu kaldırır */
 }
 
-/* SVG Path Stilleri (script.js tarafından geçersiz kılınabilir) */
-#gameMap path {
-    fill: #7f8c8d; /* Varsayılan bölge rengi */
-    stroke: #2c3e50; /* Sınır rengi */
-    stroke-width: 0.5px;
-    transition: fill 0.2s ease, stroke 0.2s ease, stroke-width 0.2s ease;
-}
-
-#gameMap path:hover {
-    opacity: 0.8;
-    cursor: pointer;
-}
-
-/* SVG üzerindeki birim sayıları için text'lerin daha net görünmesi için */
-svg text {
-    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7); /* Beyaz gölge ekle */
-    user-select: none; /* Metnin seçilmesini engelle */
-    pointer-events: none; /* Metin elementine tıklanmayı engelle, path'e tıklansın */
-}
-
-/* Kontrol Paneli */
-.control-panel {
-    background-color: #2980b9; /* Mavimsi arka plan */
+.controls {
+    flex: 1; /* Kontrol panelinin daha az yer kaplamasını sağlar */
+    min-width: 280px; /* Kontrol paneli için minimum genişlik */
+    background-color: #f9f9f9;
     padding: 15px;
+    border: 1px solid #ddd;
     border-radius: 8px;
+}
+
+.control-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #eee;
+}
+
+.control-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.controls select, .controls button {
     width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-wrap: wrap; /* Küçük ekranlarda alt alta gelmeleri için */
-    justify-content: space-around;
-    align-items: center;
-    gap: 10px;
+    margin-top: 5px;
+}
+
+/* Bildirimler */
+.notifications {
     margin-top: 20px;
+    padding: 15px;
+    background-color: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
 }
 
-.control-item {
-    background-color: #3498db; /* Açık mavi */
-    padding: 10px 15px;
-    border-radius: 5px;
-    flex: 1 1 calc(33% - 20px); /* Üçlü sütun düzeni (küçük ekranlar için esnek) */
-    min-width: 150px; /* Minimum genişlik */
-    box-sizing: border-box;
-}
-
-.control-item p {
-    margin: 5px 0;
-    font-size: 1.1em;
-    font-weight: bold;
-}
-
-.control-item span {
-    font-weight: normal;
-    font-size: 0.9em;
-}
-
-/* Bildirim Sistemi */
 #notificationList {
-    list-style: none;
-    padding: 10px;
-    margin-top: 20px;
-    max-height: 200px; /* Maksimum yükseklik, kaydırma çubuğu için */
-    overflow-y: auto; /* Yükseklik aşılırsa kaydırma çubuğu */
-    border: 1px solid #7f8c8d;
-    background-color: #34495e; /* Konteyner rengiyle uyumlu */
-    border-radius: 5px;
-    text-align: left; /* Metin sola hizalı */
-    width: 100%;
-    box-sizing: border-box;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px; /* Maksimum yükseklik */
+    overflow-y: auto; /* Dikey kaydırma */
 }
 
 #notificationList li {
-    padding: 5px 0;
-    border-bottom: 1px dashed #555;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
     font-size: 0.9em;
 }
 
@@ -181,55 +139,48 @@ svg text {
     border-bottom: none;
 }
 
-/* Bildirim Tipleri */
-.notification-default { color: #ecf0f1; } /* Varsayılan beyaz */
-.notification-info { color: #5dade2; }    /* Mavi */
-.notification-success { color: #27ae60; } /* Yeşil */
-.notification-warning { color: #f1c40f; } /* Sarı */
-.notification-error { color: #e74c3c; }   /* Kırmızı */
-.notification-danger { color: #c0392b; font-weight: bold; } /* Koyu kırmızı ve kalın */
+.notification-info { color: #0056b3; }
+.notification-warning { color: #ffc107; }
+.notification-error { color: #dc3545; }
+.notification-success { color: #28a745; }
+.notification-danger { color: #dc3545; font-weight: bold; }
 
+/* SVG Path Stilleri (gameMap.svg içindeki yollar için) */
+/* Bunlar doğrudan SVG içindeki elementlere uygulanır, genel CSS'te örnek olarak tutulur. */
+path[data-nuts-id] {
+    transition: fill 0.3s ease; /* Renk değişimine yumuşak geçiş */
+}
 
-/* Savaş Modalı Stilleri */
+path[data-nuts-id]:hover {
+    filter: brightness(1.1); /* Üzerine gelince biraz daha parlak yap */
+    cursor: pointer;
+}
+
+/* Modal Stilleri */
 .modal {
-    display: none; /* Varsayılan olarak gizli */
-    position: fixed; /* Sabit konum */
-    z-index: 1000; /* Diğer her şeyin üstünde */
+    display: none; /* BAŞLANGIÇTA GİZLİ OLMASINI SAĞLAYAN KRİTİK KURAL */
+    position: fixed; /* Ekranın üzerinde sabit kalır */
+    z-index: 100; /* Diğer her şeyin üzerinde görünmesini sağlar */
     left: 0;
     top: 0;
-    width: 100%; /* Tam genişlik */
-    height: 100%; /* Tam yükseklik */
-    overflow: auto; /* Gerekirse kaydırma */
-    background-color: rgba(0,0,0,0.7); /* Hafif karartılmış arka plan */
-    display: flex; /* Ortalamak için flexbox kullan */
-    justify-content: center;
-    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Gerekirse kaydırma çubuğu */
+    background-color: rgba(0,0,0,0.6); /* Yarı şeffaf arka plan */
+    padding-top: 60px;
 }
 
 .modal-content {
     background-color: #fefefe;
-    color: #333; /* Modal içeriği için koyu metin */
-    margin: auto; /* Otomatik margin ile ortalama */
+    margin: 5% auto; /* Üstten ve alttan boşluk, ortala */
     padding: 20px;
     border: 1px solid #888;
-    border-radius: 8px;
-    width: 80%; /* Modal genişliği */
+    width: 80%;
     max-width: 500px; /* Maksimum genişlik */
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-    animation-name: animatetop;
-    animation-duration: 0.4s;
-    text-align: center;
-}
-
-/* Modal için animasyon */
-@-webkit-keyframes animatetop {
-    from {top:-300px; opacity:0}
-    to {top:0; opacity:1}
-}
-
-@keyframes animatetop {
-    from {top:-300px; opacity:0}
-    to {top:0; opacity:1}
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    text-align: center; /* İçeriği ortala */
+    position: relative; /* Kapatma butonu için */
 }
 
 .close-button {
@@ -237,7 +188,10 @@ svg text {
     float: right;
     font-size: 28px;
     font-weight: bold;
-    transition: color 0.3s ease;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
 }
 
 .close-button:hover,
@@ -247,28 +201,51 @@ svg text {
     cursor: pointer;
 }
 
-/* Saldırı ikonu için özel stil (opsiyonel) */
-.attack-icon {
-    /* İkonun boyutunu ve görünümünü ayarlayabilirsiniz */
-    /* Örneğin: filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5)); */
+.war-modal-content h2 {
+    color: #dc3545;
+    margin-bottom: 15px;
 }
 
-/* Duyarlı Tasarım */
+.war-modal-content p {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.war-modal-content button {
+    margin-top: 20px;
+    background-color: #dc3545; /* Saldırı butonu için kırmızı */
+}
+
+.war-modal-content button:hover {
+    background-color: #c82333;
+}
+
+
+/* Mobil uyumluluk */
 @media (max-width: 768px) {
-    .container {
+    .screen {
+        width: 95%;
+        margin-top: 10px;
+        margin-bottom: 10px;
         padding: 15px;
     }
-    .control-item {
-        flex: 1 1 100%; /* Mobil cihazlarda tek sütun */
+
+    #game-screen .header {
+        flex-direction: column;
+        align-items: flex-start;
     }
-    h1 {
-        font-size: 1.8em;
+
+    #game-screen .game-area {
+        flex-direction: column;
     }
-    h2 {
-        font-size: 1.4em;
+
+    .map-container, .controls {
+        min-width: unset;
+        width: 100%;
     }
-    button {
-        padding: 10px 20px;
-        font-size: 16px;
+
+    .modal-content {
+        width: 90%;
+        margin: 20% auto;
     }
 }
