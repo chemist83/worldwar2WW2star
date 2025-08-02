@@ -232,3 +232,39 @@ input[type="text"], select {
     from { opacity: 0.7; }
     to { opacity: 1; }
 }
+/* Harita kapsayıcısı için gerekli stil */
+#mapContainer {
+    position: relative; /* Birim sayılarının overlay olarak üzerine bindirilebilmesi için */
+    width: 100%;
+    height: 100%;
+}
+
+/* Birim sayısı gösterim div'i için stil */
+.unit-count {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7); /* Hafif şeffaf siyah arkaplan */
+    color: white;
+    font-size: 10px; /* Daha küçük font boyutu */
+    font-weight: bold;
+    padding: 2px 4px;
+    border-radius: 3px;
+    pointer-events: none; /* Harita etkileşimini engellememesi için */
+    z-index: 10; /* Haritanın üzerinde olması için */
+    white-space: nowrap; /* Sayının tek satırda kalması için */
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5); /* Hafif gölge */
+}
+
+/* Saldırı hedefi vurgusu (düşman bölgeleri için) */
+path.highlight-target {
+    stroke: yellow !important; /* Sarı kenarlık */
+    stroke-width: 3px !important; /* Daha kalın kenarlık */
+    /* fill: rgba(255, 255, 0, 0.3); /* Hafif sarı dolgu (isteğe bağlı) */
+}
+
+/* Saldıran bölge vurgusu (kendi bölgemiz için) */
+path.active-attack-origin {
+    stroke: green !important; /* Yeşil kenarlık */
+    stroke-width: 3px !important; /* Daha kalın kenarlık */
+    /* fill: rgba(0, 128, 0, 0.3); /* Hafif yeşil dolgu (isteğe bağlı) */
+}
+
