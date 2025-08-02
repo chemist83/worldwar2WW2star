@@ -1081,14 +1081,8 @@ function onRegionClick(nutsId) {
             addNotification("Saldırı modunda: Kendi bölgelerinizden birine tıklayarak saldırı başlatın, sonra parlayan düşman bölgelerine tıklayın.");
         }
     } else {
-        // Normal modda bölgeye tıklama
-        if (regionCountryId === playerCountryId) {
-            const regionUnits = countriesData[playerCountryId].regions[nutsId] ? countriesData[playerCountryId].regions[nutsId].units : 0;
-            addNotification(`Kendi bölgeniz: ${nutsId}. Birim sayısı: ${regionUnits}.`);
-        } else { // Eğer tıklanan bölge kendi ülkemize ait değilse
-            const regionUnits = countriesData[regionCountryId].regions[nutsId] ? countriesData[regionCountryId].regions[nutsId].units : 0;
-            addNotification(`Düşman bölgesi: ${nutsId} (${countriesData[regionCountryId].name}). Birim sayısı: ${regionUnits}.`);
-        }
+        // Normal modda bölgeye tıklama - ülke modalını aç
+        showCountryModal(regionCountryId);
     }
 }
 
@@ -1388,34 +1382,44 @@ function runAILogic() {
         const aiCountry = countriesData[aiId];
         if (!aiCountry || aiCountry.nuts2.length === 0) return; // Ülke elenmiş olabilir veya toprağı yok
 
+        // Gelişmiş AI stratejisi
+        const situation = evaluateStrategicSituation(aiId);
+        
         // AI gelir elde etsin
         const aiIncome = aiCountry.nuts2.length * INCOME_PER_REGION;
         aiCountry.coins += aiIncome;
         addNotification(`${aiCountry.name} ${aiIncome} coin gelir elde etti.`);
 
-        // AI birim satın alsın (basit strateji: parası yettiği kadar)
-        while (aiCountry.coins >= UNIT_COST) {
-            aiCountry.coins -= UNIT_COST;
-            aiCountry.unitsReady = (aiCountry.unitsReady || 0) + 1;
-            addNotification(`${aiCountry.name} 1 birim satın aldı.`);
+        // Akıllı birim satın alma stratejisi
+        const shouldBuyUnits = situation.militaryStrength < situation.threats.length * 2 || 
+                              situation.opportunities.length > 0;
+        
+        if (shouldBuyUnits && aiCountry.coins >= UNIT_COST) {
+            const unitsToBuy = Math.min(Math.floor(aiCountry.coins / UNIT_COST), 3); // Maksimum 3 birim
+            aiCountry.coins -= unitsToBuy * UNIT_COST;
+            aiCountry.unitsReady = (aiCountry.unitsReady || 0) + unitsToBuy;
+            addNotification(`${aiCountry.name} ${unitsToBuy} birim satın aldı.`);
         }
 
-        // AI birimlerini yerleştirsin (rastgele kendi bölgelerine)
+        // Akıllı birim yerleştirme stratejisi
         if (aiCountry.unitsReady > 0 && aiCountry.nuts2.length > 0) {
-            let ownedRegionsToPlaceUnits = aiCountry.nuts2.filter(nutsId => aiCountry.regions[nutsId]);
-            // Eğer hiç birim olan bölge yoksa veya yeni bölge eklenmişse, tüm bölgeleri hedefle
-            if (ownedRegionsToPlaceUnits.length === 0 && aiCountry.nuts2.length > 0) {
-                 ownedRegionsToPlaceUnits = aiCountry.nuts2;
-            } else if (ownedRegionsToPlaceUnits.length === 0) {
-                 // Hiç bölgesi yoksa birim yerleştiremez
-                 aiCountry.unitsReady = 0;
-                 return;
+            // Tehdit altındaki bölgeleri öncelikle güçlendir
+            let priorityRegions = aiCountry.nuts2.filter(nutsId => {
+                const neighbors = nutsNeighbors[nutsId] || [];
+                return neighbors.some(neighborId => {
+                    const neighborCountryId = getCountryIdFromNutsId(neighborId);
+                    return neighborCountryId && neighborCountryId !== aiId;
+                });
+            });
+            
+            if (priorityRegions.length === 0) {
+                priorityRegions = aiCountry.nuts2;
             }
 
-            const targetRegionForPlacement = ownedRegionsToPlaceUnits[Math.floor(Math.random() * ownedRegionsToPlaceUnits.length)];
+            const targetRegionForPlacement = priorityRegions[Math.floor(Math.random() * priorityRegions.length)];
 
             if (targetRegionForPlacement) {
-                if (!aiCountry.regions[targetRegionForPlacement]) { // Bölge objesi yoksa oluştur
+                if (!aiCountry.regions[targetRegionForPlacement]) {
                     aiCountry.regions[targetRegionForPlacement] = { units: 0 };
                 }
                 aiCountry.regions[targetRegionForPlacement].units += aiCountry.unitsReady;
@@ -1424,51 +1428,54 @@ function runAILogic() {
             }
         }
 
-        // AI savaş ilan etsin (basit rastgele strateji)
-        if (Math.random() < WAR_CHANCE_BASE) {
-            const potentialTargets = Object.keys(countriesData).filter(id => 
-                id !== aiId && 
-                countriesData[id].nuts2 && 
-                countriesData[id].nuts2.length > 0
-            );
-            
-            if (potentialTargets.length > 0) {
-                const targetCountryId = potentialTargets[Math.floor(Math.random() * potentialTargets.length)];
-                const targetCountry = countriesData[targetCountryId];
-
-                const aiAvailableRegions = aiCountry.nuts2.filter(nutsId => aiCountry.regions[nutsId] && aiCountry.regions[nutsId].units > 0);
-
-                let attackInitiated = false;
-                shuffleArray(aiAvailableRegions).forEach(attackingRegionNutsId => {
-                    if (attackInitiated) return; // Zaten saldırı başlatıldıysa çık
-
-                    const possibleDefendingRegions = (nutsNeighbors[attackingRegionNutsId] || []).filter(neighborNutsId => {
-                        return getCountryIdFromNutsId(neighborNutsId) === targetCountryId && 
-                               (targetCountry.regions[neighborNutsId] && targetCountry.regions[neighborNutsId].units >= 0); 
-                    });
-
-                    if (possibleDefendingRegions.length > 0) {
-                        const defendingRegionNutsId = possibleDefendingRegions[Math.floor(Math.random() * possibleDefendingRegions.length)];
-
-                        const attackingUnits = aiCountry.regions[attackingRegionNutsId].units;
-                        const defendingUnits = targetCountry.regions[defendingRegionNutsId] ? targetCountry.regions[defendingRegionNutsId].units : 0;
-
-                        // AI saldırıyı başlatmak için en az 1 birimi olmalı ve hedef bölgede birim olmalı
-                        // Veya AI'nın birimi hedeften fazla olmalı (basit AI kuralı)
-                        if (attackingUnits > 0 && 
-                            (defendingUnits === 0 || attackingUnits > defendingUnits)) {
-                            
-                            addNotification(`${aiCountry.name} ülkesi, ${targetCountry.name} ülkesine savaş ilan etti!`);
-                            resolveCombat(
-                                aiId, attackingRegionNutsId, attackingUnits,
-                                targetCountryId, defendingRegionNutsId, defendingUnits
-                            );
-                            attackInitiated = true; // Bu tur bu AI için saldırı yapıldı
-                        }
-                    }
-                });
+        // Akıllı savaş stratejisi
+        const warChance = calculateWarChance(aiId, situation);
+        if (Math.random() < warChance) {
+            const bestTarget = findBestTarget(aiId, situation);
+            if (bestTarget) {
+                executeAIAttack(aiId, bestTarget);
             }
         }
+    });
+}
+
+function calculateWarChance(aiId, situation) {
+    let baseChance = 0.1; // %10 temel şans
+    
+    // Tehdit varsa savaş şansı artar
+    if (situation.threats.length > 0) {
+        baseChance += 0.2;
+    }
+    
+    // Fırsat varsa savaş şansı artar
+    if (situation.opportunities.length > 0) {
+        baseChance += 0.3;
+    }
+    
+    // Askeri güç yüksekse savaş şansı artar
+    if (situation.militaryStrength > 10) {
+        baseChance += 0.2;
+    }
+    
+    return Math.min(baseChance, 0.8); // Maksimum %80
+}
+
+function findBestTarget(aiId, situation) {
+    const potentialTargets = situation.opportunities.length > 0 ? 
+        situation.opportunities : 
+        Object.keys(countriesData).filter(id => 
+            id !== aiId && 
+            countriesData[id].nuts2 && 
+            countriesData[id].nuts2.length > 0
+        );
+    
+    if (potentialTargets.length === 0) return null;
+    
+    // En zayıf hedefi seç
+    return potentialTargets.reduce((best, current) => {
+        const bestStrength = getTotalUnitsForCountry(best);
+        const currentStrength = getTotalUnitsForCountry(current);
+        return currentStrength < bestStrength ? current : best;
     });
 }
 
@@ -1522,6 +1529,197 @@ function closeWarModal() {
     window.currentBattle = null;
 }
 
+// ÜLKE MODALI FONKSİYONLARI - Age of History Tarzı
+function showCountryModal(countryId) {
+    const country = countriesData[countryId];
+    if (!country) return;
+    
+    // Ülke bilgilerini doldur
+    document.getElementById('countryName').textContent = country.name;
+    document.getElementById('countryFlag').textContent = getCountryFlag(countryId);
+    document.getElementById('countryGovernment').textContent = getGovernmentName(country.government || 'dictatorship');
+    document.getElementById('countryLeader').textContent = `Lider: ${getCountryLeader(countryId)}`;
+    
+    // İstatistikleri doldur
+    const totalUnits = getTotalUnitsForCountry(countryId);
+    const population = country.nuts2.length * 1000000; // Her bölge 1 milyon nüfus
+    const economy = country.coins;
+    const military = totalUnits * 10; // Her birlik 10 askeri güç
+    
+    document.getElementById('countryPopulation').textContent = formatNumber(population);
+    document.getElementById('countryEconomy').textContent = formatNumber(economy);
+    document.getElementById('countryMilitary').textContent = formatNumber(military);
+    document.getElementById('countryCapital').textContent = country.capital || 'Bilinmiyor';
+    
+    // Ekonomi sekmesi
+    document.getElementById('countryIncome').textContent = `${Math.floor(country.coins * 0.1)}/tur`;
+    document.getElementById('countryTotalGold').textContent = formatNumber(country.coins);
+    document.getElementById('countryGrowth').textContent = `+${Math.floor(Math.random() * 10 + 5)}%/tur`;
+    
+    // Askeri sekmesi
+    document.getElementById('countryTotalUnits').textContent = totalUnits;
+    document.getElementById('countryMilitaryPower').textContent = totalUnits * 10;
+    document.getElementById('countryDefense').textContent = totalUnits * 5;
+    
+    // Yönetim biçimi seçimini güncelle
+    updateGovernmentSelection(country.government || 'dictatorship');
+    
+    // Modalı göster
+    document.getElementById('countryModal').style.display = 'block';
+}
+
+function closeCountryModal() {
+    document.getElementById('countryModal').style.display = 'none';
+}
+
+function switchTab(tabName) {
+    // Tüm tabları gizle
+    document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    
+    // Tüm tab butonlarını pasif yap
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Seçilen tabı aktif yap
+    document.getElementById(tabName).classList.add('active');
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+}
+
+function changeGovernment(government) {
+    // Yönetim biçimi seçimini güncelle
+    updateGovernmentSelection(government);
+    
+    // Ülke verilerini güncelle
+    const currentCountryId = playerCountryId;
+    if (countriesData[currentCountryId]) {
+        countriesData[currentCountryId].government = government;
+        
+        // Bonusları uygula
+        applyGovernmentBonuses(currentCountryId, government);
+        
+        addNotification(`${getGovernmentName(government)} yönetim biçimine geçildi!`);
+        updateUI();
+    }
+}
+
+function updateGovernmentSelection(government) {
+    // Tüm seçimleri kaldır
+    document.querySelectorAll('.gov-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Seçilen yönetim biçimini işaretle
+    document.querySelector(`[data-government="${government}"]`).classList.add('selected');
+    
+    // Bonusları göster
+    updateGovernmentEffects(government);
+}
+
+function updateGovernmentEffects(government) {
+    const effectsList = document.getElementById('governmentEffects');
+    effectsList.innerHTML = '';
+    
+    const effects = getGovernmentEffects(government);
+    effects.forEach(effect => {
+        const li = document.createElement('li');
+        li.textContent = effect;
+        effectsList.appendChild(li);
+    });
+}
+
+function getGovernmentEffects(government) {
+    const effects = {
+        democracy: ['Ekonomi +30%', 'Askeri üretim -20%', 'Nüfus memnuniyeti +50%'],
+        monarchy: ['Ekonomi +10%', 'Askeri üretim +10%', 'Stabilite +30%'],
+        dictatorship: ['Askeri üretim +30%', 'Ekonomi -20%', 'Nüfus memnuniyeti -30%'],
+        communism: ['Üretim +40%', 'Ekonomi -10%', 'Askeri üretim +20%']
+    };
+    
+    return effects[government] || effects.dictatorship;
+}
+
+function applyGovernmentBonuses(countryId, government) {
+    const country = countriesData[countryId];
+    if (!country) return;
+    
+    // Bonusları uygula
+    switch (government) {
+        case 'democracy':
+            country.coins = Math.floor(country.coins * 1.3);
+            break;
+        case 'monarchy':
+            country.coins = Math.floor(country.coins * 1.1);
+            break;
+        case 'dictatorship':
+            country.coins = Math.floor(country.coins * 0.8);
+            break;
+        case 'communism':
+            country.coins = Math.floor(country.coins * 0.9);
+            break;
+    }
+}
+
+function getCountryFlag(countryId) {
+    const flags = {
+        'GERMAN_REICH': '🇩🇪',
+        'BRITISH_EMPIRE': '🇬🇧',
+        'FRENCH_REPUBLIC': '🇫🇷',
+        'KINGDOM_OF_ITALY': '🇮🇹',
+        'RUSSIA_WEST': '🇷🇺',
+        'RUSSIA_CENTRAL': '🇷🇺',
+        'RUSSIA_EAST': '🇷🇺',
+        'RUSSIA_NORTH': '🇷🇺',
+        'YUGOSLAVIA': '🇷🇸',
+        'CZECHOSLOVAKIA': '🇨🇿',
+        'POLAND': '🇵🇱'
+    };
+    
+    return flags[countryId] || '🏳️';
+}
+
+function getCountryLeader(countryId) {
+    const leaders = {
+        'GERMAN_REICH': 'Adolf Hitler',
+        'BRITISH_EMPIRE': 'Neville Chamberlain',
+        'FRENCH_REPUBLIC': 'Édouard Daladier',
+        'KINGDOM_OF_ITALY': 'Benito Mussolini',
+        'RUSSIA_WEST': 'Joseph Stalin',
+        'RUSSIA_CENTRAL': 'Joseph Stalin',
+        'RUSSIA_EAST': 'Joseph Stalin',
+        'RUSSIA_NORTH': 'Joseph Stalin',
+        'YUGOSLAVIA': 'Peter II',
+        'CZECHOSLOVAKIA': 'Edvard Beneš',
+        'POLAND': 'Ignacy Mościcki'
+    };
+    
+    return leaders[countryId] || 'Bilinmiyor';
+}
+
+function getGovernmentName(government) {
+    const names = {
+        democracy: 'Demokrasi',
+        monarchy: 'Monarşi',
+        dictatorship: 'Diktatörlük',
+        communism: 'Komünizm'
+    };
+    
+    return names[government] || 'Diktatörlük';
+}
+
+function formatNumber(num) {
+    if (num >= 1000000000) {
+        return (num / 1000000000).toFixed(1) + 'B';
+    } else if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+}
+
 // ============================================================================
 // Olay Dinleyicileri
 // ============================================================================
@@ -1543,6 +1741,27 @@ if (document.getElementById('closeWarModalButton')) {
 if (attackButton) {
     attackButton.addEventListener('click', toggleAttackMode);
 }
+
+// Ülke modalı event listeners
+if (document.getElementById('closeCountryModal')) {
+    document.getElementById('closeCountryModal').addEventListener('click', closeCountryModal);
+}
+
+// Tab sistemi
+document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', () => {
+        const tabName = button.getAttribute('data-tab');
+        switchTab(tabName);
+    });
+});
+
+// Yönetim biçimi seçimi
+document.querySelectorAll('.gov-option').forEach(option => {
+    option.addEventListener('click', () => {
+        const government = option.getAttribute('data-government');
+        changeGovernment(government);
+    });
+});
 
 // ============================================================================
 // Gelişmiş AI Management - Age of History Tarzı

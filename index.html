@@ -125,6 +125,140 @@
         </div>
     </div>
 
+    <!-- ÜLKE DETAY MODALI - Age of History Tarzı -->
+    <div id="countryModal" class="modal" style="display: none;">
+        <div class="modal-content country-modal">
+            <div class="country-header">
+                <div class="country-flag" id="countryFlag">🏳️</div>
+                <div class="country-info">
+                    <h2 id="countryName">Ülke Adı</h2>
+                    <p id="countryGovernment">Yönetim Biçimi</p>
+                    <p id="countryLeader">Lider: Adolf Hitler</p>
+                </div>
+                <div class="country-leader-image">
+                    <img id="leaderImage" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxpZGVyPC90ZXh0Pgo8L3N2Zz4K" alt="Lider">
+                </div>
+            </div>
+            
+            <div class="country-tabs">
+                <button class="tab-button active" data-tab="overview">📊 Genel Bakış</button>
+                <button class="tab-button" data-tab="government">🏛️ Yönetim</button>
+                <button class="tab-button" data-tab="economy">💰 Ekonomi</button>
+                <button class="tab-button" data-tab="military">⚔️ Askeri</button>
+                <button class="tab-button" data-tab="diplomacy">🤝 Diplomasi</button>
+            </div>
+            
+            <div class="tab-content">
+                <!-- GENEL BAKIŞ -->
+                <div id="overview" class="tab-panel active">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <h4>👥 Nüfus</h4>
+                            <p id="countryPopulation">0</p>
+                        </div>
+                        <div class="stat-item">
+                            <h4>💰 Ekonomi</h4>
+                            <p id="countryEconomy">0</p>
+                        </div>
+                        <div class="stat-item">
+                            <h4>⚔️ Askeri Güç</h4>
+                            <p id="countryMilitary">0</p>
+                        </div>
+                        <div class="stat-item">
+                            <h4>🏛️ Başkent</h4>
+                            <p id="countryCapital">-</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- YÖNETİM -->
+                <div id="government" class="tab-panel">
+                    <h3>🏛️ Yönetim Biçimi</h3>
+                    <div class="government-options">
+                        <button class="gov-option" data-government="democracy">
+                            🗳️ Demokrasi<br>
+                            <small>+Ekonomi, -Askeri</small>
+                        </button>
+                        <button class="gov-option" data-government="monarchy">
+                            👑 Monarşi<br>
+                            <small>+Denge, +Stabilite</small>
+                        </button>
+                        <button class="gov-option" data-government="dictatorship">
+                            🥷 Diktatörlük<br>
+                            <small>+Askeri, -Ekonomi</small>
+                        </button>
+                        <button class="gov-option" data-government="communism">
+                            ☭ Komünizm<br>
+                            <small>+Üretim, -Özgürlük</small>
+                        </button>
+                    </div>
+                    <div class="government-effects">
+                        <h4>Mevcut Bonuslar:</h4>
+                        <ul id="governmentEffects">
+                            <li>Askeri üretim +20%</li>
+                            <li>Ekonomi -10%</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- EKONOMİ -->
+                <div id="economy" class="tab-panel">
+                    <h3>💰 Ekonomi</h3>
+                    <div class="economy-stats">
+                        <div class="economy-item">
+                            <h4>Altın Geliri</h4>
+                            <p id="countryIncome">0/tur</p>
+                        </div>
+                        <div class="economy-item">
+                            <h4>Toplam Altın</h4>
+                            <p id="countryTotalGold">0</p>
+                        </div>
+                        <div class="economy-item">
+                            <h4>Ekonomik Büyüme</h4>
+                            <p id="countryGrowth">+5%/tur</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ASKERİ -->
+                <div id="military" class="tab-panel">
+                    <h3>⚔️ Askeri</h3>
+                    <div class="military-stats">
+                        <div class="military-item">
+                            <h4>Toplam Birlik</h4>
+                            <p id="countryTotalUnits">0</p>
+                        </div>
+                        <div class="military-item">
+                            <h4>Askeri Güç</h4>
+                            <p id="countryMilitaryPower">0</p>
+                        </div>
+                        <div class="military-item">
+                            <h4>Savunma Gücü</h4>
+                            <p id="countryDefense">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DİPLOMASİ -->
+                <div id="diplomacy" class="tab-panel">
+                    <h3>🤝 Diplomasi</h3>
+                    <div class="diplomacy-relations">
+                        <h4>İlişkiler:</h4>
+                        <div id="countryRelations">
+                            <p>Almanya: Dostane</p>
+                            <p>Fransa: Düşman</p>
+                            <p>İngiltere: Tarafsız</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button id="closeCountryModal">❌ Kapat</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SAVAŞ MODALI - Age of History Tarzı -->
     <div id="warModal" class="modal" style="display:none;">
         <div class="modal-content">
