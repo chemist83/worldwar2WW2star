@@ -852,13 +852,8 @@ function onRegionClick(nutsId) {
                 return;
             }
             
-            resolveCombat(
-                playerCountryId, selectedAttackingRegionNutsId, attackingUnits,
-                targetCountryIdForWar, defendingRegionNutsId, defendingUnits
-            );
-            
-            resetAttackMode(); // Savaş bitti, saldırı modunu kapat
-            addNotification("Saldırı modu kapatıldı.");
+            // Show war modal instead of directly resolving combat
+            showWarModal(selectedAttackingRegionNutsId, defendingRegionNutsId, attackingUnits, defendingUnits);
 
         } else {
             addNotification("Lütfen birim yerleştirmek için kendi bölgelerinize, saldırı için ise parlayan düşman bölgelerine tıklayın.");
@@ -1237,6 +1232,48 @@ function shuffleArray(array) {
 }
 
 // ============================================================================
+// War Modal Functions
+// ============================================================================
+function showWarModal(attackingRegionId, defendingRegionId, attackingUnits, defendingUnits) {
+    const attackingCountry = countriesData[playerCountryId];
+    const defendingCountryId = getCountryIdFromNutsId(defendingRegionId);
+    const defendingCountry = countriesData[defendingCountryId];
+    
+    document.getElementById('warModalTitle').textContent = `${attackingCountry.name} vs ${defendingCountry.name}`;
+    document.getElementById('attackingRegionInfo').textContent = `${attackingRegionId} (${attackingUnits} birim)`;
+    document.getElementById('defendingRegionInfo').textContent = `${defendingRegionId} (${defendingUnits} birim)`;
+    
+    // Store battle data for later use
+    window.currentBattle = {
+        attackingRegionId,
+        defendingRegionId,
+        attackingUnits,
+        defendingUnits,
+        attackingCountryId: playerCountryId,
+        defendingCountryId
+    };
+    
+    document.getElementById('warModal').style.display = 'block';
+}
+
+function conductAttack() {
+    if (!window.currentBattle) return;
+    
+    const { attackingRegionId, defendingRegionId, attackingUnits, defendingUnits, attackingCountryId, defendingCountryId } = window.currentBattle;
+    
+    resolveCombat(attackingCountryId, attackingRegionId, attackingUnits, defendingCountryId, defendingRegionId, defendingUnits);
+    
+    closeWarModal();
+    resetAttackMode();
+    addNotification("Saldırı tamamlandı!");
+}
+
+function closeWarModal() {
+    document.getElementById('warModal').style.display = 'none';
+    window.currentBattle = null;
+}
+
+// ============================================================================
 // Olay Dinleyicileri
 // ============================================================================
 startGameButton.addEventListener('click', initializeGame);
@@ -1244,6 +1281,14 @@ selectCountryButton.addEventListener('click', startGame);
 buyUnitButton.addEventListener('click', buyUnit);
 nextTurnButton.addEventListener('click', nextTurn);
 declareWarButton.addEventListener('click', declareWar);
+
+// War modal event listeners (check if elements exist first)
+if (document.getElementById('conductAttackButton')) {
+    document.getElementById('conductAttackButton').addEventListener('click', conductAttack);
+}
+if (document.getElementById('closeWarModalButton')) {
+    document.getElementById('closeWarModalButton').addEventListener('click', closeWarModal);
+}
 
 // İlk yüklemede UI'ı gizle
 document.addEventListener('DOMContentLoaded', () => {
