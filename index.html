@@ -3,62 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Risk Benzeri Harita Oyunu</title>
+    <title>Harita Fetih Oyunu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div id="start-screen" class="screen active">
-        <h1>Oyuna Hoş Geldiniz!</h1>
-        <input type="text" id="playerNameInput" placeholder="Adınızı Girin">
+    <div id="startScreen">
+        <h1>Harita Fetih Oyununa Hoş Geldiniz!</h1>
+        <label for="playerNameInput">Oyuncu Adınız:</label>
+        <input type="text" id="playerNameInput" placeholder="Adınızı girin">
         <button id="startGameButton">Oyuna Başla</button>
     </div>
 
-    <div id="country-selection-screen" class="screen">
-        <h1>Ülkenizi Seçin</h1>
-        <select id="countrySelect"></select>
-        <button id="selectCountryButton">Ülkeyi Seç</button>
-    </div>
-
-    <div id="game-screen" class="screen">
-        <div class="header">
-            <p>Oyuncu: <span id="playerCountryName"></span> (<span id="playerCoins"></span> Coin | <span id="playerUnits"></span> Birim Hazır)</p>
-            <p>Tur: <span id="currentTurn">1</span></p>
-            <button id="nextTurnButton">Sonraki Tur</button>
-        </div>
-
-        <div class="game-area">
-            <div class="map-container">
-                <object id="gameMap" data="map.svg" type="image/svg+xml"></object>
+    <div id="gameScreen" style="display:none;">
+        <div id="header">
+            <h2 id="welcomeMessage">Hoş Geldiniz!</h2>
+            <div id="gameInfo">
+                <p>Tur: <span id="turnCounter">1</span></p>
+                <p>Coin: <span id="playerCoin">0</span></p>
+                <p>Hazır Birim: <span id="playerUnitsReady">0</span></p>
+                <p>Ülkeniz: <span id="playerCountryName"></span></p>
             </div>
-            <div class="controls">
-                <h2>Kontroller</h2>
-                <div class="control-section">
-                    <h3>Birim Yönetimi</h3>
-                    <p>Birim Fiyatı: <span id="unitPrice"></span> Coin</p>
-                    <button id="buyUnitButton">Birim Satın Al</button>
-                </div>
-                <div class="control-section">
-                    <h3>Savaş İlanı</h3>
-                    <select id="targetCountrySelect"></select>
+            <div id="controls">
+                <h3>Kontroller</h3>
+                <button id="buyUnitButton">Birim Satın Al (20 Coin)</button>
+                <button id="nextTurnButton">Sonraki Tur</button>
+
+                <div class="control-group">
+                    <h4>Savaş İlan Et</h4>
+                    <select id="targetCountrySelect">
+                        </select>
                     <button id="declareWarButton">Savaş İlan Et</button>
                 </div>
             </div>
         </div>
 
-        <div class="notifications">
-            <h2>Bildirimler</h2>
-            <ul id="notificationList"></ul>
+        <div id="mapContainer">
+            <object id="gameMapObject" type="image/svg+xml" data="map.svg"></object>
+            <div id="unitCountsOverlay"></div>
+            </div>
+
+        <div id="notifications">
+            <h3>Bildirimler</h3>
+            <ul id="notificationList">
+                </ul>
         </div>
     </div>
 
-    <div id="warModal" class="modal">
-        <div class="modal-content war-modal-content">
-            <span class="close-button" id="closeWarModal">&times;</span>
-            <h2>Savaş İlanı!</h2>
-            <p>Saldıran Bölge: <span id="attackingRegionName"></span> (<span id="attackingUnits"></span> Birim)</p>
-            <p>Savunan Bölge: <span id="defendingRegionName"></span> (<span id="defendingUnits"></span> Birim)</p>
-            <button id="attackButton">SALDIR!</button>
+    <div id="countrySelectionModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2>Ülkenizi Seçin</h2>
+            <div id="countryList">
+                </div>
+            <button id="selectCountryButton">Ülkeyi Seç</button>
+        </div>
+    </div>
+
+    <div id="warModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2 id="warModalTitle">Savaş Başladı!</h2>
+            <p>Saldıran Bölge: <span id="attackingRegionInfo"></span></p>
+            <p>Savunan Bölge: <span id="defendingRegionInfo"></span></p>
+            <button id="conductAttackButton">SALDIRIYI GERÇEKLEŞTİR</button>
+            <button id="closeWarModalButton">Kapat</button>
         </div>
     </div>
 
