@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'EE00': ['LV00', 'RU-LEN'],
         'LV00': ['EE00', 'LT00', 'RU-PSK', 'BY10'],
         'LT00': ['LV00', 'PL21', 'BY20', 'RU-KGD'],
-        'GR11': ['GR12', 'GR13', 'YU', 'MK00'], // Yunanistan'dan Yugoslavya'ya komşuluk
+        'GR11': ['GR12', 'GR13', 'MK00'], // Yunanistan'dan Makedonya'ya (YU'nun parçası)
         'ITG2': ['ITG1', 'SI03', 'AT31'], // İtalya'dan SI03'e (artık YU'nun bir parçası)
         'FRC1': ['FRC2', 'DE60', 'LU00'],
         'AT34': ['AT12', 'AT13', 'AT31', 'SI03', 'HR03', 'HU10'], // Avusturya'dan Yugoslavya (SI, HR)
@@ -582,17 +582,17 @@ document.addEventListener('DOMContentLoaded', () => {
         'BG42': ['BG31', 'GR24', 'TR10', 'RO42', 'MK00', 'RS'], // Bulgaristan'dan Yugoslavya (MK, RS)
         'AL01': ['AL02', 'MK00', 'GR11', 'ME00', 'RS'], // Arnavutluk'tan Yugoslavya (MK, ME, RS)
 
-        // Yugoslavya'nın iç komşulukları (eski ülkelerin birleşimi)
-        // Önemli: Haritanızdaki gerçek komşuluklara göre burayı doğru doldurun!
+        // Yugoslavya'nın iç komşulukları (eski ülkelerin birleşimi) - Örnekler
+        // Burayı haritanızdaki gerçek NUTS ID'lere ve komşuluklara göre doldurmanız çok önemli!
         'SI03': ['SI04', 'HR03', 'AT34', 'ITG2'],
         'SI04': ['SI03', 'HR03', 'HR04', 'AT34'],
-        'HR03': ['HR04', 'SI03', 'SI04', 'BA', 'RS', 'HU33'], // Örnek
+        'HR03': ['HR04', 'SI03', 'SI04', 'BA', 'RS', 'HU33'],
         'HR04': ['HR03', 'BA', 'RS', 'ME00'],
-        'BA': ['HR03', 'HR04', 'RS', 'ME00', 'MK00'], // Bosna-Hersek ve komşuları
-        'RS': ['BA', 'HR03', 'HR04', 'ME00', 'MK00', 'HU33', 'RO42', 'BG42', 'AL01'], // Sırbistan ve komşuları
-        'ME00': ['RS', 'BA', 'HR04', 'AL01'], // Karadağ ve komşuları
-        'MK00': ['RS', 'BA', 'GR11', 'AL01', 'BG42', 'XK'], // Kuzey Makedonya ve komşuları
-        'XK': ['MK00', 'RS', 'AL01'], // Kosova ve komşuları (eğer haritanızda ayrı bir ID ise)
+        'BA': ['HR03', 'HR04', 'RS', 'ME00', 'MK00'],
+        'RS': ['BA', 'HR03', 'HR04', 'ME00', 'MK00', 'HU33', 'RO42', 'BG42', 'AL01', 'XK'],
+        'ME00': ['RS', 'BA', 'HR04', 'AL01'],
+        'MK00': ['RS', 'BA', 'GR11', 'AL01', 'BG42', 'XK'],
+        'XK': ['MK00', 'RS', 'AL01'],
 
         // ... buraya diğer tüm NUTS2 bölgelerinin komşularını eklemeniz gerekmektedir.
         // Komşuluk ilişkileri çift yönlü olmalıdır (A-B komşuysa, B-A da komşudur)
@@ -1079,7 +1079,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- AI Kontrolü (Basit Saldırı ve Fetih Örneği) ---
     function runAILogic() {
         const WAR_CHANCE_BASE = 0.15; // AI'nın savaş ilan etme temel şansı
-        const CONQUER_CHANCE_PER_UNIT_ADVANTAGE = 0.05; // Birim avantajına göre fetih şansı artışı
+        // const CONQUER_CHANCE_PER_UNIT_ADVANTAGE = 0.05; // Şu an kullanılmıyor ama savaş mantığına eklenebilir
 
         // AI'ların saldırı sırasını rastgele karıştır (aynı anda saldırmamaları için)
         const aiCountryIds = Object.keys(countriesData).filter(id => !countriesData[id].isPlayer);
@@ -1090,7 +1090,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!aiCountry || aiCountry.nuts2.length === 0) return; // Ülke daha önce silinmiş veya toprağı yoksa devam etme
 
             // AI birim satın alabilir (her 3 turda bir 1 birim alır ve yeterli coini varsa)
-            if (currentTurn % 3 === 0 && aiCountry.coins >= UNIT_COST) {
+            // Ya da her tur %30 ihtimalle 1 birim alır
+            if (Math.random() < 0.30 && aiCountry.coins >= UNIT_COST) {
                 aiCountry.coins -= UNIT_COST;
                 aiCountry.units += 1; // Satın alınan birimler, birim havuzuna eklenir
                 addNotification(`${aiCountry.name} 1 birim satın aldı.`, 'info');
@@ -1163,4 +1164,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Eğer hedef ülkenin hiç bölgesi kalmadıysa, yok et
                     if (targetCountry.nuts2.length === 0) {
-                        addNotification(`${targetCountry.name} ül
+                        addNotification(`${targetCountry.name} ülkesi oyundan silindi!`, 'warning');
+                        delete countriesData[targetCountryId]; // Ülkeyi ülkeler listesinden kaldır
+                        populateTargetCountrySelection(); // Savaş ilan hedef listesini güncelle
+                    }
+
+                    // Harita renklerini ve birim sayılarını güncelle
+                    applyCountryColorsToMap();
+                    updateUnitDisplays();
+                } else {
+                    addNotification(`${aiCountry.name} ülkesinin saldırısı ${targetCountry.name} ülkesine karşı BAŞARISIZ OLDU!`, 'info');
+                    territoryUnits[attackingRegionNutsId] = Math.max(0, aiAttackingUnits - Math.floor(targetDefendingUnits / 2));
+                    territoryUnits[defendingRegionNutsId] = Math.max(0, targetDefendingUnits - Math.floor(aiAttackingUnits / 2));
+                    applyCountryColorsToMap(); // Eski renklerine döner
+                    updateUnitDisplays();
+                }
+            }
+        });
+    }
+
+    // --- Bildirim Sistemi ---
+    function addNotification(message, type = 'default') {
+        const li = document.createElement('li');
+        li.textContent = message;
+        li.className = `notification-${type}`; // Stil için sınıf ekle
+
+        notificationList.prepend(li); // En yeni bildirimi üste ekle
+        if (notificationList.children.length > 15) { // Çok fazla bildirim birikmesini önle
+            notificationList.removeChild(notificationList.lastChild);
+        }
+    }
+
+    // Sayfa yüklendiğinde SVG'nin hazır olup olmadığını kontrol et
+    // Eğer SVG zaten yüklendiyse, load olayını manuel olarak tetikle
+    if (gameMapObject.contentDocument && gameMapObject.contentDocument.documentElement && gameMapObject.contentDocument.documentElement.nodeName === 'svg') {
+        gameMapObject.dispatchEvent(new Event('load'));
+    }
+});
