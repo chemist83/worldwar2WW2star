@@ -47,97 +47,87 @@ const selectCountryButton = document.getElementById('selectCountryButton');
 const targetCountrySelect = document.getElementById('targetCountrySelect');
 const declareWarButton = document.getElementById('declareWarButton');
 
+// War modal elements
+const warModal = document.getElementById('warModal');
+const warModalTitle = document.getElementById('warModalTitle');
+const attackingRegionInfo = document.getElementById('attackingRegionInfo');
+const defendingRegionInfo = document.getElementById('defendingRegionInfo');
+const conductAttackButton = document.getElementById('conductAttackButton');
+const closeWarModalButton = document.getElementById('closeWarModalButton');
+
 
 // ============================================================================
 // Oyun Verileri (Tüm NUTS-2 Kodları ve UK Dahil)
 // ============================================================================
 let countriesData = {
-    // Avusturya (AT)
+    // Avusturya (AT) - SVG'de mevcut
     'AT': { name: 'Avusturya', nuts2: ['AT11', 'AT12', 'AT13', 'AT21', 'AT22', 'AT31', 'AT32', 'AT33', 'AT34'], isPlayer: false, color: '#FF0000', coins: INITIAL_AI_COINS, units: 0 },
-    // Belçika (BE)
+    // Belçika (BE) - SVG'de mevcut
     'BE': { name: 'Belçika', nuts2: ['BE10', 'BE21', 'BE22', 'BE23', 'BE24', 'BE25', 'BE31', 'BE32', 'BE33', 'BE34', 'BE35'], isPlayer: false, color: '#0000FF', coins: INITIAL_AI_COINS, units: 0 },
-    // Bulgaristan (BG)
+    // Bulgaristan (BG) - SVG'de mevcut
     'BG': { name: 'Bulgaristan', nuts2: ['BG31', 'BG32', 'BG33', 'BG34', 'BG41', 'BG42'], isPlayer: false, color: '#00FF00', coins: INITIAL_AI_COINS, units: 0 },
-    // İsviçre (CH)
+    // İsviçre (CH) - SVG'de mevcut
     'CH': { name: 'İsviçre', nuts2: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05', 'CH06', 'CH07'], isPlayer: false, color: '#DC143C', coins: INITIAL_AI_COINS, units: 0 },
-    // Kıbrıs (CY)
+    // Kıbrıs (CY) - SVG'de mevcut
     'CY': { name: 'Kıbrıs', nuts2: ['CY00'], isPlayer: false, color: '#19cf0c', coins: INITIAL_AI_COINS, units: 0 },
-    // Çekya (CZ)
+    // Çekya (CZ) - SVG'de mevcut
     'CZ': { name: 'Çekya', nuts2: ['CZ01', 'CZ02', 'CZ03', 'CZ04', 'CZ05', 'CZ06', 'CZ07', 'CZ08'], isPlayer: false, color: '#4682B4', coins: INITIAL_AI_COINS, units: 0 },
-    // Almanya (DE)
-    'DE': { name: 'Almanya', nuts2: ['DE11', 'DE12', 'DE13', 'DE14', 'DE21', 'DE22', 'DE23', 'DE24', 'DE25', 'DE26', 'DE27', 'DE30', 'DE40', 'DE50', 'DE60', 'DE71', 'DE72', 'DE73', 'DE80', 'DE91', 'DE92', 'DE93', 'DE94', 'DEA1', 'DEA2', 'DEA3', 'DEA4', 'DEA5', 'DEB1', 'DEB2', 'DEB3', 'DEC0', 'DED2', 'DED4', 'DED5', 'DED6', 'DEG0'], isPlayer: false, color: '#FFFF00', coins: INITIAL_AI_COINS, units: 0 },
-    // Danimarka (DK)
+    // Almanya (DE) - SVG'deki gerçek kodlar
+    'DE': { name: 'Almanya', nuts2: ['DE11', 'DE12', 'DE13', 'DE14', 'DE21', 'DE22', 'DE23', 'DE24', 'DE25', 'DE26', 'DE27', 'DE30', 'DE41', 'DE42', 'DE50', 'DE60', 'DE71', 'DE72', 'DE73', 'DE80', 'DE91', 'DE92', 'DE93', 'DE94', 'DEA1', 'DEA2', 'DEA3', 'DEA4', 'DEA5', 'DEB1', 'DEB2', 'DEB3', 'DEC0', 'DED1', 'DED2', 'DED3', 'DEE0', 'DEF0', 'DEG0'], isPlayer: false, color: '#FFFF00', coins: INITIAL_AI_COINS, units: 0 },
+    // Danimarka (DK) - SVG'de mevcut
     'DK': { name: 'Danimarka', nuts2: ['DK01', 'DK02', 'DK03', 'DK04', 'DK05'], isPlayer: false, color: '#CD5C5C', coins: INITIAL_AI_COINS, units: 0 },
-    // Estonya (EE)
+    // Estonya (EE) - SVG'de mevcut
     'EE': { name: 'Estonya', nuts2: ['EE00'], isPlayer: false, color: '#FFFAF0', coins: INITIAL_AI_COINS, units: 0 },
-    // İspanya (ES)
-    'ES': { name: 'İspanya', nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62', 'ES63', 'ES64', 'ES70'], isPlayer: false, color: '#FFA500', coins: INITIAL_AI_COINS, units: 0 },
-    // Finlandiya (FI)
-    'FI': { name: 'Finlandiya', nuts2: ['FI19', 'FI1B', 'FI1C', 'FI20'], isPlayer: false, color: '#AFEEEE', coins: INITIAL_AI_COINS, units: 0 },
-    // Fransa (FR)
-    'FR': { name: 'Fransa', nuts2: ['FR10', 'FRB0', 'FRC1', 'FRC2', 'FRD1', 'FRD2', 'FRE1', 'FRE2', 'FRF1', 'FRF2', 'FRF3'], isPlayer: false, color: '#FF4500', coins: INITIAL_AI_COINS, units: 0 },
-    // Yunanistan (EL)
-    'EL': { name: 'Yunanistan', nuts2: ['EL30', 'EL41', 'EL42', 'EL43', 'EL51', 'EL52', 'EL53', 'EL54'], isPlayer: false, color: '#ADFF2F', coins: INITIAL_AI_COINS, units: 0 },
-    // Hırvatistan (HR)
-    'HR': { name: 'Hırvatistan', nuts2: ['HR03', 'HR04'], isPlayer: false, color: '#9ACD32', coins: INITIAL_AI_COINS, units: 0 },
-    // Macaristan (HU)
+    // İspanya (ES) - SVG'deki gerçek kodlar
+    'ES': { name: 'İspanya', nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62'], isPlayer: false, color: '#FFA500', coins: INITIAL_AI_COINS, units: 0 },
+    // Finlandiya (FI) - SVG'deki gerçek kodlar
+    'FI': { name: 'Finlandiya', nuts2: ['FI13', 'FI18', 'FI19', 'FI1A', 'FI20'], isPlayer: false, color: '#AFEEEE', coins: INITIAL_AI_COINS, units: 0 },
+    // Fransa (FR) - SVG'deki gerçek kodlar
+    'FR': { name: 'Fransa', nuts2: ['FR10', 'FR21', 'FR22', 'FR23', 'FR24', 'FR25', 'FR26', 'FR30', 'FR41', 'FR42', 'FR43', 'FR51', 'FR52', 'FR53', 'FR61', 'FR62', 'FR63', 'FR71', 'FR72', 'FR81', 'FR82', 'FR83'], isPlayer: false, color: '#FF4500', coins: INITIAL_AI_COINS, units: 0 },
+    // Yunanistan (GR) - SVG'de GR prefixiyle mevcut
+    'GR': { name: 'Yunanistan', nuts2: ['GR11', 'GR12', 'GR13', 'GR14', 'GR21', 'GR22', 'GR23', 'GR24', 'GR25', 'GR30', 'GR41', 'GR42', 'GR43'], isPlayer: false, color: '#ADFF2F', coins: INITIAL_AI_COINS, units: 0 },
+    // Hırvatistan (HR) - SVG'deki gerçek kodlar
+    'HR': { name: 'Hırvatistan', nuts2: ['HR01', 'HR02', 'HR03'], isPlayer: false, color: '#9ACD32', coins: INITIAL_AI_COINS, units: 0 },
+    // Macaristan (HU) - SVG'de mevcut
     'HU': { name: 'Macaristan', nuts2: ['HU10', 'HU21', 'HU22', 'HU23', 'HU31', 'HU32', 'HU33'], isPlayer: false, color: '#FFC0CB', coins: INITIAL_AI_COINS, units: 0 },
-    // İzlanda (IS)
+    // İzlanda (IS) - SVG'de mevcut
     'IS': { name: 'İzlanda', nuts2: ['IS00'], isPlayer: false, color: '#A9A9A9', coins: INITIAL_AI_COINS, units: 0 },
-    // İrlanda (IE)
-    'IE': { name: 'İrlanda', nuts2: ['IE04', 'IE05', 'IE06'], isPlayer: false, color: '#228B22', coins: INITIAL_AI_COINS, units: 0 },
-    // İtalya (IT)
-    'IT': { name: 'İtalya', nuts2: ['ITC1', 'ITC2', 'ITC3', 'ITC4', 'ITC5', 'ITD1', 'ITD2', 'ITD3', 'ITD4', 'ITE1', 'ITE2', 'ITE3', 'ITE4', 'ITF1', 'ITF2', 'ITF3', 'ITF4', 'ITF5', 'ITG1', 'ITG2'], isPlayer: false, color: '#00FF00', coins: INITIAL_AI_COINS, units: 0 },
-    // Letonya (LV)
+    // İrlanda (IE) - SVG'deki gerçek kodlar
+    'IE': { name: 'İrlanda', nuts2: ['IE01', 'IE02'], isPlayer: false, color: '#228B22', coins: INITIAL_AI_COINS, units: 0 },
+    // İtalya (IT) - SVG'deki gerçek kodlar
+    'IT': { name: 'İtalya', nuts2: ['ITC1', 'ITC2', 'ITC3', 'ITC4', 'ITD1', 'ITD2', 'ITD3', 'ITD4', 'ITD5', 'ITE1', 'ITE2', 'ITE3', 'ITE4', 'ITF1', 'ITF2', 'ITF3', 'ITF4', 'ITF5', 'ITF6', 'ITG1', 'ITG2'], isPlayer: false, color: '#00FF00', coins: INITIAL_AI_COINS, units: 0 },
+    // Letonya (LV) - SVG'de mevcut
     'LV': { name: 'Letonya', nuts2: ['LV00'], isPlayer: false, color: '#DEB887', coins: INITIAL_AI_COINS, units: 0 },
-    // Litvanya (LT)
-    'LT': { name: 'Litvanya', nuts2: ['LT01', 'LT02'], isPlayer: false, color: '#FFD700', coins: INITIAL_AI_COINS, units: 0 },
-    // Lüksemburg (LU)
+    // Litvanya (LT) - SVG'deki gerçek kod
+    'LT': { name: 'Litvanya', nuts2: ['LT00'], isPlayer: false, color: '#FFD700', coins: INITIAL_AI_COINS, units: 0 },
+    // Lüksemburg (LU) - SVG'de mevcut
     'LU': { name: 'Lüksemburg', nuts2: ['LU00'], isPlayer: false, color: '#800080', coins: INITIAL_AI_COINS, units: 0 },
-    // Karadağ (ME)
-    'ME': { name: 'Karadağ', nuts2: ['ME00'], isPlayer: false, color: '#CD853F', coins: INITIAL_AI_COINS, units: 0 },
-    // Malta (MT)
-    'MT': { name: 'Malta', nuts2: ['MT00'], isPlayer: false, color: '#D3D3D3', coins: INITIAL_AI_COINS, units: 0 },
-    // Hollanda (NL)
-    'NL': { name: 'Hollanda', nuts2: ['NL11', 'NL12', 'NL13', 'NL21', 'NL22', 'NL23', 'NL31', 'NL32', 'NL33', 'NL34'], isPlayer: false, color: '#DAA520', coins: INITIAL_AI_COINS, units: 0 },
-    // Norveç (NO)
-    'NO': { name: 'Norveç', nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07', 'NO08'], isPlayer: false, color: '#B0C4DE', coins: INITIAL_AI_COINS, units: 0 },
-    // Polonya (PL)
-    'PL': { name: 'Polonya', nuts2: ['PL21', 'PL22', 'PL41', 'PL42', 'PL43', 'PL51', 'PL52', 'PL61', 'PL62', 'PL63', 'PL71', 'PL72', 'PL81', 'PL82', 'PL84', 'PL91', 'PL92'], isPlayer: false, color: '#800080', coins: INITIAL_AI_COINS, units: 0 },
-    // Portekiz (PT)
-    'PT': { name: 'Portekiz', nuts2: ['PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20', 'PT30'], isPlayer: false, color: '#8B4513', coins: INITIAL_AI_COINS, units: 0 },
-    // Romanya (RO)
-    'RO': { name: 'Romanya', nuts2: ['RO11', 'RO12', 'RO21', 'RO22', 'RO31', 'RO32', 'RO41', 'RO42'], isPlayer: false, color: '#ADD8E6', coins: INITIAL_AI_COINS, units: 0 },
-    // Sırbistan (RS)
-    'RS': { name: 'Sırbistan', nuts2: ['RS11', 'RS12', 'RS21', 'RS22'], isPlayer: false, color: '#483D8B', coins: INITIAL_AI_COINS, units: 0 },
-    // Slovakya (SK)
-    'SK': { name: 'Slovakya', nuts2: ['SK01', 'SK02', 'SK03', 'SK04'], isPlayer: false, color: '#BA55D3', coins: INITIAL_AI_COINS, units: 0 },
-    // Slovenya (SI)
-    'SI': { name: 'Slovenya', nuts2: ['SI03', 'SI04'], isPlayer: false, color: '#66CDAA', coins: INITIAL_AI_COINS, units: 0 },
-    // İsveç (SE)
-    'SE': { name: 'İsveç', nuts2: ['SE11', 'SE12', 'SE21', 'SE22', 'SE23', 'SE31', 'SE32', 'SE33'], isPlayer: false, color: '#87CEEB', coins: INITIAL_AI_COINS, units: 0 },
-    // Türkiye (TR)
-    'TR': { name: 'Türkiye', nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3'], isPlayer: false, color: '#FF4500', coins: INITIAL_AI_COINS, units: 0 },
-    // Bosna-Hersek (BA)
-    'BA': { name: 'Bosna-Hersek', nuts2: ['BA01', 'BA02'], isPlayer: false, color: '#4B0082', coins: INITIAL_AI_COINS, units: 0 },
-    // Kuzey Makedonya (MK)
+    // Kuzey Makedonya (MK) - SVG'de mevcut
     'MK': { name: 'Kuzey Makedonya', nuts2: ['MK00'], isPlayer: false, color: '#FF6347', coins: INITIAL_AI_COINS, units: 0 },
-    // EKLEDİĞİM DİĞER KOMŞU ÜLKELER (Eğer SVG'nizde varsa tutun, yoksa silebilirsiniz)
-    'AL': { name: 'Arnavutluk', nuts2: ['AL00'], isPlayer: false, color: '#8B0000', coins: INITIAL_AI_COINS, units: 0 }, // Varsayımsal tek NUTS ID
-    'MD': { name: 'Moldova', nuts2: ['MD00'], isPlayer: false, color: '#98FB98', coins: INITIAL_AI_COINS, units: 0 }, // Varsayımsal tek NUTS ID
-    'UA': { name: 'Ukrayna', nuts2: ['UA30', 'UA40', 'UA50'], isPlayer: false, color: '#DAA520', coins: INITIAL_AI_COINS, units: 0 }, // Varsayımsal NUTS ID'leri
-    'BY': { name: 'Belarus', nuts2: ['BY00'], isPlayer: false, color: '#BDB76B', coins: INITIAL_AI_COINS, units: 0 }, // Varsayımsal tek NUTS ID
-    'RU': { name: 'Rusya', nuts2: ['RU00'], isPlayer: false, color: '#006400', coins: INITIAL_AI_COINS, units: 0 }, // Varsayımsal tek NUTS ID
-
-    // YENİ EKLENEN: Birleşik Krallık (UK)
-    'UK': { name: 'Birleşik Krallık', nuts2: [
-        'UKC1', 'UKC2', 'UKD1', 'UKD3', 'UKD4', 'UKD6', 'UKD7',
-        'UKE1', 'UKE2', 'UKE3', 'UKE4', 'UKF1', 'UKF2', 'UKF3',
-        'UKG1', 'UKG2', 'UKG3', 'UKH1', 'UKH2', 'UKH3', 'UKI1',
-        'UKI2', 'UKJ1', 'UKJ2', 'UKJ3', 'UKJ4', 'UKK1', 'UKK2',
-        'UKK3', 'UKK4', 'UKL1', 'UKL2', 'UKM2', 'UKM3', 'UKM5',
-        'UKM6', 'UKN0'
-    ], isPlayer: false, color: '#8A2BE2', coins: INITIAL_AI_COINS, units: 0 }, // Mor tonu
+    // Malta (MT) - SVG'de mevcut
+    'MT': { name: 'Malta', nuts2: ['MT00'], isPlayer: false, color: '#D3D3D3', coins: INITIAL_AI_COINS, units: 0 },
+    // Hollanda (NL) - SVG'deki gerçek kodlar
+    'NL': { name: 'Hollanda', nuts2: ['NL11', 'NL12', 'NL13', 'NL21', 'NL22', 'NL23', 'NL31', 'NL32', 'NL33', 'NL34', 'NL41', 'NL42'], isPlayer: false, color: '#DAA520', coins: INITIAL_AI_COINS, units: 0 },
+    // Norveç (NO) - SVG'deki gerçek kodlar
+    'NO': { name: 'Norveç', nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07'], isPlayer: false, color: '#B0C4DE', coins: INITIAL_AI_COINS, units: 0 },
+    // Polonya (PL) - SVG'deki gerçek kodlar
+    'PL': { name: 'Polonya', nuts2: ['PL11', 'PL12', 'PL21', 'PL22', 'PL31', 'PL32', 'PL33', 'PL34', 'PL41', 'PL42', 'PL43', 'PL51', 'PL52', 'PL61', 'PL62', 'PL63'], isPlayer: false, color: '#800080', coins: INITIAL_AI_COINS, units: 0 },
+    // Portekiz (PT) - SVG'deki gerçek kodlar
+    'PT': { name: 'Portekiz', nuts2: ['PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20'], isPlayer: false, color: '#8B4513', coins: INITIAL_AI_COINS, units: 0 },
+    // Romanya (RO) - SVG'de mevcut
+    'RO': { name: 'Romanya', nuts2: ['RO11', 'RO12', 'RO21', 'RO22', 'RO31', 'RO32', 'RO41', 'RO42'], isPlayer: false, color: '#ADD8E6', coins: INITIAL_AI_COINS, units: 0 },
+    // Slovakya (SK) - SVG'de mevcut
+    'SK': { name: 'Slovakya', nuts2: ['SK01', 'SK02', 'SK03', 'SK04'], isPlayer: false, color: '#BA55D3', coins: INITIAL_AI_COINS, units: 0 },
+    // Slovenya (SI) - SVG'deki gerçek kodlar
+    'SI': { name: 'Slovenya', nuts2: ['SI01', 'SI02'], isPlayer: false, color: '#66CDAA', coins: INITIAL_AI_COINS, units: 0 },
+    // İsveç (SE) - SVG'de mevcut
+    'SE': { name: 'İsveç', nuts2: ['SE11', 'SE12', 'SE21', 'SE22', 'SE23', 'SE31', 'SE32', 'SE33'], isPlayer: false, color: '#87CEEB', coins: INITIAL_AI_COINS, units: 0 },
+    // Türkiye (TR) - SVG'de mevcut
+    'TR': { name: 'Türkiye', nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3'], isPlayer: false, color: '#FF4500', coins: INITIAL_AI_COINS, units: 0 },
+    // Birleşik Krallık (UK) - SVG'deki gerçek kodlar
+    'UK': { name: 'Birleşik Krallık', nuts2: ['UKC1', 'UKC2', 'UKD1', 'UKD2', 'UKD3', 'UKD4', 'UKD5', 'UKE1', 'UKE2', 'UKE3', 'UKE4', 'UKF1', 'UKF2', 'UKF3', 'UKG1', 'UKG2', 'UKG3', 'UKH1', 'UKH2', 'UKH3', 'UKI1', 'UKI2', 'UKJ1', 'UKJ2', 'UKJ3', 'UKJ4', 'UKK1', 'UKK2', 'UKK3', 'UKK4', 'UKL1', 'UKL2', 'UKM2', 'UKM3', 'UKM5', 'UKM6', 'UKN0'], isPlayer: false, color: '#8A2BE2', coins: INITIAL_AI_COINS, units: 0 },
+    // Liechtenstein (LI) - SVG'de mevcut
+    'LI': { name: 'Liechtenstein', nuts2: ['LI00'], isPlayer: false, color: '#DDA0DD', coins: INITIAL_AI_COINS, units: 0 }
 };
 
 // NUTS Bölgeleri ve Komşulukları (Tüm Ülkeler ve UK Dahil)
@@ -852,13 +842,8 @@ function onRegionClick(nutsId) {
                 return;
             }
             
-            resolveCombat(
-                playerCountryId, selectedAttackingRegionNutsId, attackingUnits,
-                targetCountryIdForWar, defendingRegionNutsId, defendingUnits
-            );
-            
-            resetAttackMode(); // Savaş bitti, saldırı modunu kapat
-            addNotification("Saldırı modu kapatıldı.");
+            // Show war modal instead of directly resolving combat
+            showWarModal(selectedAttackingRegionNutsId, defendingRegionNutsId, attackingUnits, defendingUnits);
 
         } else {
             addNotification("Lütfen birim yerleştirmek için kendi bölgelerinize, saldırı için ise parlayan düşman bölgelerine tıklayın.");
@@ -1237,6 +1222,52 @@ function shuffleArray(array) {
 }
 
 // ============================================================================
+// War Modal Functions
+// ============================================================================
+function showWarModal(attackingRegionId, defendingRegionId, attackingUnits, defendingUnits) {
+    const attackingCountry = countriesData[playerCountryId];
+    const defendingCountryId = getCountryIdFromNutsId(defendingRegionId);
+    const defendingCountry = countriesData[defendingCountryId];
+    
+    warModalTitle.textContent = 'Savaş Başladı!';
+    attackingRegionInfo.textContent = `${attackingRegionId} (${attackingUnits} birim)`;
+    defendingRegionInfo.textContent = `${defendingRegionId} (${defendingUnits} birim)`;
+    
+    // Store attack data for conduct attack function
+    warModal.dataset.attackingRegion = attackingRegionId;
+    warModal.dataset.defendingRegion = defendingRegionId;
+    warModal.dataset.attackingUnits = attackingUnits;
+    warModal.dataset.defendingUnits = defendingUnits;
+    warModal.dataset.defendingCountryId = defendingCountryId;
+    
+    warModal.style.display = 'flex';
+}
+
+function conductAttack() {
+    const attackingRegionId = warModal.dataset.attackingRegion;
+    const defendingRegionId = warModal.dataset.defendingRegion;
+    const attackingUnits = parseInt(warModal.dataset.attackingUnits);
+    const defendingUnits = parseInt(warModal.dataset.defendingUnits);
+    const defendingCountryId = warModal.dataset.defendingCountryId;
+    
+    // Perform the combat
+    resolveCombat(
+        playerCountryId, attackingRegionId, attackingUnits,
+        defendingCountryId, defendingRegionId, defendingUnits
+    );
+    
+    // Close modal and reset attack mode
+    closeWarModal();
+    resetAttackMode();
+    updateUI();
+}
+
+function closeWarModal() {
+    warModal.style.display = 'none';
+    clearHighlights();
+}
+
+// ============================================================================
 // Olay Dinleyicileri
 // ============================================================================
 startGameButton.addEventListener('click', initializeGame);
@@ -1244,6 +1275,14 @@ selectCountryButton.addEventListener('click', startGame);
 buyUnitButton.addEventListener('click', buyUnit);
 nextTurnButton.addEventListener('click', nextTurn);
 declareWarButton.addEventListener('click', declareWar);
+
+// War modal event listeners (check if elements exist first)
+if (document.getElementById('conductAttackButton')) {
+    document.getElementById('conductAttackButton').addEventListener('click', conductAttack);
+}
+if (document.getElementById('closeWarModalButton')) {
+    document.getElementById('closeWarModalButton').addEventListener('click', closeWarModal);
+}
 
 // İlk yüklemede UI'ı gizle
 document.addEventListener('DOMContentLoaded', () => {
