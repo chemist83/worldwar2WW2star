@@ -10,10 +10,19 @@ const STARTING_UNITS_PER_REGION = 2; // Başlangıçta her bölgede 2 birim var
 
 // AI Personality Types - Age of History tarzı
 const AI_PERSONALITIES = {
-    AGGRESSIVE: { warChance: 0.3, expansionFocus: 0.8, defenseFocus: 0.2 },
-    DEFENSIVE: { warChance: 0.1, expansionFocus: 0.3, defenseFocus: 0.7 },
-    BALANCED: { warChance: 0.2, expansionFocus: 0.5, defenseFocus: 0.5 },
-    EXPANSIONIST: { warChance: 0.25, expansionFocus: 0.9, defenseFocus: 0.1 }
+    AGGRESSIVE: { warChance: 0.3, expansionFocus: 0.8, defenseFocus: 0.2, buildChance: 0.7 },
+    DEFENSIVE: { warChance: 0.1, expansionFocus: 0.3, defenseFocus: 0.7, buildChance: 0.9 },
+    BALANCED: { warChance: 0.2, expansionFocus: 0.5, defenseFocus: 0.5, buildChance: 0.6 },
+    EXPANSIONIST: { warChance: 0.25, expansionFocus: 0.9, defenseFocus: 0.1, buildChance: 0.8 }
+};
+
+// Government Types - Age of History tarzı
+const GOVERNMENT_TYPES = {
+    DEMOCRACY: { name: 'Demokrasi', incomeBonus: 1.2, stabilityBonus: 1.3, militaryPenalty: 0.9 },
+    DICTATORSHIP: { name: 'Diktatörlük', incomeBonus: 0.8, stabilityBonus: 0.7, militaryBonus: 1.4 },
+    MONARCHY: { name: 'Monarşi', incomeBonus: 1.1, stabilityBonus: 1.2, militaryBonus: 1.1 },
+    COMMUNISM: { name: 'Komünizm', incomeBonus: 1.0, stabilityBonus: 1.1, militaryBonus: 1.3 },
+    FASCISM: { name: 'Faşizm', incomeBonus: 0.9, stabilityBonus: 0.8, militaryBonus: 1.5 }
 };
 
 let playerName = '';
@@ -35,6 +44,10 @@ let victoryConditions = {
     territoryControl: 0.6, // %60 toprak kontrolü
     economicDominance: 10000 // 10000 coin
 };
+
+// Country click menu state
+let selectedCountryForMenu = null;
+let countryMenuOpen = false;
 
 // ============================================================================
 // DOM Elementleri
@@ -63,21 +76,87 @@ const targetCountrySelect = document.getElementById('targetCountrySelect');
 const declareWarButton = document.getElementById('declareWarButton');
 
 // ============================================================================
-// Gelişmiş Ülke Verileri - Tüm SVG Bölgeleri İçin Güncellenmiş
+// Gelişmiş Ülke Verileri - RUSYA 4 PARÇAYA BÖLÜNDÜ
 // ============================================================================
 let countriesData = {
-    // Sovyet Sosyalist Cumhuriyetler Birliği (USSR)
-    'USSR': { 
-        name: 'Sovyet Sosyalist Cumhuriyetler Birliği', 
-        nuts2: ['EE00', 'LV00', 'LT00', 'FI13', 'FI18', 'FI19', 'FI1A', 'FI20'], // Balık ülkeleri ve Finlandiya'nın doğusu temsili
+    // Batı Rusya (Western Russia)
+    'WESTERN_RUSSIA': { 
+        name: 'Batı Rusya', 
+        nuts2: ['EE00', 'LV00', 'LT00', 'FI13', 'FI18', 'FI19', 'FI1A', 'FI20'], // Baltık ülkeleri ve Finlandiya'nın doğusu
         isPlayer: false, 
         color: '#CC0000', 
-        coins: INITIAL_AI_COINS * 2, // Büyük güç
+        coins: INITIAL_AI_COINS * 1.5,
         units: 0,
         personality: 'AGGRESSIVE',
         capital: 'LV00', // Moskova temsili
         era: '1936',
-        type: 'major_power'
+        type: 'major_power',
+        government: 'COMMUNISM',
+        leader: 'Joseph Stalin',
+        flag: '🇷🇺',
+        population: 45000000,
+        stability: 0.8,
+        technology: 0.7
+    },
+    
+    // Orta Rusya (Central Russia)
+    'CENTRAL_RUSSIA': { 
+        name: 'Orta Rusya', 
+        nuts2: ['BLR'], // Belarus temsili
+        isPlayer: false, 
+        color: '#AA0000', 
+        coins: INITIAL_AI_COINS * 1.2,
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'BLR', // Minsk temsili
+        era: '1936',
+        type: 'major_power',
+        government: 'COMMUNISM',
+        leader: 'Nikolai Bukharin',
+        flag: '🇷🇺',
+        population: 35000000,
+        stability: 0.7,
+        technology: 0.6
+    },
+    
+    // Sibirya (Siberia)
+    'SIBERIA': { 
+        name: 'Sibirya', 
+        nuts2: ['KAZ'], // Kazakistan temsili
+        isPlayer: false, 
+        color: '#880000', 
+        coins: INITIAL_AI_COINS * 1.0,
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'KAZ', // Novosibirsk temsili
+        era: '1936',
+        type: 'major_power',
+        government: 'COMMUNISM',
+        leader: 'Sergo Ordzhonikidze',
+        flag: '🇷🇺',
+        population: 25000000,
+        stability: 0.6,
+        technology: 0.5
+    },
+    
+    // Uzak Doğu Rusya (Far East Russia)
+    'FAR_EAST_RUSSIA': { 
+        name: 'Uzak Doğu Rusya', 
+        nuts2: ['RUS_FAR_EAST'], // Rusya'nın uzak doğu bölgeleri
+        isPlayer: false, 
+        color: '#660000', 
+        coins: INITIAL_AI_COINS * 0.8,
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'RUS_FAR_EAST', // Vladivostok temsili
+        era: '1936',
+        type: 'major_power',
+        government: 'COMMUNISM',
+        leader: 'Kliment Voroshilov',
+        flag: '🇷🇺',
+        population: 15000000,
+        stability: 0.5,
+        technology: 0.4
     },
     
     // Alman Reich (Nazi Almanya)
@@ -91,7 +170,13 @@ let countriesData = {
         personality: 'AGGRESSIVE',
         capital: 'DE30', // Berlin
         era: '1936',
-        type: 'major_power'
+        type: 'major_power',
+        government: 'FASCISM',
+        leader: 'Adolf Hitler',
+        flag: '🇩🇪',
+        population: 80000000,
+        stability: 0.9,
+        technology: 0.9
     },
     
     // Büyük Britanya İmparatorluğu
@@ -105,7 +190,13 @@ let countriesData = {
         personality: 'DEFENSIVE',
         capital: 'UKI1', // Londra
         era: '1936',
-        type: 'major_power'
+        type: 'major_power',
+        government: 'DEMOCRACY',
+        leader: 'Neville Chamberlain',
+        flag: '🇬🇧',
+        population: 50000000,
+        stability: 0.8,
+        technology: 0.8
     },
     
     // Fransız Cumhuriyeti
@@ -119,7 +210,13 @@ let countriesData = {
         personality: 'DEFENSIVE',
         capital: 'FR10', // Paris
         era: '1936',
-        type: 'major_power'
+        type: 'major_power',
+        government: 'DEMOCRACY',
+        leader: 'Édouard Daladier',
+        flag: '🇫🇷',
+        population: 42000000,
+        stability: 0.7,
+        technology: 0.7
     },
     
     // İtalyan Krallığı
@@ -133,7 +230,13 @@ let countriesData = {
         personality: 'EXPANSIONIST',
         capital: 'ITE4', // Roma
         era: '1936',
-        type: 'major_power'
+        type: 'major_power',
+        government: 'FASCISM',
+        leader: 'Benito Mussolini',
+        flag: '🇮🇹',
+        population: 45000000,
+        stability: 0.8,
+        technology: 0.6
     },
     
     // Yugoslavya Krallığı
@@ -147,7 +250,13 @@ let countriesData = {
         personality: 'DEFENSIVE',
         capital: 'HR01', // Belgrad temsili
         era: '1936',
-        type: 'minor_power'
+        type: 'minor_power',
+        government: 'MONARCHY',
+        leader: 'Peter II',
+        flag: '🇷🇸',
+        population: 15000000,
+        stability: 0.6,
+        technology: 0.4
     },
     
     // Çekoslovakya Cumhuriyeti
@@ -161,7 +270,13 @@ let countriesData = {
         personality: 'DEFENSIVE',
         capital: 'CZ01', // Prag
         era: '1936',
-        type: 'minor_power'
+        type: 'minor_power',
+        government: 'DEMOCRACY',
+        leader: 'Edvard Beneš',
+        flag: '🇨🇿',
+        population: 15000000,
+        stability: 0.7,
+        technology: 0.6
     },
     
     // Polonya Cumhuriyeti
@@ -175,7 +290,13 @@ let countriesData = {
         personality: 'DEFENSIVE',
         capital: 'PL12', // Varşova
         era: '1936',
-        type: 'minor_power'
+        type: 'minor_power',
+        government: 'DEMOCRACY',
+        leader: 'Ignacy Mościcki',
+        flag: '🇵🇱',
+        population: 35000000,
+        stability: 0.6,
+        technology: 0.5
     },
     
     // Romanya Krallığı
@@ -189,7 +310,13 @@ let countriesData = {
         personality: 'BALANCED',
         capital: 'RO32', // Bükreş
         era: '1936',
-        type: 'minor_power'
+        type: 'minor_power',
+        government: 'MONARCHY',
+        leader: 'Carol II',
+        flag: '🇷🇴',
+        population: 20000000,
+        stability: 0.5,
+        technology: 0.4
     },
     
     // Macaristan Krallığı
@@ -203,119 +330,13 @@ let countriesData = {
         personality: 'BALANCED',
         capital: 'HU10', // Budapeşte
         era: '1936',
-        type: 'minor_power'
-    },
-    
-    // İspanya Cumhuriyeti (İç Savaş Öncesi)
-    'SPANISH_REPUBLIC': { 
-        name: 'İspanya Cumhuriyeti', 
-        nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62', 'PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20'], // İspanya + Portekiz
-        isPlayer: false, 
-        color: '#FF4500', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'ES30', // Madrid
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // Türkiye Cumhuriyeti
-    'TURKEY': { 
-        name: 'Türkiye Cumhuriyeti', 
-        nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3', 'GR11', 'GR12', 'GR13', 'GR14', 'GR21', 'GR22', 'GR23', 'GR24', 'GR25', 'GR30', 'GR41', 'GR42', 'GR43', 'CY00'], // Türkiye + Yunanistan + Kıbrıs
-        isPlayer: false, 
-        color: '#FF0000', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'BALANCED',
-        capital: 'TR10', // Ankara
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // Norveç Krallığı
-    'NORWAY': { 
-        name: 'Norveç Krallığı', 
-        nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07'], 
-        isPlayer: false, 
-        color: '#191970', 
-        coins: INITIAL_AI_COINS * 0.8, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'NO01', // Oslo
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // İsveç Krallığı
-    'SWEDEN': { 
-        name: 'İsveç Krallığı', 
-        nuts2: ['SE11', 'SE12', 'SE21', 'SE22', 'SE23', 'SE31', 'SE32', 'SE33'], 
-        isPlayer: false, 
-        color: '#FFD700', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'SE11', // Stockholm
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // Danimarka Krallığı
-    'DENMARK': { 
-        name: 'Danimarka Krallığı', 
-        nuts2: ['DK01', 'DK02', 'DK03', 'DK04', 'DK05'], 
-        isPlayer: false, 
-        color: '#8B0000', 
-        coins: INITIAL_AI_COINS * 0.8, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'DK01', // Kopenhag
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // İsviçre Konfederasyonu
-    'SWITZERLAND': { 
-        name: 'İsviçre Konfederasyonu', 
-        nuts2: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05', 'CH06', 'CH07', 'LI00'], 
-        isPlayer: false, 
-        color: '#FF0000', 
-        coins: INITIAL_AI_COINS, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'CH01', // Bern
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // İzlanda Krallığı
-    'ICELAND': { 
-        name: 'İzlanda Krallığı', 
-        nuts2: ['IS00'], 
-        isPlayer: false, 
-        color: '#4682B4', 
-        coins: INITIAL_AI_COINS * 0.5, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'IS00', // Reykjavik
-        era: '1936',
-        type: 'minor_power'
-    },
-    
-    // Malta
-    'MALTA': { 
-        name: 'Malta', 
-        nuts2: ['MT00'], 
-        isPlayer: false, 
-        color: '#D2691E', 
-        coins: INITIAL_AI_COINS * 0.3, 
-        units: 0,
-        personality: 'DEFENSIVE',
-        capital: 'MT00', // Valletta
-        era: '1936',
-        type: 'minor_power'
+        type: 'minor_power',
+        government: 'MONARCHY',
+        leader: 'Miklós Horthy',
+        flag: '🇭🇺',
+        population: 10000000,
+        stability: 0.6,
+        technology: 0.5
     }
 };
 
