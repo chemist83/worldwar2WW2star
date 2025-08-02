@@ -1,12 +1,20 @@
 // ============================================================================
 // Sabitler ve Global Değişkenler
 // ============================================================================
-const WAR_CHANCE_BASE = 0.20; // AI'nın savaş ilan etme temel şansı
+const WAR_CHANCE_BASE = 0.15; // AI'nın savaş ilan etme temel şansı
 const UNIT_COST = 20;
 const INCOME_PER_REGION = 10;
-const INITIAL_PLAYER_COINS = 100;
-const INITIAL_AI_COINS = 80;
-const STARTING_UNITS_PER_REGION = 1; // Başlangıçta her bölgede 1 birim var (player ve AI)
+const INITIAL_PLAYER_COINS = 150;
+const INITIAL_AI_COINS = 100;
+const STARTING_UNITS_PER_REGION = 2; // Başlangıçta her bölgede 2 birim var
+
+// AI Personality Types - Age of History tarzı
+const AI_PERSONALITIES = {
+    AGGRESSIVE: { warChance: 0.3, expansionFocus: 0.8, defenseFocus: 0.2 },
+    DEFENSIVE: { warChance: 0.1, expansionFocus: 0.3, defenseFocus: 0.7 },
+    BALANCED: { warChance: 0.2, expansionFocus: 0.5, defenseFocus: 0.5 },
+    EXPANSIONIST: { warChance: 0.25, expansionFocus: 0.9, defenseFocus: 0.1 }
+};
 
 let playerName = '';
 let playerCountryId = '';
@@ -15,11 +23,18 @@ let currentTurn = 1;
 let gameMapObject;
 let svgDoc; // SVG dökümanına erişim için
 
-// Yeni eklenenler
-let currentAttackMode = false; // Saldırı modunda olup olmadığımızı belirler
-let selectedAttackingRegionNutsId = null; // Hangi bölgeden saldırı başlatıldı
-let targetCountryIdForWar = null; // Savaş ilan edilen ülke (tıklanan düşman bölgesi bu ülkeye ait olmalı)
+// Savaş ve diplomasi sistemi
+let currentAttackMode = false;
+let selectedAttackingRegionNutsId = null;
+let targetCountryIdForWar = null;
+let warDeclarations = {}; // Aktif savaşlar
 
+// Age of History tarzı game state
+let gamePhase = 'setup'; // setup, playing, ended
+let victoryConditions = {
+    territoryControl: 0.6, // %60 toprak kontrolü
+    economicDominance: 10000 // 10000 coin
+};
 
 // ============================================================================
 // DOM Elementleri
@@ -47,97 +62,417 @@ const selectCountryButton = document.getElementById('selectCountryButton');
 const targetCountrySelect = document.getElementById('targetCountrySelect');
 const declareWarButton = document.getElementById('declareWarButton');
 
-
 // ============================================================================
-// Oyun Verileri (Tüm NUTS-2 Kodları ve UK Dahil)
+// Gelişmiş Ülke Verileri - Tüm SVG Bölgeleri İçin Güncellenmiş
 // ============================================================================
 let countriesData = {
-    // Avusturya (AT)
-    'AT': { name: 'Avusturya', nuts2: ['AT11', 'AT12', 'AT13', 'AT21', 'AT22', 'AT31', 'AT32', 'AT33', 'AT34'], isPlayer: false, color: '#FF0000', coins: INITIAL_AI_COINS, units: 0 },
-    // Belçika (BE)
-    'BE': { name: 'Belçika', nuts2: ['BE10', 'BE21', 'BE22', 'BE23', 'BE24', 'BE25', 'BE31', 'BE32', 'BE33', 'BE34', 'BE35'], isPlayer: false, color: '#0000FF', coins: INITIAL_AI_COINS, units: 0 },
-    // Bulgaristan (BG)
-    'BG': { name: 'Bulgaristan', nuts2: ['BG31', 'BG32', 'BG33', 'BG34', 'BG41', 'BG42'], isPlayer: false, color: '#00FF00', coins: INITIAL_AI_COINS, units: 0 },
-    // İsviçre (CH)
-    'CH': { name: 'İsviçre', nuts2: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05', 'CH06', 'CH07'], isPlayer: false, color: '#DC143C', coins: INITIAL_AI_COINS, units: 0 },
-    // Kıbrıs (CY)
-    'CY': { name: 'Kıbrıs', nuts2: ['CY00'], isPlayer: false, color: '#19cf0c', coins: INITIAL_AI_COINS, units: 0 },
-    // Çekya (CZ)
-    'CZ': { name: 'Çekya', nuts2: ['CZ01', 'CZ02', 'CZ03', 'CZ04', 'CZ05', 'CZ06', 'CZ07', 'CZ08'], isPlayer: false, color: '#4682B4', coins: INITIAL_AI_COINS, units: 0 },
-    // Almanya (DE)
-    'DE': { name: 'Almanya', nuts2: ['DE11', 'DE12', 'DE13', 'DE14', 'DE21', 'DE22', 'DE23', 'DE24', 'DE25', 'DE26', 'DE27', 'DE30', 'DE40', 'DE50', 'DE60', 'DE71', 'DE72', 'DE73', 'DE80', 'DE91', 'DE92', 'DE93', 'DE94', 'DEA1', 'DEA2', 'DEA3', 'DEA4', 'DEA5', 'DEB1', 'DEB2', 'DEB3', 'DEC0', 'DED2', 'DED4', 'DED5', 'DED6', 'DEG0'], isPlayer: false, color: '#FFFF00', coins: INITIAL_AI_COINS, units: 0 },
-    // Danimarka (DK)
-    'DK': { name: 'Danimarka', nuts2: ['DK01', 'DK02', 'DK03', 'DK04', 'DK05'], isPlayer: false, color: '#CD5C5C', coins: INITIAL_AI_COINS, units: 0 },
-    // Estonya (EE)
-    'EE': { name: 'Estonya', nuts2: ['EE00'], isPlayer: false, color: '#FFFAF0', coins: INITIAL_AI_COINS, units: 0 },
-    // İspanya (ES)
-    'ES': { name: 'İspanya', nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62', 'ES63', 'ES64', 'ES70'], isPlayer: false, color: '#FFA500', coins: INITIAL_AI_COINS, units: 0 },
-    // Finlandiya (FI)
-    'FI': { name: 'Finlandiya', nuts2: ['FI19', 'FI1B', 'FI1C', 'FI20'], isPlayer: false, color: '#AFEEEE', coins: INITIAL_AI_COINS, units: 0 },
-    // Fransa (FR)
-    'FR': { name: 'Fransa', nuts2: ['FR10', 'FRB0', 'FRC1', 'FRC2', 'FRD1', 'FRD2', 'FRE1', 'FRE2', 'FRF1', 'FRF2', 'FRF3'], isPlayer: false, color: '#FF4500', coins: INITIAL_AI_COINS, units: 0 },
-    // Yunanistan (EL)
-    'EL': { name: 'Yunanistan', nuts2: ['EL30', 'EL41', 'EL42', 'EL43', 'EL51', 'EL52', 'EL53', 'EL54'], isPlayer: false, color: '#ADFF2F', coins: INITIAL_AI_COINS, units: 0 },
-    // Hırvatistan (HR)
-    'HR': { name: 'Hırvatistan', nuts2: ['HR03', 'HR04'], isPlayer: false, color: '#9ACD32', coins: INITIAL_AI_COINS, units: 0 },
-    // Macaristan (HU)
-    'HU': { name: 'Macaristan', nuts2: ['HU10', 'HU21', 'HU22', 'HU23', 'HU31', 'HU32', 'HU33'], isPlayer: false, color: '#FFC0CB', coins: INITIAL_AI_COINS, units: 0 },
-    // İzlanda (IS)
-    'IS': { name: 'İzlanda', nuts2: ['IS00'], isPlayer: false, color: '#A9A9A9', coins: INITIAL_AI_COINS, units: 0 },
-    // İrlanda (IE)
-    'IE': { name: 'İrlanda', nuts2: ['IE04', 'IE05', 'IE06'], isPlayer: false, color: '#228B22', coins: INITIAL_AI_COINS, units: 0 },
-    // İtalya (IT)
-    'IT': { name: 'İtalya', nuts2: ['ITC1', 'ITC2', 'ITC3', 'ITC4', 'ITC5', 'ITD1', 'ITD2', 'ITD3', 'ITD4', 'ITE1', 'ITE2', 'ITE3', 'ITE4', 'ITF1', 'ITF2', 'ITF3', 'ITF4', 'ITF5', 'ITG1', 'ITG2'], isPlayer: false, color: '#00FF00', coins: INITIAL_AI_COINS, units: 0 },
-    // Letonya (LV)
-    'LV': { name: 'Letonya', nuts2: ['LV00'], isPlayer: false, color: '#DEB887', coins: INITIAL_AI_COINS, units: 0 },
-    // Litvanya (LT)
-    'LT': { name: 'Litvanya', nuts2: ['LT01', 'LT02'], isPlayer: false, color: '#FFD700', coins: INITIAL_AI_COINS, units: 0 },
-    // Lüksemburg (LU)
-    'LU': { name: 'Lüksemburg', nuts2: ['LU00'], isPlayer: false, color: '#800080', coins: INITIAL_AI_COINS, units: 0 },
-    // Karadağ (ME)
-    'ME': { name: 'Karadağ', nuts2: ['ME00'], isPlayer: false, color: '#CD853F', coins: INITIAL_AI_COINS, units: 0 },
-    // Malta (MT)
-    'MT': { name: 'Malta', nuts2: ['MT00'], isPlayer: false, color: '#D3D3D3', coins: INITIAL_AI_COINS, units: 0 },
-    // Hollanda (NL)
-    'NL': { name: 'Hollanda', nuts2: ['NL11', 'NL12', 'NL13', 'NL21', 'NL22', 'NL23', 'NL31', 'NL32', 'NL33', 'NL34'], isPlayer: false, color: '#DAA520', coins: INITIAL_AI_COINS, units: 0 },
-    // Norveç (NO)
-    'NO': { name: 'Norveç', nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07', 'NO08'], isPlayer: false, color: '#B0C4DE', coins: INITIAL_AI_COINS, units: 0 },
-    // Polonya (PL)
-    'PL': { name: 'Polonya', nuts2: ['PL21', 'PL22', 'PL41', 'PL42', 'PL43', 'PL51', 'PL52', 'PL61', 'PL62', 'PL63', 'PL71', 'PL72', 'PL81', 'PL82', 'PL84', 'PL91', 'PL92'], isPlayer: false, color: '#800080', coins: INITIAL_AI_COINS, units: 0 },
-    // Portekiz (PT)
-    'PT': { name: 'Portekiz', nuts2: ['PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20', 'PT30'], isPlayer: false, color: '#8B4513', coins: INITIAL_AI_COINS, units: 0 },
-    // Romanya (RO)
-    'RO': { name: 'Romanya', nuts2: ['RO11', 'RO12', 'RO21', 'RO22', 'RO31', 'RO32', 'RO41', 'RO42'], isPlayer: false, color: '#ADD8E6', coins: INITIAL_AI_COINS, units: 0 },
-    // Sırbistan (RS)
-    'RS': { name: 'Sırbistan', nuts2: ['RS11', 'RS12', 'RS21', 'RS22'], isPlayer: false, color: '#483D8B', coins: INITIAL_AI_COINS, units: 0 },
-    // Slovakya (SK)
-    'SK': { name: 'Slovakya', nuts2: ['SK01', 'SK02', 'SK03', 'SK04'], isPlayer: false, color: '#BA55D3', coins: INITIAL_AI_COINS, units: 0 },
-    // Slovenya (SI)
-    'SI': { name: 'Slovenya', nuts2: ['SI03', 'SI04'], isPlayer: false, color: '#66CDAA', coins: INITIAL_AI_COINS, units: 0 },
-    // İsveç (SE)
-    'SE': { name: 'İsveç', nuts2: ['SE11', 'SE12', 'SE21', 'SE22', 'SE23', 'SE31', 'SE32', 'SE33'], isPlayer: false, color: '#87CEEB', coins: INITIAL_AI_COINS, units: 0 },
-    // Türkiye (TR)
-    'TR': { name: 'Türkiye', nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3'], isPlayer: false, color: '#FF4500', coins: INITIAL_AI_COINS, units: 0 },
-    // Bosna-Hersek (BA)
-    'BA': { name: 'Bosna-Hersek', nuts2: ['BA01', 'BA02'], isPlayer: false, color: '#4B0082', coins: INITIAL_AI_COINS, units: 0 },
-    // Kuzey Makedonya (MK)
-    'MK': { name: 'Kuzey Makedonya', nuts2: ['MK00'], isPlayer: false, color: '#FF6347', coins: INITIAL_AI_COINS, units: 0 },
-    // EKLEDİĞİM DİĞER KOMŞU ÜLKELER (Eğer SVG'nizde varsa tutun, yoksa silebilirsiniz)
-    'AL': { name: 'Arnavutluk', nuts2: ['AL00'], isPlayer: false, color: '#8B0000', coins: INITIAL_AI_COINS, units: 0 }, // Varsayımsal tek NUTS ID
-    'MD': { name: 'Moldova', nuts2: ['MD00'], isPlayer: false, color: '#98FB98', coins: INITIAL_AI_COINS, units: 0 }, // Varsayımsal tek NUTS ID
-    'UA': { name: 'Ukrayna', nuts2: ['UA30', 'UA40', 'UA50'], isPlayer: false, color: '#DAA520', coins: INITIAL_AI_COINS, units: 0 }, // Varsayımsal NUTS ID'leri
-    'BY': { name: 'Belarus', nuts2: ['BY00'], isPlayer: false, color: '#BDB76B', coins: INITIAL_AI_COINS, units: 0 }, // Varsayımsal tek NUTS ID
-    'RU': { name: 'Rusya', nuts2: ['RU00'], isPlayer: false, color: '#006400', coins: INITIAL_AI_COINS, units: 0 }, // Varsayımsal tek NUTS ID
-
-    // YENİ EKLENEN: Birleşik Krallık (UK)
-    'UK': { name: 'Birleşik Krallık', nuts2: [
-        'UKC1', 'UKC2', 'UKD1', 'UKD3', 'UKD4', 'UKD6', 'UKD7',
-        'UKE1', 'UKE2', 'UKE3', 'UKE4', 'UKF1', 'UKF2', 'UKF3',
-        'UKG1', 'UKG2', 'UKG3', 'UKH1', 'UKH2', 'UKH3', 'UKI1',
-        'UKI2', 'UKJ1', 'UKJ2', 'UKJ3', 'UKJ4', 'UKK1', 'UKK2',
-        'UKK3', 'UKK4', 'UKL1', 'UKL2', 'UKM2', 'UKM3', 'UKM5',
-        'UKM6', 'UKN0'
-    ], isPlayer: false, color: '#8A2BE2', coins: INITIAL_AI_COINS, units: 0 }, // Mor tonu
+    // Almanya (DE) - 39 bölge
+    'DE': { 
+        name: 'Almanya', 
+        nuts2: ['DE11', 'DE12', 'DE13', 'DE14', 'DE21', 'DE22', 'DE23', 'DE24', 'DE25', 'DE26', 'DE27', 'DE30', 'DE42', 'DE41', 'DE50', 'DE60', 'DE71', 'DE72', 'DE73', 'DE80', 'DE91', 'DE92', 'DE93', 'DE94', 'DEA1', 'DEA2', 'DEA3', 'DEA4', 'DEA5', 'DEB1', 'DEB2', 'DEB3', 'DEC0', 'DED1', 'DED2', 'DED3', 'DEE0', 'DEF0', 'DEG0'], 
+        isPlayer: false, 
+        color: '#FFD700', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'DE30' // Berlin
+    },
+    
+    // Fransa (FR) - 26 bölge  
+    'FR': { 
+        name: 'Fransa', 
+        nuts2: ['FR10', 'FR21', 'FR22', 'FR23', 'FR24', 'FR25', 'FR26', 'FR30', 'FR41', 'FR42', 'FR43', 'FR51', 'FR52', 'FR53', 'FR61', 'FR62', 'FR63', 'FR71', 'FR72', 'FR81', 'FR82', 'FR83'], 
+        isPlayer: false, 
+        color: '#0066CC', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'FR10' // Paris
+    },
+    
+    // İspanya (ES) - 19 bölge
+    'ES': { 
+        name: 'İspanya', 
+        nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62'], 
+        isPlayer: false, 
+        color: '#FF6600', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'EXPANSIONIST',
+        capital: 'ES30' // Madrid
+    },
+    
+    // İtalya (IT) - 20 bölge
+    'IT': { 
+        name: 'İtalya', 
+        nuts2: ['ITC1', 'ITC2', 'ITC3', 'ITC4', 'ITD1', 'ITD2', 'ITD3', 'ITD4', 'ITD5', 'ITE1', 'ITE2', 'ITE3', 'ITE4', 'ITF1', 'ITF2', 'ITF3', 'ITF4', 'ITF5', 'ITF6', 'ITG1', 'ITG2'], 
+        isPlayer: false, 
+        color: '#00AA44', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'ITE4' // Roma
+    },
+    
+    // Birleşik Krallık (UK) - 40 bölge
+    'UK': { 
+        name: 'Birleşik Krallık', 
+        nuts2: ['UKC1', 'UKC2', 'UKD1', 'UKD2', 'UKD3', 'UKD4', 'UKD5', 'UKE1', 'UKE2', 'UKE3', 'UKE4', 'UKF1', 'UKF2', 'UKF3', 'UKG1', 'UKG2', 'UKG3', 'UKH1', 'UKH2', 'UKH3', 'UKI1', 'UKI2', 'UKJ1', 'UKJ2', 'UKJ3', 'UKJ4', 'UKK1', 'UKK2', 'UKK3', 'UKK4', 'UKL1', 'UKL2', 'UKM2', 'UKM3', 'UKM5', 'UKM6', 'UKN0'], 
+        isPlayer: false, 
+        color: '#CC0066', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'AGGRESSIVE',
+        capital: 'UKI1' // London
+    },
+    
+    // Polonya (PL) - 16 bölge
+    'PL': { 
+        name: 'Polonya', 
+        nuts2: ['PL11', 'PL12', 'PL21', 'PL22', 'PL31', 'PL32', 'PL33', 'PL34', 'PL41', 'PL42', 'PL43', 'PL51', 'PL52', 'PL61', 'PL62', 'PL63'], 
+        isPlayer: false, 
+        color: '#AA3300', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'PL12' // Warszawa
+    },
+    
+    // Romanya (RO) - 8 bölge
+    'RO': { 
+        name: 'Romanya', 
+        nuts2: ['RO11', 'RO12', 'RO21', 'RO22', 'RO31', 'RO32', 'RO41', 'RO42'], 
+        isPlayer: false, 
+        color: '#6600AA', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'RO32' // Bükreş
+    },
+    
+    // Norveç (NO) - 7 bölge
+    'NO': { 
+        name: 'Norveç', 
+        nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07'], 
+        isPlayer: false, 
+        color: '#0088AA', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'NO01' // Oslo
+    },
+    
+    // İsveç (SE) - 8 bölge
+    'SE': { 
+        name: 'İsveç', 
+        nuts2: ['SE11', 'SE12', 'SE21', 'SE22', 'SE23', 'SE31', 'SE32', 'SE33'], 
+        isPlayer: false, 
+        color: '#FFAA00', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'SE11' // Stockholm
+    },
+    
+    // Finlandiya (FI) - 5 bölge
+    'FI': { 
+        name: 'Finlandiya', 
+        nuts2: ['FI13', 'FI18', 'FI19', 'FI1A', 'FI20'], 
+        isPlayer: false, 
+        color: '#00AAFF', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'FI18' // Helsinki
+    },
+    
+    // Yunanistan (GR) - 13 bölge
+    'GR': { 
+        name: 'Yunanistan', 
+        nuts2: ['GR11', 'GR12', 'GR13', 'GR14', 'GR21', 'GR22', 'GR23', 'GR24', 'GR25', 'GR30', 'GR41', 'GR42', 'GR43'], 
+        isPlayer: false, 
+        color: '#0066FF', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'GR30' // Atina
+    },
+    
+    // Türkiye (TR) - 26 bölge
+    'TR': { 
+        name: 'Türkiye', 
+        nuts2: ['TR10', 'TR21', 'TR22', 'TR31', 'TR32', 'TR33', 'TR41', 'TR42', 'TR51', 'TR52', 'TR61', 'TR62', 'TR63', 'TR71', 'TR72', 'TR81', 'TR82', 'TR83', 'TR90', 'TRA1', 'TRA2', 'TRB1', 'TRB2', 'TRC1', 'TRC2', 'TRC3'], 
+        isPlayer: false, 
+        color: '#FF3300', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'AGGRESSIVE',
+        capital: 'TR10' // Ankara
+    },
+    
+    // Hollanda (NL) - 12 bölge
+    'NL': { 
+        name: 'Hollanda', 
+        nuts2: ['NL11', 'NL12', 'NL13', 'NL21', 'NL22', 'NL23', 'NL31', 'NL32', 'NL33', 'NL34', 'NL41', 'NL42'], 
+        isPlayer: false, 
+        color: '#FF6600', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'NL32' // Amsterdam
+    },
+    
+    // Belçika (BE) - 11 bölge
+    'BE': { 
+        name: 'Belçika', 
+        nuts2: ['BE10', 'BE21', 'BE22', 'BE23', 'BE24', 'BE25', 'BE31', 'BE32', 'BE33', 'BE34', 'BE35'], 
+        isPlayer: false, 
+        color: '#444444', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'BE10' // Brüksel
+    },
+    
+    // Avusturya (AT) - 9 bölge
+    'AT': { 
+        name: 'Avusturya', 
+        nuts2: ['AT11', 'AT12', 'AT13', 'AT21', 'AT22', 'AT31', 'AT32', 'AT33', 'AT34'], 
+        isPlayer: false, 
+        color: '#AA0000', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'AT13' // Viyana
+    },
+    
+    // İsviçre (CH) - 7 bölge
+    'CH': { 
+        name: 'İsviçre', 
+        nuts2: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05', 'CH06', 'CH07'], 
+        isPlayer: false, 
+        color: '#CC0000', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'CH01' // Bern
+    },
+    
+    // Çekya (CZ) - 8 bölge
+    'CZ': { 
+        name: 'Çekya', 
+        nuts2: ['CZ01', 'CZ02', 'CZ03', 'CZ04', 'CZ05', 'CZ06', 'CZ07', 'CZ08'], 
+        isPlayer: false, 
+        color: '#0044AA', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'CZ01' // Prag
+    },
+    
+    // Slovakya (SK) - 4 bölge
+    'SK': { 
+        name: 'Slovakya', 
+        nuts2: ['SK01', 'SK02', 'SK03', 'SK04'], 
+        isPlayer: false, 
+        color: '#AA6600', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'SK01' // Bratislava
+    },
+    
+    // Slovenya (SI) - 2 bölge
+    'SI': { 
+        name: 'Slovenya', 
+        nuts2: ['SI01', 'SI02'], 
+        isPlayer: false, 
+        color: '#66AA00', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'SI01' // Ljubljana
+    },
+    
+    // Hırvatistan (HR) - 3 bölge
+    'HR': { 
+        name: 'Hırvatistan', 
+        nuts2: ['HR01', 'HR02', 'HR03'], 
+        isPlayer: false, 
+        color: '#00AA66', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'HR01' // Zagreb
+    },
+    
+    // Macaristan (HU) - 7 bölge
+    'HU': { 
+        name: 'Macaristan', 
+        nuts2: ['HU10', 'HU21', 'HU22', 'HU23', 'HU31', 'HU32', 'HU33'], 
+        isPlayer: false, 
+        color: '#AA00AA', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'HU10' // Budapeşte
+    },
+    
+    // Bulgaristan (BG) - 6 bölge
+    'BG': { 
+        name: 'Bulgaristan', 
+        nuts2: ['BG31', 'BG32', 'BG33', 'BG34', 'BG41', 'BG42'], 
+        isPlayer: false, 
+        color: '#00CC00', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'BG41' // Sofya
+    },
+    
+    // Danimarka (DK) - 5 bölge
+    'DK': { 
+        name: 'Danimarka', 
+        nuts2: ['DK01', 'DK02', 'DK03', 'DK04', 'DK05'], 
+        isPlayer: false, 
+        color: '#AA0066', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'DK01' // Kopenhag
+    },
+    
+    // Portekiz (PT) - 7 bölge
+    'PT': { 
+        name: 'Portekiz', 
+        nuts2: ['PT11', 'PT15', 'PT16', 'PT17', 'PT18', 'PT20'], 
+        isPlayer: false, 
+        color: '#006600', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'BALANCED',
+        capital: 'PT17' // Lizbon
+    },
+    
+    // İrlanda (IE) - 3 bölge
+    'IE': { 
+        name: 'İrlanda', 
+        nuts2: ['IE01', 'IE02'], 
+        isPlayer: false, 
+        color: '#00AA00', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'IE02' // Dublin
+    },
+    
+    // İzlanda (IS) - 1 bölge
+    'IS': { 
+        name: 'İzlanda', 
+        nuts2: ['IS00'], 
+        isPlayer: false, 
+        color: '#6666AA', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'IS00' // Reykjavik
+    },
+    
+    // Estonya (EE) - 1 bölge
+    'EE': { 
+        name: 'Estonya', 
+        nuts2: ['EE00'], 
+        isPlayer: false, 
+        color: '#0099CC', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'EE00' // Tallinn
+    },
+    
+    // Letonya (LV) - 1 bölge
+    'LV': { 
+        name: 'Letonya', 
+        nuts2: ['LV00'], 
+        isPlayer: false, 
+        color: '#CC6600', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'LV00' // Riga
+    },
+    
+    // Litvanya (LT) - 1 bölge
+    'LT': { 
+        name: 'Litvanya', 
+        nuts2: ['LT00'], 
+        isPlayer: false, 
+        color: '#CCAA00', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'LT00' // Vilnius
+    },
+    
+    // Lüksemburg (LU) - 1 bölge
+    'LU': { 
+        name: 'Lüksemburg', 
+        nuts2: ['LU00'], 
+        isPlayer: false, 
+        color: '#9966CC', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'LU00' // Luxembourg
+    },
+    
+    // Malta (MT) - 1 bölge
+    'MT': { 
+        name: 'Malta', 
+        nuts2: ['MT00'], 
+        isPlayer: false, 
+        color: '#CCCCCC', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'MT00' // Valletta
+    },
+    
+    // Kıbrıs (CY) - 1 bölge
+    'CY': { 
+        name: 'Kıbrıs', 
+        nuts2: ['CY00'], 
+        isPlayer: false, 
+        color: '#66CCAA', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'CY00' // Lefkoşa
+    },
+    
+    // Kuzey Makedonya (MK) - 1 bölge
+    'MK': { 
+        name: 'Kuzey Makedonya', 
+        nuts2: ['MK00'], 
+        isPlayer: false, 
+        color: '#AA6666', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'MK00' // Üsküp
+    },
+    
+    // Liechtenstein (LI) - 1 bölge
+    'LI': { 
+        name: 'Liechtenstein', 
+        nuts2: ['LI00'], 
+        isPlayer: false, 
+        color: '#AA99CC', 
+        coins: INITIAL_AI_COINS, 
+        units: 0,
+        personality: 'DEFENSIVE',
+        capital: 'LI00' // Vaduz
+    }
 };
 
 // NUTS Bölgeleri ve Komşulukları (Tüm Ülkeler ve UK Dahil)
@@ -1119,8 +1454,8 @@ function nextTurn() {
     
     resetAttackMode(); // Her tur sonunda saldırı modunu sıfırla
 
-    // AI'ların hareketleri
-    runAILogic();
+    // Gelişmiş AI hareketleri - Age of History tarzı
+    performAdvancedAI();
 
     updateUI();
 }
@@ -1290,7 +1625,330 @@ if (document.getElementById('closeWarModalButton')) {
     document.getElementById('closeWarModalButton').addEventListener('click', closeWarModal);
 }
 
+// ============================================================================
+// Gelişmiş AI Management - Age of History Tarzı
+// ============================================================================
+
+// AI stratejik değerlendirme fonksiyonu
+function evaluateStrategicSituation(countryId) {
+    const country = countriesData[countryId];
+    const personality = AI_PERSONALITIES[country.personality];
+    
+    return {
+        territoryCount: country.nuts2.length,
+        economicPower: country.coins,
+        militaryStrength: getTotalUnitsForCountry(countryId),
+        threats: getThreateningNeighbors(countryId),
+        opportunities: getWeakNeighbors(countryId),
+        personality: personality
+    };
+}
+
+// Tehdit oluşturan komşuları bulma
+function getThreateningNeighbors(countryId) {
+    const neighbors = getNeighboringCountries(countryId);
+    const myStrength = getTotalUnitsForCountry(countryId);
+    
+    return neighbors.filter(neighborId => {
+        const neighborStrength = getTotalUnitsForCountry(neighborId);
+        return neighborStrength > myStrength * 1.2; // %20 daha güçlü olanlar tehdit
+    });
+}
+
+// Zayıf komşuları bulma (fırsat)
+function getWeakNeighbors(countryId) {
+    const neighbors = getNeighboringCountries(countryId);
+    const myStrength = getTotalUnitsForCountry(countryId);
+    
+    return neighbors.filter(neighborId => {
+        const neighborStrength = getTotalUnitsForCountry(neighborId);
+        return neighborStrength < myStrength * 0.8; // %20 daha zayıf olanlar hedef
+    });
+}
+
+// Gelişmiş AI karar verme sistemi
+function makeAIDecisions(countryId) {
+    const country = countriesData[countryId];
+    const situation = evaluateStrategicSituation(countryId);
+    const personality = situation.personality;
+    
+    // 1. Ekonomik kararlar (birim satın alma)
+    const economicDecision = makeEconomicDecisions(countryId, situation);
+    
+    // 2. Askeri kararlar (savaş, savunma)
+    const militaryDecision = makeMilitaryDecisions(countryId, situation);
+    
+    return {
+        economic: economicDecision,
+        military: militaryDecision
+    };
+}
+
+// Ekonomik karar verme
+function makeEconomicDecisions(countryId, situation) {
+    const country = countriesData[countryId];
+    const decisions = [];
+    
+    // Birim satın alma stratejisi
+    const maxAffordableUnits = Math.floor(country.coins / UNIT_COST);
+    const territoryRatio = situation.territoryCount / 10; // Toprak sayısına göre normalize
+    const threatLevel = situation.threats.length;
+    
+    let targetUnits = 0;
+    
+    if (situation.personality.defenseFocus > 0.6 && threatLevel > 0) {
+        // Savunma odaklı: Tehdit varsa birim al
+        targetUnits = Math.min(maxAffordableUnits, threatLevel * 2);
+    } else if (situation.personality.expansionFocus > 0.7) {
+        // Genişleme odaklı: Sürekli birim al
+        targetUnits = Math.min(maxAffordableUnits, Math.floor(territoryRatio * 3));
+    } else {
+        // Dengeli: Orta düzeyde birim al
+        targetUnits = Math.min(maxAffordableUnits, Math.floor(territoryRatio * 2));
+    }
+    
+    for (let i = 0; i < targetUnits; i++) {
+        decisions.push('buyUnit');
+    }
+    
+    return decisions;
+}
+
+// Askeri karar verme
+function makeMilitaryDecisions(countryId, situation) {
+    const decisions = [];
+    
+    // Savaş ilanı değerlendirmesi
+    if (situation.opportunities.length > 0 && Math.random() < situation.personality.warChance) {
+        // En zayıf komşuyu hedef al
+        const targetCountry = situation.opportunities[0];
+        decisions.push({
+            type: 'declareWar',
+            target: targetCountry,
+            reason: 'expansion'
+        });
+    }
+    
+    // Savunma pozisyonları güçlendirme
+    if (situation.threats.length > 0) {
+        decisions.push({
+            type: 'reinforceDefenses',
+            priority: 'high'
+        });
+    }
+    
+    return decisions;
+}
+
+// Komşu ülkeleri bulma fonksiyonu
+function getNeighboringCountries(countryId) {
+    const neighbors = new Set();
+    const myRegions = countriesData[countryId].nuts2;
+    
+    for (const myRegion of myRegions) {
+        if (regionsNeighbors[myRegion]) {
+            for (const neighborRegion of regionsNeighbors[myRegion]) {
+                const neighborCountry = getCountryIdFromNutsId(neighborRegion);
+                if (neighborCountry && neighborCountry !== countryId) {
+                    neighbors.add(neighborCountry);
+                }
+            }
+        }
+    }
+    
+    return Array.from(neighbors);
+}
+
+// Ülkenin toplam asker sayısını hesaplama
+function getTotalUnitsForCountry(countryId) {
+    const regions = countriesData[countryId].nuts2;
+    let totalUnits = 0;
+    
+    for (const regionId of regions) {
+        if (regionUnits[regionId]) {
+            totalUnits += regionUnits[regionId];
+        }
+    }
+    
+    return totalUnits;
+}
+
+// Ana AI tur fonksiyonu
+function performAdvancedAI() {
+    console.log("🤖 AI Turn Phase Started - Age of History Style");
+    
+    const aiCountries = Object.keys(countriesData).filter(id => !countriesData[id].isPlayer);
+    
+    for (const countryId of aiCountries) {
+        performAdvancedAIActions(countryId);
+    }
+    
+    // Zafer koşullarını kontrol et
+    checkVictoryConditions();
+}
+
+// Gelişmiş AI eylem sistemi
+function performAdvancedAIActions(countryId) {
+    const country = countriesData[countryId];
+    console.log(`🎯 ${country.name} (${country.personality}) thinking...`);
+    
+    // Gelir elde et
+    const income = country.nuts2.length * INCOME_PER_REGION;
+    country.coins += income;
+    
+    // Stratejik kararlar al
+    const decisions = makeAIDecisions(countryId);
+    
+    // Ekonomik kararları uygula
+    for (const decision of decisions.economic) {
+        if (decision === 'buyUnit' && country.coins >= UNIT_COST) {
+            // En az birimli bölgeyi güçlendir
+            const weakestRegion = findWeakestRegion(countryId);
+            if (weakestRegion) {
+                regionUnits[weakestRegion] = (regionUnits[weakestRegion] || 0) + 1;
+                country.coins -= UNIT_COST;
+                console.log(`💰 ${country.name} bought unit for ${weakestRegion}`);
+            }
+        }
+    }
+    
+    // Askeri kararları uygula
+    for (const decision of decisions.military) {
+        if (decision.type === 'declareWar') {
+            executeAIWarDeclaration(countryId, decision.target);
+        }
+    }
+}
+
+// AI savaş ilanı
+function executeAIWarDeclaration(attackerCountryId, defenderCountryId) {
+    const attacker = countriesData[attackerCountryId];
+    const defender = countriesData[defenderCountryId];
+    
+    if (!warDeclarations[attackerCountryId]) {
+        warDeclarations[attackerCountryId] = [];
+    }
+    
+    if (!warDeclarations[attackerCountryId].includes(defenderCountryId)) {
+        warDeclarations[attackerCountryId].push(defenderCountryId);
+        
+        addNotification(`⚔️ ${attacker.name}, ${defender.name}'a savaş ilan etti!`);
+        console.log(`⚔️ WAR: ${attacker.name} vs ${defender.name}`);
+        
+        // Otomatik saldırı başlat
+        setTimeout(() => {
+            executeAIAttack(attackerCountryId, defenderCountryId);
+        }, 1000);
+    }
+}
+
+// AI saldırısı gerçekleştir
+function executeAIAttack(attackerCountryId, defenderCountryId) {
+    const attackerRegions = countriesData[attackerCountryId].nuts2;
+    const defenderRegions = countriesData[defenderCountryId].nuts2;
+    
+    // En güçlü saldırı bölgesini bul
+    let bestAttackRegion = null;
+    let maxAttackPower = 0;
+    
+    for (const regionId of attackerRegions) {
+        const units = regionUnits[regionId] || 0;
+        if (units > maxAttackPower) {
+            maxAttackPower = units;
+            bestAttackRegion = regionId;
+        }
+    }
+    
+    // En zayıf savunma bölgesini bul
+    let bestTargetRegion = null;
+    let minDefensePower = Infinity;
+    
+    for (const regionId of defenderRegions) {
+        const units = regionUnits[regionId] || 0;
+        if (units < minDefensePower) {
+            minDefensePower = units;
+            bestTargetRegion = regionId;
+        }
+    }
+    
+    if (bestAttackRegion && bestTargetRegion && maxAttackPower > 0) {
+        console.log(`🎯 AI Attack: ${bestAttackRegion} -> ${bestTargetRegion}`);
+        resolveCombat(attackerCountryId, bestAttackRegion, maxAttackPower, defenderCountryId, bestTargetRegion, minDefensePower);
+    }
+}
+
+// En zayıf bölgeyi bulma
+function findWeakestRegion(countryId) {
+    const regions = countriesData[countryId].nuts2;
+    let weakestRegion = null;
+    let minUnits = Infinity;
+    
+    for (const regionId of regions) {
+        const units = regionUnits[regionId] || 0;
+        if (units < minUnits) {
+            minUnits = units;
+            weakestRegion = regionId;
+        }
+    }
+    
+    return weakestRegion;
+}
+
+// Zafer koşullarını kontrol etme
+function checkVictoryConditions() {
+    if (!playerCountryId || !countriesData[playerCountryId]) return;
+    
+    const playerTerritoryCount = countriesData[playerCountryId].nuts2.length;
+    const totalTerritories = Object.values(countriesData).reduce((sum, country) => sum + country.nuts2.length, 0);
+    const playerTerritoryRatio = playerTerritoryCount / totalTerritories;
+    
+    if (playerTerritoryRatio >= victoryConditions.territoryControl) {
+        endGame('territorial_victory');
+    } else if (countriesData[playerCountryId].coins >= victoryConditions.economicDominance) {
+        endGame('economic_victory');
+    }
+    
+    // AI zafer kontrolü
+    for (const [countryId, country] of Object.entries(countriesData)) {
+        if (!country.isPlayer) {
+            const aiTerritoryRatio = country.nuts2.length / totalTerritories;
+            if (aiTerritoryRatio >= victoryConditions.territoryControl) {
+                endGame('ai_victory', countryId);
+                break;
+            }
+        }
+    }
+}
+
+// Oyun sonu
+function endGame(victoryType, winnerId = null) {
+    gamePhase = 'ended';
+    
+    let message = '';
+    switch (victoryType) {
+        case 'territorial_victory':
+            message = `🏆 TEBRİKLER! Toprakların %${Math.round(victoryConditions.territoryControl * 100)}'ini kontrol ederek zafer kazandınız!`;
+            break;
+        case 'economic_victory':
+            message = `💰 TEBRİKLER! Ekonomik hakimiyetinizle zafer kazandınız!`;
+            break;
+        case 'ai_victory':
+            const winner = countriesData[winnerId];
+            message = `😔 ${winner.name} Avrupa'yı ele geçirdi! Oyun sona erdi.`;
+            break;
+    }
+    
+    addNotification(message);
+    
+    // Oyun kontrolleri devre dışı bırak
+    nextTurnButton.disabled = true;
+    buyUnitButton.disabled = true;
+    declareWarButton.disabled = true;
+}
+
+// ============================================================================
 // İlk yüklemede UI'ı gizle
+// ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
     gameScreen.style.display = 'none';
     countrySelectionModal.style.display = 'none';
