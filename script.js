@@ -47,6 +47,14 @@ const selectCountryButton = document.getElementById('selectCountryButton');
 const targetCountrySelect = document.getElementById('targetCountrySelect');
 const declareWarButton = document.getElementById('declareWarButton');
 
+// War modal elements
+const warModal = document.getElementById('warModal');
+const warModalTitle = document.getElementById('warModalTitle');
+const attackingRegionInfo = document.getElementById('attackingRegionInfo');
+const defendingRegionInfo = document.getElementById('defendingRegionInfo');
+const conductAttackButton = document.getElementById('conductAttackButton');
+const closeWarModalButton = document.getElementById('closeWarModalButton');
+
 
 // ============================================================================
 // Oyun Verileri (Tüm NUTS-2 Kodları ve UK Dahil)
@@ -1237,6 +1245,52 @@ function shuffleArray(array) {
 }
 
 // ============================================================================
+// War Modal Functions
+// ============================================================================
+function showWarModal(attackingRegionId, defendingRegionId, attackingUnits, defendingUnits) {
+    const attackingCountry = countriesData[playerCountryId];
+    const defendingCountryId = getCountryIdFromNutsId(defendingRegionId);
+    const defendingCountry = countriesData[defendingCountryId];
+    
+    warModalTitle.textContent = 'Savaş Başladı!';
+    attackingRegionInfo.textContent = `${attackingRegionId} (${attackingUnits} birim)`;
+    defendingRegionInfo.textContent = `${defendingRegionId} (${defendingUnits} birim)`;
+    
+    // Store attack data for conduct attack function
+    warModal.dataset.attackingRegion = attackingRegionId;
+    warModal.dataset.defendingRegion = defendingRegionId;
+    warModal.dataset.attackingUnits = attackingUnits;
+    warModal.dataset.defendingUnits = defendingUnits;
+    warModal.dataset.defendingCountryId = defendingCountryId;
+    
+    warModal.style.display = 'flex';
+}
+
+function conductAttack() {
+    const attackingRegionId = warModal.dataset.attackingRegion;
+    const defendingRegionId = warModal.dataset.defendingRegion;
+    const attackingUnits = parseInt(warModal.dataset.attackingUnits);
+    const defendingUnits = parseInt(warModal.dataset.defendingUnits);
+    const defendingCountryId = warModal.dataset.defendingCountryId;
+    
+    // Perform the combat
+    resolveCombat(
+        playerCountryId, attackingRegionId, attackingUnits,
+        defendingCountryId, defendingRegionId, defendingUnits
+    );
+    
+    // Close modal and reset attack mode
+    closeWarModal();
+    resetAttackMode();
+    updateUI();
+}
+
+function closeWarModal() {
+    warModal.style.display = 'none';
+    clearHighlights();
+}
+
+// ============================================================================
 // Olay Dinleyicileri
 // ============================================================================
 startGameButton.addEventListener('click', initializeGame);
@@ -1244,6 +1298,10 @@ selectCountryButton.addEventListener('click', startGame);
 buyUnitButton.addEventListener('click', buyUnit);
 nextTurnButton.addEventListener('click', nextTurn);
 declareWarButton.addEventListener('click', declareWar);
+
+// War modal event listeners
+conductAttackButton.addEventListener('click', conductAttack);
+closeWarModalButton.addEventListener('click', closeWarModal);
 
 // İlk yüklemede UI'ı gizle
 document.addEventListener('DOMContentLoaded', () => {
