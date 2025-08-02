@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ----------- ÜLKE VERİLERİ (countriesData) -----------
     // ÖNEMLİ: 'nuts2' dizilerine kendi map.svg dosyanızdaki data-nuts-id değerlerini YAZMALISINIZ!
-    // Renkleri siz dolduracaksınız.
+    // Her ülkeye özel saldırı ikonu yolu eklendi (attackIconPath)
+    // Sovyet bloğu ülkeleri aynı renge ayarlandı.
     let countriesData = {
         // Batı Avrupa
         'UK': {
@@ -59,15 +60,17 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#19cf0c', // Yeşil
             coins: 100,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/uk_attack_icon.png' // İkon yolu
         },
         'FR': {
             name: 'Fransa',
-            nuts2: ['FR10', 'FRB0', 'FRC1', 'FRC2', 'FRC3', 'FRD1', 'FRD2', 'FRD3', 'FRE1', 'FRE2', 'FRE3', 'FRF1', 'FRF2', 'FRF3', 'FRG0', 'FRH0', 'FRI0', 'FRJ0', 'FRL0', 'FRM0', 'FRN0', 'FRP0'], // FRK0, FRJ0 eksikse ekleyin
+            nuts2: ['FR10', 'FRB0', 'FRC1', 'FRC2', 'FRC3', 'FRD1', 'FRD2', 'FRD3', 'FRE1', 'FRE2', 'FRE3', 'FRF1', 'FRF2', 'FRF3', 'FRG0', 'FRH0', 'FRI0', 'FRJ0', 'FRL0', 'FRM0', 'FRN0', 'FRP0'],
             isPlayer: false,
             color: '#947119', // Kahverengimsi
             coins: 100,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/fr_attack_icon.png'
         },
         'DE': {
             name: 'Almanya',
@@ -75,7 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#e0d253', // Açık Sarımsı
             coins: 100,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/de_attack_icon.png' // Sizin verdiğiniz Almanya ikonu
         },
         'PT': {
             name: 'Portekiz',
@@ -83,15 +87,17 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#dc2ee6', // Morumsu Pembe
             coins: 100,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/pt_attack_icon.png'
         },
         'ES': {
             name: 'İspanya',
-            nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62', 'ES63', 'ES70', 'ESZZ'], // ESZZ bazen genel adadır
+            nuts2: ['ES11', 'ES12', 'ES13', 'ES21', 'ES22', 'ES23', 'ES24', 'ES30', 'ES41', 'ES42', 'ES43', 'ES51', 'ES52', 'ES53', 'ES61', 'ES62', 'ES63', 'ES70', 'ESZZ'],
             isPlayer: false,
             color: '#62d9d5', // Turkuaz
             coins: 100,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/es_attack_icon.png'
         },
         'IT': {
             name: 'İtalya',
@@ -99,7 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#9c9b6a', // Grimsi Yeşil
             coins: 100,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/it_attack_icon.png'
         },
         'NL': { // Hollanda
             name: 'Hollanda',
@@ -107,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#FFD700', // Altın Sarısı
             coins: 80,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/nl_attack_icon.png'
         },
         'BE': { // Belçika
             name: 'Belçika',
@@ -115,15 +123,17 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#FFA500', // Turuncu
             coins: 80,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/be_attack_icon.png'
         },
         'LU': { // Lüksemburg (Tek Topraklı)
             name: 'Lüksemburg',
-            nuts2: ['LU00'], // Lüksemburg NUTS2 kodu
+            nuts2: ['LU00'],
             isPlayer: false,
             color: '#800080', // Mor
             coins: 30,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/lu_attack_icon.png'
         },
         'AT': { // Avusturya
             name: 'Avusturya',
@@ -131,25 +141,28 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#FF4500', // Koyu Turuncu
             coins: 90,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/at_attack_icon.png'
         },
-        'CH': { // İsviçre (NUTS'a dahil değil, ama genellikle coğrafi bölgelere ayrılır)
+        'CH': { // İsviçre
             name: 'İsviçre',
-            nuts2: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05', 'CH06', 'CH07'], // Tahmini bölgeler
+            nuts2: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05', 'CH06', 'CH07'],
             isPlayer: false,
             color: '#DC143C', // Koyu Kırmızı
             coins: 90,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/ch_attack_icon.png'
         },
 
         // İskandinavya ve Baltıklar
         'NO': { // Norveç
             name: 'Norveç',
-            nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07'], // Tahmini NUTS2 benzeri bölgeler
+            nuts2: ['NO01', 'NO02', 'NO03', 'NO04', 'NO05', 'NO06', 'NO07'],
             isPlayer: false,
             color: '#008080', // Teal
             coins: 80,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/no_attack_icon.png'
         },
         'SE': { // İsveç
             name: 'İsveç',
@@ -157,7 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#ADD8E6', // Açık Mavi
             coins: 80,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/se_attack_icon.png'
         },
         'FI': { // Finlandiya
             name: 'Finlandiya',
@@ -165,55 +179,62 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#87CEEB', // Gök Mavisi
             coins: 70,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/fi_attack_icon.png'
         },
-        'DK': { // Danimarka (Tek Topraklı olabilir veya birkaç NUTS2)
+        'DK': { // Danimarka
             name: 'Danimarka',
-            nuts2: ['DK01', 'DK02', 'DK03', 'DK04', 'DK05'], // Danimarka NUTS2
+            nuts2: ['DK01', 'DK02', 'DK03', 'DK04', 'DK05'],
             isPlayer: false,
             color: '#FF6347', // Domates Kırmızısı
             coins: 60,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/dk_attack_icon.png'
         },
-        'IS': { // İzlanda (Tek Topraklı)
+        'IS': { // İzlanda
             name: 'İzlanda',
-            nuts2: ['IS00'], // İzlanda NUTS2 kodu
+            nuts2: ['IS00'],
             isPlayer: false,
             color: '#6A5ACD', // Slate Blue
             coins: 40,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/is_attack_icon.png'
         },
-        'IE': { // İrlanda (Tek Topraklı veya birkaç NUTS2)
+        'IE': { // İrlanda
             name: 'İrlanda',
-            nuts2: ['IE04', 'IE05', 'IE06'], // İrlanda NUTS2 kodları
+            nuts2: ['IE04', 'IE05', 'IE06'],
             isPlayer: false,
             color: '#32CD32', // Lime Green
             coins: 70,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/ie_attack_icon.png'
         },
-        'EE': { // Estonya (Tek Topraklı)
+        'EE': { // Estonya (Sovyet bloğu rengi)
             name: 'Estonya',
-            nuts2: ['EE00'], // Estonya NUTS2 kodu
+            nuts2: ['EE00'],
             isPlayer: false,
-            color: '#346369', // Sizin verdiğiniz renk
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
             coins: 50,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/ee_attack_icon.png'
         },
-        'LV': { // Letonya (Tek Topraklı)
+        'LV': { // Letonya (Sovyet bloğu rengi)
             name: 'Letonya',
-            nuts2: ['LV00'], // Letonya NUTS2 kodu
+            nuts2: ['LV00'],
             isPlayer: false,
-            color: '#4a398f', // Sizin verdiğiniz renk
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
             coins: 50,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/lv_attack_icon.png'
         },
-        'LT': { // Litvanya (Tek Topraklı)
+        'LT': { // Litvanya (Sovyet bloğu rengi)
             name: 'Litvanya',
-            nuts2: ['LT00'], // Litvanya NUTS2 kodu
+            nuts2: ['LT00'],
             isPlayer: false,
-            color: '#4e6644', // Sizin verdiğiniz renk
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
             coins: 50,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/lt_attack_icon.png'
         },
 
         // Doğu Avrupa ve Balkanlar
@@ -223,7 +244,8 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#FF0000', // Kırmızı
             coins: 90,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/pl_attack_icon.png'
         },
         'CZ': { // Çekya
             name: 'Çekya',
@@ -231,7 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#B0C4DE', // Açık Çelik Mavisi
             coins: 70,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/cz_attack_icon.png'
         },
         'SK': { // Slovakya
             name: 'Slovakya',
@@ -239,7 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#4682B4', // Çelik Mavisi
             coins: 60,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/sk_attack_icon.png'
         },
         'HU': { // Macaristan
             name: 'Macaristan',
@@ -247,71 +271,18 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#3CB371', // Medium Sea Green
             coins: 70,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/hu_attack_icon.png'
         },
-        'SI': { // Slovenya (Tek Topraklı olabilir veya iki NUTS2)
-            name: 'Slovenya',
-            nuts2: ['SI03', 'SI04'], // Slovenya NUTS2 kodları
-            isPlayer: false,
-            color: '#8A2BE2', // Mavi Menekşe
-            coins: 50,
-            units: 0
-        },
-        'HR': { // Hırvatistan (Tek Topraklı olabilir veya birkaç NUTS2)
-            name: 'Hırvatistan',
-            nuts2: ['HR03', 'HR04'], // Hırvatistan NUTS2 kodları
-            isPlayer: false,
-            color: '#B22222', // Ateş Tuğlası
-            coins: 60,
-            units: 0
-        },
-        'BA': { // Bosna-Hersek (NUTS'a dahil değil, genellikle tek topraklı)
-            name: 'Bosna-Hersek',
-            nuts2: ['BA'], // Tahmini ID
-            isPlayer: false,
-            color: '#5F9EA0', // Cadet Blue
-            coins: 40,
-            units: 0
-        },
-        'RS': { // Sırbistan (NUTS'a dahil değil, genellikle tek topraklı veya birkaç bölge)
-            name: 'Sırbistan',
-            nuts2: ['RS'], // Tahmini ID
-            isPlayer: false,
-            color: '#DDA0DD', // Erik Moru
-            coins: 50,
-            units: 0
-        },
-        'ME': { // Karadağ (Tek Topraklı)
-            name: 'Karadağ',
-            nuts2: ['ME00'], // Tahmini ID
-            isPlayer: false,
-            color: '#6B8E23', // Olive Drab
-            coins: 30,
-            units: 0
-        },
-        'AL': { // Arnavutluk (Tek Topraklı veya birkaç bölge)
-            name: 'Arnavutluk',
-            nuts2: ['AL01', 'AL02', 'AL03'], // Arnavutluk NUTS2
-            isPlayer: false,
-            color: '#CD853F', // Peru
-            coins: 40,
-            units: 0
-        },
-        'MK': { // Kuzey Makedonya (Tek Topraklı)
-            name: 'Kuzey Makedonya',
-            nuts2: ['MK00'], // Tahmini ID
-            isPlayer: false,
-            color: '#A9A9A9', // Koyu Gri
-            coins: 30,
-            units: 0
-        },
-        'GR': { // Yunanistan (Özel İstek: GR olarak!)
+        // SI, HR, BA, RS, ME, MK kaldırıldı, Yugoslavya'ya dahil edildi.
+        'GR': { // Yunanistan
             name: 'Yunanistan',
             nuts2: ['GR11', 'GR12', 'GR13', 'GR14', 'GR21', 'GR22', 'GR23', 'GR24', 'GR25', 'GR30', 'GR41', 'GR42', 'GR43'],
             isPlayer: false,
             color: '#00BFFF', // Derin Gök Mavisi
             coins: 80,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/gr_attack_icon.png'
         },
         'TR': { // Türkiye
             name: 'Türkiye',
@@ -319,15 +290,17 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#FF0000', // Kırmızı
             coins: 100,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/tr_attack_icon.png'
         },
-        'CY': { // Kıbrıs (Tek Topraklı)
+        'CY': { // Kıbrıs
             name: 'Kıbrıs',
-            nuts2: ['CY00'], // Kıbrıs NUTS2 kodu
+            nuts2: ['CY00'],
             isPlayer: false,
             color: '#19cf0c', // UK ile aynı renk (daha önce böyleydi)
             coins: 20,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/cy_attack_icon.png'
         },
         'RO': { // Romanya
             name: 'Romanya',
@@ -335,7 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#FFFF00', // Sarı
             coins: 80,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/ro_attack_icon.png'
         },
         'BG': { // Bulgaristan
             name: 'Bulgaristan',
@@ -343,189 +317,283 @@ document.addEventListener('DOMContentLoaded', () => {
             isPlayer: false,
             color: '#8B0000', // Koyu Kırmızı
             coins: 70,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/bg_attack_icon.png'
         },
 
-        // Kuzey Afrika ve Ortadoğu (Genellikle tek topraklı veya NUTS'a dahil değil)
-        'MA': { // Fas (Sizin kodunuzda 'MAR' idi, burada standart ISO kodunu kullandım, SVG'nizi kontrol edin)
+        // Kuzey Afrika ve Ortadoğu
+        'MA': { // Fas
             name: 'Fas',
-            nuts2: ['MA'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['MA'],
             isPlayer: false,
-            color: '#8B0000', // Koyu Kırmızı
+            color: '#8B0000',
             coins: 50,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/ma_attack_icon.png'
         },
-        'DZ': { // Cezayir (Sizin kodunuzda 'DZA' idi)
+        'DZ': { // Cezayir
             name: 'Cezayir',
-            nuts2: ['DZ'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['DZ'],
             isPlayer: false,
-            color: '#006400', // Koyu Yeşil
+            color: '#006400',
             coins: 50,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/dz_attack_icon.png'
         },
-        'TN': { // Tunus (Tek Topraklı)
+        'TN': { // Tunus
             name: 'Tunus',
-            nuts2: ['TN'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['TN'],
             isPlayer: false,
-            color: '#BDB76B', // Koyu Haki
+            color: '#BDB76B',
             coins: 40,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/tn_attack_icon.png'
         },
-        'LY': { // Libya (Sizin kodunuzda 'LBY' idi)
+        'LY': { // Libya
             name: 'Libya',
-            nuts2: ['LY'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['LY'],
             isPlayer: false,
-            color: '#9c9b6a', // İtalya'nın rengiyle benzerdi
+            color: '#9c9b6a',
             coins: 50,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/ly_attack_icon.png'
         },
-        'EG': { // Mısır (Genellikle tek topraklı)
+        'EG': { // Mısır
             name: 'Mısır',
-            nuts2: ['EG'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['EG'],
             isPlayer: false,
-            color: '#DAA520', // Altınçubuk
+            color: '#DAA520',
             coins: 60,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/eg_attack_icon.png'
         },
-        'SY': { // Suriye (Sizin kodunuzda 'SYR' idi)
+        'SY': { // Suriye
             name: 'Suriye',
-            nuts2: ['SY'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['SY'],
             isPlayer: false,
-            color: '#4682b4', // Çelik Mavi
+            color: '#4682b4',
             coins: 50,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/sy_attack_icon.png'
         },
-        'LB': { // Lübnan (Sizin kodunuzda 'LBN' idi)
+        'LB': { // Lübnan
             name: 'Lübnan',
-            nuts2: ['LB'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['LB'],
             isPlayer: false,
-            color: '#947119', // Fransa'nın rengi
+            color: '#947119',
             coins: 20,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/lb_attack_icon.png'
         },
-        'IQ': { // Irak (Sizin kodunuzda 'IRQ' idi)
+        'IQ': { // Irak
             name: 'Irak',
-            nuts2: ['IQ'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['IQ'],
             isPlayer: false,
-            color: '#d2691e', // Çikolata Kahve
+            color: '#d2691e',
             coins: 50,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/iq_attack_icon.png'
         },
-        'IR': { // İran (Genellikle tek topraklı veya birkaç bölge)
+        'IR': { // İran
             name: 'İran',
-            nuts2: ['IR'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['IR'],
             isPlayer: false,
-            color: '#008000', // Yeşil
+            color: '#008000',
             coins: 70,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/ir_attack_icon.png'
         },
-        'SA': { // Suudi Arabistan (Genellikle tek topraklı)
+        'SA': { // Suudi Arabistan
             name: 'Suudi Arabistan',
-            nuts2: ['SA'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['SA'],
             isPlayer: false,
-            color: '#228B22', // Orman Yeşili
+            color: '#228B22',
             coins: 80,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/sa_attack_icon.png'
         },
-        'YE': { // Yemen (Genellikle tek topraklı)
+        'YE': { // Yemen
             name: 'Yemen',
-            nuts2: ['YE'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['YE'],
             isPlayer: false,
-            color: '#7CFC00', // Çim Yeşili
+            color: '#7CFC00',
             coins: 30,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/ye_attack_icon.png'
         },
-        'OM': { // Umman (Genellikle tek topraklı)
+        'OM': { // Umman
             name: 'Umman',
-            nuts2: ['OM'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['OM'],
             isPlayer: false,
-            color: '#00CED1', // Koyu Turkuaz
+            color: '#00CED1',
             coins: 40,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/om_attack_icon.png'
         },
-        'AE': { // Birleşik Arap Emirlikleri (Tek Topraklı)
+        'AE': { // Birleşik Arap Emirlikleri
             name: 'Birleşik Arap Emirlikleri',
-            nuts2: ['AE'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['AE'],
             isPlayer: false,
-            color: '#8B4513', // Sepya
+            color: '#8B4513',
             coins: 50,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/ae_attack_icon.png'
         },
-        'QA': { // Katar (Tek Topraklı)
+        'QA': { // Katar
             name: 'Katar',
-            nuts2: ['QA'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['QA'],
             isPlayer: false,
-            color: '#FFDAB9', // Şeftali Kreması
+            color: '#FFDAB9',
             coins: 30,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/qa_attack_icon.png'
         },
-        'KW': { // Kuveyt (Tek Topraklı)
+        'KW': { // Kuveyt
             name: 'Kuveyt',
-            nuts2: ['KW'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['KW'],
             isPlayer: false,
-            color: '#FFFAF0', // Karbeyazı
+            color: '#FFFAF0',
             coins: 30,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/kw_attack_icon.png'
         },
-        'BH': { // Bahreyn (Tek Topraklı)
+        'BH': { // Bahreyn
             name: 'Bahreyn',
-            nuts2: ['BH'], // Genellikle tek ID, SVG'nizi kontrol edin
+            nuts2: ['BH'],
             isPlayer: false,
-            color: '#F0E68C', // Haki
+            color: '#F0E68C',
             coins: 30,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/bh_attack_icon.png'
         },
 
-        // Doğu Avrupa - Geniş Ülkeler
-        'UA': { // Ukrayna
-            name: 'Ukrayna',
-            nuts2: ['UA11', 'UA12', 'UA13', 'UA14', 'UA15', 'UA16', 'UA17', 'UA18', 'UA19', 'UA20', 'UA21', 'UA22', 'UA23', 'UA24', 'UA25', 'UA26', 'UA27'], // Tahmini NUTS2 benzeri
-            isPlayer: false,
-            color: '#FFD700', // Altın Sarısı
-            coins: 90,
-            units: 0
-        },
-        'BY': { // Belarus (Genellikle birkaç bölgeye ayrılır)
-            name: 'Belarus',
-            nuts2: ['BY10', 'BY20', 'BY30', 'BY40', 'BY50', 'BY60', 'BY70'], // Tahmini NUTS2 benzeri
-            isPlayer: false,
-            color: '#7FFF00', // Chartreuse
-            coins: 70,
-            units: 0
-        },
-        'MD': { // Moldova (Tek Topraklı veya birkaç bölge)
-            name: 'Moldova',
-            nuts2: ['MD00'], // Tahmini ID
-            isPlayer: false,
-            color: '#8B0000', // Koyu Kırmızı
-            coins: 30,
-            units: 0
-        },
-        'RU': { // Rusya (Avrupa Kısmı - NUTS'a dahil değil, geniş bölgeler)
+        // Doğu Avrupa - Sovyet Bloğu (Aynı Renk)
+        // Rusya için 'RU' kodu kullanıldı, NUTS2 listesi genişletildi.
+        'RU': {
             name: 'Rusya',
             nuts2: ['RU-MOS', 'RU-SPE', 'RU-KGD', 'RU-LEN', 'RU-MUR', 'RU-ARK', 'RU-VLG', 'RU-NGR', 'RU-PSK', 'RU-TVE', 'RU-SMO', 'RU-BRY', 'RU-KLU', 'RU-ORL', 'RU-LIP', 'RU-TUL', 'RU-RYA', 'RU-VLA', 'RU-IVA', 'RU-KOS', 'RU-YAR', 'RU-TVL', 'RU-KDA', 'RU-ROS', 'RU-VGG', 'RU-AST', 'RU-DA', 'RU-CHE', 'RU-KAB', 'RU-KC', 'RU-AD', 'RU-ME', 'RU-KOS', 'RU-STV', 'RU-VOR', 'RU-TAM', 'RU-BEL', 'RU-KRS', 'RU-RYA', 'RU-NIZ', 'RU-PNZ', 'RU-SAM', 'RU-SAR', 'RU-ULY', 'RU-ORE', 'RU-PER', 'RU-KIR', 'RU-UD', 'RU-MOR', 'RU-CHU', 'RU-TA', 'RU-BA'], // Avrupa Rusya'sının tahmini bazı federal bölgeleri/oblastları
             isPlayer: false,
-            color: '#808080', // Gri
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
             coins: 120,
-            units: 0
+            units: 0,
+            attackIconPath: 'icons/ru_attack_icon.png'
         },
+        'UA': { // Ukrayna (Sovyet bloğu rengi)
+            name: 'Ukrayna',
+            nuts2: ['UA11', 'UA12', 'UA13', 'UA14', 'UA15', 'UA16', 'UA17', 'UA18', 'UA19', 'UA20', 'UA21', 'UA22', 'UA23', 'UA24', 'UA25', 'UA26', 'UA27'],
+            isPlayer: false,
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
+            coins: 90,
+            units: 0,
+            attackIconPath: 'icons/ua_attack_icon.png'
+        },
+        'BY': { // Belarus (Sovyet bloğu rengi)
+            name: 'Belarus',
+            nuts2: ['BY10', 'BY20', 'BY30', 'BY40', 'BY50', 'BY60', 'BY70'],
+            isPlayer: false,
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
+            coins: 70,
+            units: 0,
+            attackIconPath: 'icons/by_attack_icon.png'
+        },
+        'MD': { // Moldova
+            name: 'Moldova',
+            nuts2: ['MD00'],
+            isPlayer: false,
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
+            coins: 30,
+            units: 0,
+            attackIconPath: 'icons/md_attack_icon.png'
+        },
+        'GE': { // Gürcistan (Sovyet bloğu rengi)
+            name: 'Gürcistan',
+            nuts2: ['GE'], // Tahmini ID
+            isPlayer: false,
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
+            coins: 40,
+            units: 0,
+            attackIconPath: 'icons/ge_attack_icon.png'
+        },
+        'AZ': { // Azerbaycan (Sovyet bloğu rengi)
+            name: 'Azerbaycan',
+            nuts2: ['AZ'], // Tahmini ID
+            isPlayer: false,
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
+            coins: 40,
+            units: 0,
+            attackIconPath: 'icons/az_attack_icon.png'
+        },
+        'AM': { // Ermenistan (Sovyet bloğu rengi)
+            name: 'Ermenistan',
+            nuts2: ['AM'], // Tahmini ID
+            isPlayer: false,
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
+            coins: 30,
+            units: 0,
+            attackIconPath: 'icons/am_attack_icon.png'
+        },
+        'KZ': { // Kazakistan (Sovyet bloğu rengi)
+            name: 'Kazakistan',
+            nuts2: ['KZ'], // Tahmini ID
+            isPlayer: false,
+            color: '#8B0000', // Koyu Kırmızı (Sovyet rengi)
+            coins: 80,
+            units: 0,
+            attackIconPath: 'icons/kz_attack_icon.png'
+        },
+        // YENİ: Yugoslavya eklendi
+        'YU': {
+            name: 'Yugoslavya',
+            nuts2: [
+                'SI03', 'SI04', // Slovenya
+                'HR03', 'HR04', // Hırvatistan
+                'BA', // Bosna-Hersek (Eğer haritanızda bu ID varsa kullanın)
+                'RS', // Sırbistan (Eğer haritanızda bu ID varsa kullanın)
+                'ME00', // Karadağ
+                'MK00', // Kuzey Makedonya
+                'XK' // Kosova (Eğer haritanızda varsa ve Yugoslavya'ya dahil edilecekse)
+                // Kendi SVG haritanızdaki NUTS ID'lerini buraya eklediğinizden emin olun.
+                // Eğer haritanızdaki ID'ler farklıysa, onları buraya doğru şekilde yazın.
+            ],
+            isPlayer: false,
+            color: '#6A0DAD', // Koyu Mor (Yugoslavya için)
+            coins: 150, // Birleşik bir devlet olarak daha fazla coin
+            units: 0,
+            attackIconPath: 'icons/yu_attack_icon.png' // Yugoslavya'ya özel ikon
+        }
     };
     // --------------------------------------------------------------------------------------
 
     // NUTS2 Komşuluk Verisi
     // ÖNEMLİ: Burayı kendi haritanızdaki NUTS2 bölgelerinin komşuluklarına göre DOLDURMALISINIZ.
-    // Örnek: 'TR63': ['TR62', 'SY'], (TR63, TR62 ve Suriye'ye komşu)
-    // Eğer bir bölge başka bir ülkenin bölgesiyle komşuysa, o komşu bölgenin NUTS ID'sini yazın.
+    // Özellikle Yugoslavya'nın iç ve dış komşuluklarını güncelleyin.
     const nutsNeighbors = {
-        'TR63': ['TR62', 'SY', 'IQ'], // Örnek: TR63, TR62'ye ve Suriye'ye komşu varsayım. Siz doğrulayın.
-        'SY': ['TR63', 'IQ', 'LB', 'JO', 'SA'], // Suriye'nin komşuları
-        'IQ': ['TR63', 'SY', 'IR', 'SA', 'KW', 'JO'], // Irak'ın komşuları
-        'EE00': ['LV00', 'RU-LEN'], // Estonya'nın komşuları
-        'LV00': ['EE00', 'LT00', 'RU-PSK', 'BY10'], // Letonya'nın komşuları
-        'LT00': ['LV00', 'PL21', 'BY20', 'RU-KGD'], // Litvanya'nın komşuları
-        'GR11': ['GR12', 'GR13', 'AL01', 'MK00'], // Örnek Yunanistan komşusu
-        'ITG2': ['ITG1', 'SI03', 'AT31'], // İtalya ve komşuları
-        'FRC1': ['FRC2', 'DE60', 'LU00'], // Fransa ve komşuları
+        'TR63': ['TR62', 'SY', 'IQ'],
+        'SY': ['TR63', 'IQ', 'LB', 'JO', 'SA'],
+        'IQ': ['TR63', 'SY', 'IR', 'SA', 'KW', 'JO'],
+        'EE00': ['LV00', 'RU-LEN'],
+        'LV00': ['EE00', 'LT00', 'RU-PSK', 'BY10'],
+        'LT00': ['LV00', 'PL21', 'BY20', 'RU-KGD'],
+        'GR11': ['GR12', 'GR13', 'YU', 'MK00'], // Yunanistan'dan Yugoslavya'ya komşuluk
+        'ITG2': ['ITG1', 'SI03', 'AT31'], // İtalya'dan SI03'e (artık YU'nun bir parçası)
+        'FRC1': ['FRC2', 'DE60', 'LU00'],
+        'AT34': ['AT12', 'AT13', 'AT31', 'SI03', 'HR03', 'HU10'], // Avusturya'dan Yugoslavya (SI, HR)
+        'HU33': ['HU10', 'HU21', 'RO11', 'RO31', 'SK04', 'RS'], // Macaristan'dan Sırbistan'a (artık YU'nun bir parçası)
+        'BG42': ['BG31', 'GR24', 'TR10', 'RO42', 'MK00', 'RS'], // Bulgaristan'dan Yugoslavya (MK, RS)
+        'AL01': ['AL02', 'MK00', 'GR11', 'ME00', 'RS'], // Arnavutluk'tan Yugoslavya (MK, ME, RS)
+
+        // Yugoslavya'nın iç komşulukları (eski ülkelerin birleşimi)
+        // Önemli: Haritanızdaki gerçek komşuluklara göre burayı doğru doldurun!
+        'SI03': ['SI04', 'HR03', 'AT34', 'ITG2'],
+        'SI04': ['SI03', 'HR03', 'HR04', 'AT34'],
+        'HR03': ['HR04', 'SI03', 'SI04', 'BA', 'RS', 'HU33'], // Örnek
+        'HR04': ['HR03', 'BA', 'RS', 'ME00'],
+        'BA': ['HR03', 'HR04', 'RS', 'ME00', 'MK00'], // Bosna-Hersek ve komşuları
+        'RS': ['BA', 'HR03', 'HR04', 'ME00', 'MK00', 'HU33', 'RO42', 'BG42', 'AL01'], // Sırbistan ve komşuları
+        'ME00': ['RS', 'BA', 'HR04', 'AL01'], // Karadağ ve komşuları
+        'MK00': ['RS', 'BA', 'GR11', 'AL01', 'BG42', 'XK'], // Kuzey Makedonya ve komşuları
+        'XK': ['MK00', 'RS', 'AL01'], // Kosova ve komşuları (eğer haritanızda ayrı bir ID ise)
+
         // ... buraya diğer tüm NUTS2 bölgelerinin komşularını eklemeniz gerekmektedir.
         // Komşuluk ilişkileri çift yönlü olmalıdır (A-B komşuysa, B-A da komşudur)
     };
@@ -784,6 +852,11 @@ document.addEventListener('DOMContentLoaded', () => {
             svgDoc.documentElement.appendChild(attackIconsGroup);
         }
 
+        // Saldıran ülkenin ikonunu dinamik olarak belirle
+        // Eğer saldıran ülke için özel bir ikon tanımlanmışsa onu kullan, yoksa genel bir ikon kullan.
+        const attackerCountryData = countriesData[playerCountry];
+        const attackerIconPath = (attackerCountryData && attackerCountryData.attackIconPath) ? attackerCountryData.attackIconPath : "icons/default_attack_icon.png"; // Varsayılan ikon yolu
+
         playerNuts.forEach(playerNutsId => {
             const playerNeighbors = nutsNeighbors[playerNutsId] || [];
             playerNeighbors.forEach(neighborNutsId => {
@@ -797,9 +870,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             const centerX = bbox.x + bbox.width / 2;
                             const centerY = bbox.y + bbox.height / 2;
 
-                            const iconSize = 15; // İkon boyutu
+                            const iconSize = 25; // İkon boyutu
                             const icon = svgDoc.createElementNS("http://www.w3.org/2000/svg", "image");
-                            icon.setAttribute("xlink:href", "attack-icon.png"); // Kendi ikon dosyanızın yolu
+                            icon.setAttribute("xlink:href", attackerIconPath); // DİNAMİK İKON YOLU BURADA KULLANILDI
                             icon.setAttribute("x", centerX - iconSize / 2);
                             icon.setAttribute("y", centerY - iconSize / 2);
                             icon.setAttribute("width", iconSize);
@@ -940,9 +1013,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const remainingUnits = attackingUnits - Math.floor(defendingUnits / 2); // Örneğin, savunandaki birimlerin yarısı kadar kayıp
             territoryUnits[currentAttackingNutsId] = Math.max(0, remainingUnits - 1); // Saldıran bölgede 1 birim kalır
             territoryUnits[currentDefendingNutsId] = Math.max(0, remainingUnits); // Fethedilen bölgeye aktarılır
-
-            // Savunan bölgedeki birimler sıfırlanır
-            // territoryUnits[currentDefendingNutsId] = 0; // Eğer fetihle sıfırlansın istenirse
 
             // Eğer savunan ülkenin hiç bölgesi kalmadıysa, oyundan sil
             if (defenderCountryObj && defenderCountryObj.nuts2.length === 0) {
@@ -1093,40 +1163,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Eğer hedef ülkenin hiç bölgesi kalmadıysa, yok et
                     if (targetCountry.nuts2.length === 0) {
-                        addNotification(`${targetCountry.name} ülkesi oyundan silindi!`, 'warning');
-                        delete countriesData[targetCountryId]; // Ülkeyi ülkeler listesinden kaldır
-                        populateTargetCountrySelection(); // Savaş ilan hedef listesini güncelle
-                    }
-
-                    // Harita renklerini ve birim sayılarını güncelle
-                    applyCountryColorsToMap();
-                    updateUnitDisplays();
-                } else {
-                    addNotification(`${aiCountry.name} ülkesinin saldırısı ${targetCountry.name} ülkesine karşı BAŞARISIZ OLDU!`, 'info');
-                    territoryUnits[attackingRegionNutsId] = Math.max(0, aiAttackingUnits - Math.floor(targetDefendingUnits / 2));
-                    territoryUnits[defendingRegionNutsId] = Math.max(0, targetDefendingUnits - Math.floor(aiAttackingUnits / 2));
-                    applyCountryColorsToMap(); // Eski renklerine döner
-                    updateUnitDisplays();
-                }
-            }
-        });
-    }
-
-    // --- Bildirim Sistemi ---
-    function addNotification(message, type = 'default') {
-        const li = document.createElement('li');
-        li.textContent = message;
-        li.className = `notification-${type}`; // Stil için sınıf ekle
-
-        notificationList.prepend(li); // En yeni bildirimi üste ekle
-        if (notificationList.children.length > 15) { // Çok fazla bildirim birikmesini önle
-            notificationList.removeChild(notificationList.lastChild);
-        }
-    }
-
-    // Sayfa yüklendiğinde SVG'nin hazır olup olmadığını kontrol et
-    // Eğer SVG zaten yüklendiyse, load olayını manuel olarak tetikle
-    if (gameMapObject.contentDocument && gameMapObject.contentDocument.documentElement && gameMapObject.contentDocument.documentElement.nodeName === 'svg') {
-        gameMapObject.dispatchEvent(new Event('load'));
-    }
-});
+                        addNotification(`${targetCountry.name} ül
