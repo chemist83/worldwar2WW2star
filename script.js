@@ -860,13 +860,8 @@ function onRegionClick(nutsId) {
                 return;
             }
             
-            resolveCombat(
-                playerCountryId, selectedAttackingRegionNutsId, attackingUnits,
-                targetCountryIdForWar, defendingRegionNutsId, defendingUnits
-            );
-            
-            resetAttackMode(); // Savaş bitti, saldırı modunu kapat
-            addNotification("Saldırı modu kapatıldı.");
+            // Show war modal instead of directly resolving combat
+            showWarModal(selectedAttackingRegionNutsId, defendingRegionNutsId, attackingUnits, defendingUnits);
 
         } else {
             addNotification("Lütfen birim yerleştirmek için kendi bölgelerinize, saldırı için ise parlayan düşman bölgelerine tıklayın.");
